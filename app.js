@@ -1,4 +1,3 @@
-```javascript
 const SUPABASE_URL =
   "https://jaubryfyktdfzxqbrzue.supabase.co";
 
@@ -516,6 +515,7 @@ async function processSession(
   startAdminPresenceDisplay();
 
   createVisitHistoryButton();
+
 
 }
 
@@ -2539,6 +2539,7 @@ async function startVisitorTracking() {
   if (isAdmin)
     startAdminPresenceDisplay();
 
+
 }
 
 
@@ -2572,17 +2573,6 @@ async function startOrResumeSession() {
     return;
 
   }
-
-
-  /*
-    IMPORTANT:
-
-    gallery_visitors.visit_count is only incremented
-    when we actually create a NEW session.
-
-    This prevents every page refresh/heartbeat
-    from incorrectly becoming another visit.
-  */
 
 
   const cutoff =
@@ -2632,11 +2622,6 @@ async function startOrResumeSession() {
   }
 
 
-  /*
-    If a recent session already exists,
-    continue that same visit.
-  */
-
   if (activeSession) {
 
     currentSessionId =
@@ -2656,12 +2641,6 @@ async function startOrResumeSession() {
 
   }
 
-
-  /*
-    No active session.
-
-    Therefore this is a NEW VISIT.
-  */
 
   if (!visitor) {
 
@@ -3633,10 +3612,6 @@ async function loadVisitHistory() {
     "";
 
 
-  /*
-    Get all visitors.
-  */
-
   const {
     data: visitors,
     error: visitorError
@@ -3673,10 +3648,6 @@ async function loadVisitHistory() {
 
   }
 
-
-  /*
-    Get every individual session.
-  */
 
   const {
     data: sessions,
@@ -3773,10 +3744,6 @@ async function loadVisitHistory() {
   }
 
 
-  /*
-    Group sessions by visitor ID.
-  */
-
   const grouped =
     new Map();
 
@@ -3807,7 +3774,6 @@ async function loadVisitHistory() {
 
 
   let html = "";
-
 
   let visitorNumber = 0;
 
@@ -3958,13 +3924,6 @@ async function loadVisitHistory() {
               </div>
 
               <div class="history-row">
-
-                <span>
-                  🕐 started:
-                  ${formatHistoryTime(
-                    started
-                  )}
-                </span>
 
                 <span>
                   ${
@@ -4687,11 +4646,6 @@ function showToast(message) {
       margin-top: 6px;
     }
 
-
-    /* ========================================================
-       VISIT HISTORY BUTTON
-       ======================================================== */
-
     .visit-history-button {
       border: 0;
       cursor: pointer;
@@ -4707,11 +4661,6 @@ function showToast(message) {
     .visit-history-button:hover {
       transform: translateY(-1px);
     }
-
-
-    /* ========================================================
-       VISIT HISTORY MODAL
-       ======================================================== */
 
     .visit-history-card {
       width: min(760px, 92vw);
@@ -4821,7 +4770,6 @@ function showToast(message) {
       opacity: 0.6;
     }
 
-
     @keyframes presenceHeartPulse {
 
       0% {
@@ -4849,4 +4797,3 @@ function showToast(message) {
   );
 
 })();
-```
