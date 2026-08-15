@@ -5988,3 +5988,145 @@ setTimeout(
   document.head.appendChild(style);
 
 })();
+/* ============================================================
+   MADS ONLINE / LAST SEEN
+   ============================================================ */
+
+(function initMadsStatus() {
+
+  const ONLINE_TIMEOUT = 60000; // 1 minute
+
+  function getMadsStatusElement() {
+
+    let el = document.getElementById("madsOnlineStatus");
+
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "madsOnlineStatus";
+
+      el.style.cssText = `
+        font-size: 14px;
+        line-height: 1.5;
+      `;
+
+      document.body.appendChild(el);
+    }
+
+    return el;
+  }
+
+  function formatLastSeen(date) {
+
+    const seconds =
+      Math.floor(
+        (Date.now() - date.getTime()) / 1000
+      );
+
+    if (seconds < 60) {
+      return "just now";
+    }
+
+    const minutes =
+      Math.floor(seconds / 60);
+
+    if (minutes < 60) {
+      return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+    }
+
+    const hours =
+      Math.floor(minutes / 60);
+
+    if (hours < 24) {
+      return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+    }
+
+    const days =
+      Math.floor(hours / 24);
+
+    return `${days} day${days === 1 ? "" : "s"} ago`;
+  }
+
+  async function updateMadsStatus() {
+
+    try {
+
+      if (typeof visitorId === "undefined") {
+        console.warn("Mads status: visitorId not available yet.");
+        return;
+      }
+
+      const { data, error } =
+        await supabase
+          .from("gallery_sessions")
+          .select("last_seen")
+          .eq("visitor_id", visitorId)
+          .order("last_seen", {
+            ascending: false
+          })
+          .limit(1)
+          .maybeSingle();
+
+      if (error) {
+        console.error(
+          "Mads status error:",
+          error
+        );
+        return;
+      }
+
+      const display =
+        getMadsStatusElement();
+
+      if (!data || !data.last_seen) {
+
+        display.innerHTML =
+          `⚪ <strong>mads is offline</strong>`;
+
+        return;
+      }
+
+      const lastSeen =
+        new Date(data.last_seen);
+
+      const isOnline =
+        Date.now() -
+        lastSeen.getTime() <
+        ONLINE_TIMEOUT;
+
+      if (isOnline) {
+
+        display.innerHTML =
+          `🟢 <strong>mads is online</strong>`;
+
+      } else {
+
+        display.innerHTML = `
+          ⚪ <strong>mads is offline</strong><br>
+          <span style="opacity:.7">
+            last seen ${formatLastSeen(lastSeen)}
+          </span>
+        `;
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Mads status error:",
+        error
+      );
+
+    }
+
+  }
+
+  // Check immediately
+  updateMadsStatus();
+
+  // Keep the display updated
+  setInterval(
+    updateMadsStatus,
+    15000
+  );
+
+})();
