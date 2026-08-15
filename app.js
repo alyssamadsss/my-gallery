@@ -4388,3 +4388,1106 @@ function showToast(
   );
 
 })();
+/* ============================================================
+   VISITOR HISTORY
+   ============================================================ */
+
+let currentVisitId =
+  localStorage.getItem(
+    "gallery_current_visit_id"
+  );
+
+let currentVisitStartedAt =
+  localStorage.getItem(
+    "gallery_current_visit_started_at"
+  );
+
+let historySectionsVisited = [];
+
+let visitorHistoryInterval = null;
+
+
+/* ============================================================
+   START / RESUME VISIT
+   ============================================================ */
+
+async function startVisitorHistory() {
+
+  try {
+
+    const now =
+      Date.now();
+
+    const previousStart =
+      currentVisitStartedAt
+        ? new Date(
+            currentVisitStartedAt
+          ).getTime()
+        : 0;
+
+
+    /*
+      If there is no visit, or the previous
+      visit started more than 45 seconds ago,
+      create a new visit.
+    */
+
+    const shouldStartNewVisit =
+      !currentVisitId ||
+      !previousStart ||
+      now - previousStart > 45000;
+
+
+    if (
+      shouldStartNewVisit
+    ) {
+
+      currentVisitId =
+        null;
+
+      currentVisitStartedAt =
+        new Date().toISOString();
+
+      historySectionsVisited =
+        currentSection
+          ? [currentSection]
+          : [];
+
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from(
+            "gallery_visit_history"
+          )
+          .insert({
+
+            visitor_id:
+              visitorId,
+
+            started_at:
+              currentVisitStartedAt,
+
+            duration_seconds:
+              0,
+
+            sections_visited:
+              historySectionsVisited,
+
+            last_section_id:
+              currentSection
+
+          })
+          .select(
+            "id"
+          )
+          .single();
+
+
+      if (error) {
+
+        console.error(
+          "Visitor history start failed:",
+          error
+        );
+
+        return;
+
+      }
+
+
+      currentVisitId =
+        data.id;
+
+
+      localStorage.setItem(
+        "gallery_current_visit_id",
+        currentVisitId
+      );
+
+
+      localStorage.setItem(
+        "gallery_current_visit_started_at",
+        currentVisitStartedAt
+      );
+
+    }
+
+
+    /*
+      Make sure the current section is included.
+    */
+
+    if (
+      currentSection &&
+      !historySectionsVisited.includes(
+        currentSection
+      )
+    ) {
+
+      historySectionsVisited.push(
+        currentSection
+      );
+
+    }
+
+
+    updateVisitorHistory();
+
+
+  } catch (error) {
+
+    console.error(
+      "startVisitorHistory:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   UPDATE CURRENT VISIT
+   ============================================================ */
+
+async function updateVisitorHistory() {
+
+  if (
+    !currentVisitId ||
+    !currentVisitStartedAt
+  ) {
+
+    return;
+
+  }
+
+
+  try {
+
+    if (
+      currentSection &&
+      !historySectionsVisited.includes(
+        currentSection
+      )
+    ) {
+
+      historySectionsVisited.push(
+        currentSection
+      );
+
+    }
+
+
+    const started =
+      new Date(
+        currentVisitStartedAt
+      ).getTime();
+
+
+    const duration =
+      Math.max(
+        0,
+        Math.floor(
+          (
+            Date.now() -
+            started
+          ) / 1000
+        )
+      );
+
+
+    const {
+      error
+    } =
+      await supabaseClient.rpc(
+        "update_gallery_visit",
+        {
+
+          p_id:
+            currentVisitId,
+
+          p_duration_seconds:
+            duration,
+
+          p_ended_at:
+            new Date().toISOString(),
+
+          p_sections_visited:
+            historySectionsVisited,
+
+          p_last_section_id:
+            currentSection
+
+        }
+      );
+
+
+    if (error) {
+
+      console.error(
+        "Visitor history update failed:",
+        error
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "updateVisitorHistory:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   NEW SECTION VISIT
+   ============================================================ */
+
+function recordHistorySection() {
+
+  if (
+    currentSection &&
+    !historySectionsVisited.includes(
+      currentSection
+    )
+  ) {
+
+    historySectionsVisited.push(
+      currentSection
+    );
+
+  }
+
+
+  updateVisitorHistory();
+
+}
+
+
+/* ============================================================
+   END VISIT
+   ============================================================ */
+
+async function endVisitorHistory() {
+
+  await updateVisitorHistory();
+
+}
+
+
+/* ============================================================
+   VISIBILITY HANDLING
+   ============================================================ */
+
+document.addEventListener(
+  "visibilitychange",
+  async () => {
+
+    if (
+      document.visibilityState ===
+      "hidden"
+    ) {
+
+      await endVisitorHistory();
+
+      return;
+
+    }
+
+
+    if (
+      document.visibilityState ===
+      "visible"
+    ) {
+
+      const lastStart =
+        currentVisitStartedAt
+          ? new Date(
+              currentVisitStartedAt
+            ).getTime()
+          : 0;
+
+
+      /*
+        If they were gone for more than
+        45 seconds, treat it as a new visit.
+      */
+
+      if (
+        !lastStart ||
+        Date.now() - lastStart > 45000
+      ) {
+
+        currentVisitId =
+          null;
+
+        currentVisitStartedAt =
+          null;
+
+        historySectionsVisited =
+          [];
+
+        localStorage.removeItem(
+          "gallery_current_visit_id"
+        );
+
+        localStorage.removeItem(
+          "gallery_current_visit_started_at"
+        );
+
+
+        await startVisitorHistory();
+
+      } else {
+
+        await updateVisitorHistory();
+
+      }
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   BEFORE LEAVING PAGE
+   ============================================================ */
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    /*
+      We can't reliably await Supabase
+      during beforeunload, so the regular
+      15-second updates are the primary
+      source of duration.
+    */
+
+    updateVisitorHistory();
+
+  }
+);
+
+
+/* ============================================================
+   HISTORY REFRESH
+   ============================================================ */
+
+function startVisitorHistoryUpdates() {
+
+  if (
+    visitorHistoryInterval
+  ) {
+
+    return;
+
+  }
+
+
+  visitorHistoryInterval =
+    setInterval(
+      () => {
+
+        updateVisitorHistory();
+
+      },
+      15000
+    );
+
+}
+
+
+/* ============================================================
+   ADMIN HISTORY PANEL
+   ============================================================ */
+
+function createVisitorHistoryButton() {
+
+  if (!isAdmin) return;
+
+
+  if (
+    document.getElementById(
+      "visitorHistoryButton"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const display =
+    document.getElementById(
+      "livePresence"
+    );
+
+
+  if (!display) return;
+
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+
+  button.id =
+    "visitorHistoryButton";
+
+
+  button.type =
+    "button";
+
+
+  button.textContent =
+    "📖 visitor history";
+
+
+  button.addEventListener(
+    "click",
+    openVisitorHistory
+  );
+
+
+  display.appendChild(
+    button
+  );
+
+}
+
+
+/* ============================================================
+   OPEN HISTORY
+   ============================================================ */
+
+async function openVisitorHistory() {
+
+  if (!isAdmin) return;
+
+
+  let modal =
+    document.getElementById(
+      "visitorHistoryModal"
+    );
+
+
+  if (!modal) {
+
+    modal =
+      document.createElement(
+        "div"
+      );
+
+
+    modal.id =
+      "visitorHistoryModal";
+
+
+    modal.className =
+      "visitor-history-modal";
+
+
+    modal.innerHTML = `
+
+      <div class="visitor-history-backdrop"></div>
+
+      <div class="visitor-history-card">
+
+        <button
+          class="visitor-history-close"
+          type="button"
+        >
+          ×
+        </button>
+
+        <div class="visitor-history-heading">
+
+          <span>📖</span>
+
+          <div>
+
+            <h2>visitor history</h2>
+
+            <p>
+              little footprints left behind ♡
+            </p>
+
+          </div>
+
+        </div>
+
+        <div
+          id="visitorHistoryContent"
+          class="visitor-history-content"
+        >
+
+          <div class="visitor-history-loading">
+            loading history...
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.body.appendChild(
+      modal
+    );
+
+
+    modal
+      .querySelector(
+        ".visitor-history-close"
+      )
+      .addEventListener(
+        "click",
+        () => {
+
+          closeVisitorHistory();
+
+        }
+      );
+
+
+    modal
+      .querySelector(
+        ".visitor-history-backdrop"
+      )
+      .addEventListener(
+        "click",
+        () => {
+
+          closeVisitorHistory();
+
+        }
+      );
+
+  }
+
+
+  modal.classList.add(
+    "show"
+  );
+
+
+  await loadVisitorHistory();
+
+}
+
+
+/* ============================================================
+   CLOSE HISTORY
+   ============================================================ */
+
+function closeVisitorHistory() {
+
+  const modal =
+    document.getElementById(
+      "visitorHistoryModal"
+    );
+
+
+  if (modal) {
+
+    modal.classList.remove(
+      "show"
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   LOAD HISTORY
+   ============================================================ */
+
+async function loadVisitorHistory() {
+
+  const content =
+    document.getElementById(
+      "visitorHistoryContent"
+    );
+
+
+  if (!content) return;
+
+
+  content.innerHTML = `
+
+    <div class="visitor-history-loading">
+      loading history...
+    </div>
+
+  `;
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from(
+        "gallery_visit_history"
+      )
+      .select("*")
+      .order(
+        "started_at",
+        {
+          ascending: false
+        }
+      );
+
+
+  if (error) {
+
+    console.error(
+      "loadVisitorHistory:",
+      error
+    );
+
+
+    content.innerHTML = `
+
+      <div class="visitor-history-error">
+        couldn't load visitor history ♡
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  if (
+    !data ||
+    data.length === 0
+  ) {
+
+    content.innerHTML = `
+
+      <div class="visitor-history-empty">
+
+        <div>
+          ♡
+        </div>
+
+        <p>
+          no visits recorded yet
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  content.innerHTML =
+    "";
+
+
+  data.forEach(
+    (
+      visit,
+      index
+    ) => {
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        "visitor-history-entry";
+
+
+      const started =
+        new Date(
+          visit.started_at
+        );
+
+
+      const dateText =
+        started.toLocaleDateString(
+          undefined,
+          {
+            month:
+              "short",
+
+            day:
+              "numeric",
+
+            year:
+              "numeric"
+          }
+        );
+
+
+      const timeText =
+        started.toLocaleTimeString(
+          undefined,
+          {
+            hour:
+              "numeric",
+
+            minute:
+              "2-digit"
+          }
+        );
+
+
+      const duration =
+        formatDuration(
+          visit.duration_seconds ||
+          0
+        );
+
+
+      const sectionNames =
+        (
+          visit.sections_visited ||
+          []
+        )
+          .map(
+            id =>
+              getSectionName(id)
+          )
+          .filter(Boolean);
+
+
+      const sectionsHtml =
+        sectionNames.length
+          ? sectionNames
+              .map(
+                name =>
+                  `<span class="history-section-tag">
+                    ${escapeHtml(name)}
+                  </span>`
+              )
+              .join("")
+          : `
+              <span class="history-section-tag">
+                all memories ♡
+              </span>
+            `;
+
+
+      card.innerHTML = `
+
+        <div class="history-entry-top">
+
+          <strong>
+            Visitor ${data.length - index}
+          </strong>
+
+          <span>
+            ${escapeHtml(
+              dateText
+            )}
+            ·
+            ${escapeHtml(
+              timeText
+            )}
+          </span>
+
+        </div>
+
+        <div class="history-entry-duration">
+
+          ⏱️
+
+          <strong>
+            ${escapeHtml(
+              duration
+            )}
+          </strong>
+
+        </div>
+
+        <div class="history-entry-sections">
+
+          <span class="history-label">
+            sections visited
+          </span>
+
+          <div class="history-section-tags">
+
+            ${sectionsHtml}
+
+          </div>
+
+        </div>
+
+        <div class="history-entry-id">
+
+          visitor id:
+          ${escapeHtml(
+            visit.visitor_id
+          )}
+
+        </div>
+
+      `;
+
+
+      content.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+
+
+/* ============================================================
+   HISTORY STYLES
+   ============================================================ */
+
+(function addVisitorHistoryStyles() {
+
+  const style =
+    document.createElement(
+      "style"
+    );
+
+
+  style.textContent = `
+
+    #visitorHistoryButton {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+      opacity: 0.7;
+      padding: 3px 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    #visitorHistoryButton:hover {
+      opacity: 1;
+    }
+
+    .visitor-history-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .visitor-history-modal.show {
+      display: flex;
+    }
+
+    .visitor-history-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(4px);
+    }
+
+    .visitor-history-card {
+      position: relative;
+      z-index: 1;
+      width: min(700px, 100%);
+      max-height: 85vh;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    }
+
+    .visitor-history-close {
+      position: absolute;
+      right: 15px;
+      top: 12px;
+      border: 0;
+      background: transparent;
+      font-size: 25px;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+
+    .visitor-history-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .visitor-history-heading > span {
+      font-size: 25px;
+    }
+
+    .visitor-history-heading h2 {
+      margin: 0;
+    }
+
+    .visitor-history-heading p {
+      margin: 3px 0 0;
+      opacity: 0.6;
+      font-size: 13px;
+    }
+
+    .visitor-history-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .visitor-history-entry {
+      padding: 13px 15px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .history-entry-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .history-entry-top span {
+      opacity: 0.6;
+      font-size: 12px;
+    }
+
+    .history-entry-duration {
+      margin-top: 6px;
+      font-size: 13px;
+    }
+
+    .history-entry-sections {
+      margin-top: 7px;
+    }
+
+    .history-label {
+      display: block;
+      opacity: 0.55;
+      font-size: 11px;
+      margin-bottom: 4px;
+    }
+
+    .history-section-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .history-section-tag {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.9);
+      font-size: 11px;
+    }
+
+    .history-entry-id {
+      margin-top: 8px;
+      opacity: 0.35;
+      font-size: 9px;
+      word-break: break-all;
+    }
+
+    .visitor-history-loading,
+    .visitor-history-empty,
+    .visitor-history-error {
+      text-align: center;
+      padding: 30px 15px;
+      opacity: 0.65;
+    }
+
+    .visitor-history-empty > div {
+      font-size: 30px;
+      margin-bottom: 5px;
+    }
+
+  `;
+
+
+  document.head.appendChild(
+    style
+  );
+
+})();
+
+
+/* ============================================================
+   START VISITOR HISTORY AFTER APP LOAD
+   ============================================================ */
+
+setTimeout(
+  async () => {
+
+    await startVisitorHistory();
+
+    startVisitorHistoryUpdates();
+
+  },
+  500
+);
+
+
+/* ============================================================
+   WATCH FOR ADMIN PRESENCE PANEL
+   ============================================================ */
+
+const visitorHistoryObserver =
+  new MutationObserver(
+    () => {
+
+      if (isAdmin) {
+
+        createVisitorHistoryButton();
+
+      }
+
+    }
+  );
+
+
+visitorHistoryObserver.observe(
+  document.body,
+  {
+    childList: true,
+    subtree: true
+  }
+);
+
+
+setTimeout(
+  () => {
+
+    if (isAdmin) {
+
+      createVisitorHistoryButton();
+
+    }
+
+  },
+  1000
+);
