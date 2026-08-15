@@ -21,6 +21,11 @@ const supabaseClient = window.supabase.createClient(
   }
 );
 
+
+/* ============================================================
+   GLOBAL STATE
+   ============================================================ */
+
 let currentUser = null;
 let isAdmin = false;
 
@@ -31,14 +36,16 @@ let currentSection = null;
 let currentSort = "newest";
 
 let editingMemoryId = null;
-
 let draggedSectionId = null;
+
+let visitorId = getVisitorId();
+let currentSessionId = null;
 
 let presenceInterval = null;
 let presenceDisplayInterval = null;
 
-let visitorId =
-  getVisitorId();
+let sessionStartedAt = null;
+let lastPresenceUpdate = null;
 
 let presenceStarted = false;
 
@@ -87,9 +94,7 @@ const lightbox =
   document.getElementById("lightbox");
 
 const lightboxContent =
-  document.getElementById(
-    "lightboxContent"
-  );
+  document.getElementById("lightboxContent");
 
 const toast =
   document.getElementById("toast");
@@ -113,8 +118,6 @@ async function initialize() {
 
   await checkSession();
 
-  await startPresence();
-
   await loadSections();
 
   await loadMemories();
@@ -122,6 +125,8 @@ async function initialize() {
   renderNavigation();
 
   renderGallery();
+
+  await startVisitorTracking();
 
 }
 
@@ -203,9 +208,9 @@ function setupEventListeners() {
 
       if (!isAdmin) return;
 
-      document.getElementById(
-        "sectionForm"
-      ).reset();
+      document
+        .getElementById("sectionForm")
+        .reset();
 
       document.getElementById(
         "sectionError"
@@ -339,6 +344,42 @@ function setupEventListeners() {
           .forEach(closeModal);
 
       }
+
+    }
+  );
+
+
+  /*
+    When the visitor leaves the page/tab,
+    send one final heartbeat.
+  */
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
+
+        updateVisitorPresence();
+
+      } else {
+
+        updateVisitorPresence();
+
+      }
+
+    }
+  );
+
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+
+      updateVisitorPresence();
 
     }
   );
@@ -613,10 +654,6 @@ async function handleLogin(
 }
 
 
-/* ============================================================
-   LOGOUT
-   ============================================================ */
-
 async function logout() {
 
   await supabaseClient.auth.signOut();
@@ -723,7 +760,7 @@ function renderNavigation() {
       currentSection =
         null;
 
-      updatePresence();
+      updateVisitorPresence();
 
       renderNavigation();
 
@@ -802,7 +839,7 @@ function renderNavigation() {
           currentSection =
             section.id;
 
-          updatePresence();
+          updateVisitorPresence();
 
           renderNavigation();
 
@@ -1013,7 +1050,7 @@ function clearDragHighlights() {
 
 
 /* ============================================================
-   SECTION CREATION
+   CREATE SECTION
    ============================================================ */
 
 async function handleCreateSection(
@@ -1163,7 +1200,7 @@ async function handleCreateSection(
 
 
 /* ============================================================
-   SECTION REORDERING
+   REORDER SECTIONS
    ============================================================ */
 
 async function reorderSections(
@@ -1291,7 +1328,7 @@ async function reorderSections(
 
 
 /* ============================================================
-   SECTION REMOVAL
+   REMOVE SECTION
    ============================================================ */
 
 async function removeSection(
@@ -1390,7 +1427,7 @@ async function removeSection(
 
   renderGallery();
 
-  updatePresence();
+  updateVisitorPresence();
 
 
   showToast(
@@ -2148,7 +2185,7 @@ async function handleAddMemory(
 
 
 /* ============================================================
-   EDIT MEMORY MODAL
+   EDIT MEMORY
    ============================================================ */
 
 function createEditMemoryModal() {
@@ -2646,6 +2683,1078 @@ async function deleteMemory(
 
 
 /* ============================================================
+   VISITOR ID
+   ============================================================ */
+
+function getVisitorId() {
+
+  let id =
+    localStorage.getItem(
+      "gallery_visitor_id"
+    );
+
+
+  if (!id) {
+
+    id =
+      crypto.randomUUID();
+
+    localStorage.setItem(
+      "gallery_visitor_id",
+      id
+    );
+
+  }
+
+
+  return id;
+
+}
+
+
+/* ============================================================
+   VISITOR TRACKING
+   ============================================================ */
+
+/*
+  This is the important part.
+
+  visitorId = the browser/device identity.
+
+  currentSessionId = one particular visit.
+
+  Example:
+
+  Visitor A:
+      visitorId = abc123
+
+  Visit 1:
+      session = session001
+
+  Visit 2:
+      session = session002
+
+  Visit 3:
+      session = session003
+
+  All three sessions belong to visitor abc123.
+*/
+
+
+async function startVisitorTracking() {
+
+  if (presenceStarted)
+    return;
+
+
+  presenceStarted =
+    true;
+
+
+  await startOrResumeSession();
+
+
+  presenceInterval =
+    setInterval(
+      updateVisitorPresence,
+      15000
+    );
+
+
+  if (isAdmin) {
+
+    startAdminPresenceDisplay();
+
+  }
+
+}
+
+
+async function startOrResumeSession() {
+
+  const now =
+    new Date();
+
+
+  /*
+    First make sure the visitor exists.
+  */
+
+  const {
+    data: visitor,
+    error: visitorError
+  } =
+    await supabaseClient
+      .from("gallery_visitors")
+      .select("*")
+      .eq(
+        "visitor_id",
+        visitorId
+      )
+      .maybeSingle();
+
+
+  if (visitorError) {
+
+    console.error(
+      "visitor lookup failed:",
+      visitorError
+    );
+
+    return;
+
+  }
+
+
+  if (!visitor) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("gallery_visitors")
+        .insert({
+          visitor_id:
+            visitorId,
+
+          first_seen:
+            now.toISOString(),
+
+          last_seen:
+            now.toISOString(),
+
+          visit_count:
+            1
+        });
+
+
+    if (error) {
+
+      console.error(
+        "visitor creation failed:",
+        error
+      );
+
+    }
+
+  } else {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("gallery_visitors")
+        .update({
+
+          last_seen:
+            now.toISOString(),
+
+          visit_count:
+            Number(
+              visitor.visit_count || 0
+            ) + 1
+
+        })
+        .eq(
+          "visitor_id",
+          visitorId
+        );
+
+
+    if (error) {
+
+      console.error(
+        "visitor update failed:",
+        error
+      );
+
+    }
+
+  }
+
+
+  /*
+    Look for an existing active session.
+
+    If the last session was active less than
+    45 seconds ago, continue it.
+
+    Otherwise create a brand-new visit.
+  */
+
+  const cutoff =
+    new Date(
+      Date.now() -
+      45000
+    ).toISOString();
+
+
+  const {
+    data: activeSession,
+    error: sessionError
+  } =
+    await supabaseClient
+      .from("gallery_sessions")
+      .select("*")
+      .eq(
+        "visitor_id",
+        visitorId
+      )
+      .gte(
+        "last_seen",
+        cutoff
+      )
+      .order(
+        "last_seen",
+        {
+          ascending: false
+        }
+      )
+      .limit(1)
+      .maybeSingle();
+
+
+  if (sessionError) {
+
+    console.error(
+      "active session lookup failed:",
+      sessionError
+    );
+
+    return;
+
+  }
+
+
+  if (activeSession) {
+
+    currentSessionId =
+      activeSession.id;
+
+    sessionStartedAt =
+      new Date(
+        activeSession.started_at
+      );
+
+    lastPresenceUpdate =
+      new Date(
+        activeSession.last_seen
+      );
+
+    return;
+
+  }
+
+
+  /*
+    No active session = NEW VISIT.
+  */
+
+  const {
+    data: newSession,
+    error: newSessionError
+  } =
+    await supabaseClient
+      .from("gallery_sessions")
+      .insert({
+
+        visitor_id:
+          visitorId,
+
+        started_at:
+          now.toISOString(),
+
+        last_seen:
+          now.toISOString(),
+
+        ended_at:
+          null,
+
+        total_seconds:
+          0,
+
+        current_section_id:
+          currentSection,
+
+        sections_visited:
+          currentSection
+            ? [currentSection]
+            : []
+
+      })
+      .select()
+      .single();
+
+
+  if (newSessionError) {
+
+    console.error(
+      "new session creation failed:",
+      newSessionError
+    );
+
+    return;
+
+  }
+
+
+  currentSessionId =
+    newSession.id;
+
+  sessionStartedAt =
+    now;
+
+  lastPresenceUpdate =
+    now;
+
+}
+
+
+/* ============================================================
+   UPDATE VISITOR PRESENCE
+   ============================================================ */
+
+async function updateVisitorPresence() {
+
+  if (!currentSessionId)
+    return;
+
+
+  try {
+
+    const now =
+      new Date();
+
+
+    /*
+      Calculate how many seconds have passed
+      since the previous heartbeat.
+    */
+
+    let elapsedSeconds =
+      0;
+
+
+    if (lastPresenceUpdate) {
+
+      elapsedSeconds =
+        Math.floor(
+          (
+            now.getTime() -
+            lastPresenceUpdate.getTime()
+          ) / 1000
+        );
+
+    }
+
+
+    /*
+      Never accidentally add huge amounts of time
+      if the browser was sleeping.
+    */
+
+    elapsedSeconds =
+      Math.max(
+        0,
+        Math.min(
+          elapsedSeconds,
+          30
+        )
+      );
+
+
+    lastPresenceUpdate =
+      now;
+
+
+    /*
+      Get the existing session.
+    */
+
+    const {
+      data: session,
+      error: fetchError
+    } =
+    await supabaseClient
+      .from("gallery_sessions")
+      .select("*")
+      .eq(
+        "id",
+        currentSessionId
+      )
+      .maybeSingle();
+
+
+    if (fetchError) {
+
+      console.error(
+        "session fetch failed:",
+        fetchError
+      );
+
+      return;
+
+    }
+
+
+    if (!session) {
+
+      currentSessionId =
+        null;
+
+      await startOrResumeSession();
+
+      return;
+
+    }
+
+
+    /*
+      Update sections visited.
+    */
+
+    let visited =
+      Array.isArray(
+        session.sections_visited
+      )
+        ? [
+            ...session.sections_visited
+          ]
+        : [];
+
+
+    if (
+      currentSection &&
+      !visited.includes(
+        currentSection
+      )
+    ) {
+
+      visited.push(
+        currentSection
+      );
+
+    }
+
+
+    const newTotal =
+      Number(
+        session.total_seconds || 0
+      ) +
+      elapsedSeconds;
+
+
+    /*
+      Save the heartbeat.
+    */
+
+    const {
+      error: updateError
+    } =
+      await supabaseClient
+        .from("gallery_sessions")
+        .update({
+
+          last_seen:
+            now.toISOString(),
+
+          ended_at:
+            null,
+
+          total_seconds:
+            newTotal,
+
+          current_section_id:
+            currentSection,
+
+          sections_visited:
+            visited
+
+        })
+        .eq(
+          "id",
+          currentSessionId
+        );
+
+
+    if (updateError) {
+
+      console.error(
+        "session update failed:",
+        updateError
+      );
+
+      return;
+
+    }
+
+
+    /*
+      Also update the visitor's overall record.
+    */
+
+    await supabaseClient
+      .from("gallery_visitors")
+      .update({
+
+        last_seen:
+          now.toISOString()
+
+      })
+      .eq(
+        "visitor_id",
+        visitorId
+      );
+
+
+    if (isAdmin) {
+
+      updatePresenceDisplay();
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "visitor presence failed:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   STALE SESSION CLEANUP
+   ============================================================ */
+
+async function cleanStaleSessions() {
+
+  const cutoff =
+    new Date(
+      Date.now() -
+      45000
+    ).toISOString();
+
+
+  /*
+    We don't DELETE old sessions.
+
+    We simply mark sessions that haven't
+    checked in recently as ended.
+
+    This is what gives you proper history.
+  */
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("gallery_sessions")
+      .select("id, last_seen, ended_at")
+      .lt(
+        "last_seen",
+        cutoff
+      )
+      .is(
+        "ended_at",
+        null
+      );
+
+
+  if (error) {
+
+    console.error(
+      "stale session lookup failed:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  if (!data?.length)
+    return;
+
+
+  for (
+    const session of data
+  ) {
+
+    await supabaseClient
+      .from("gallery_sessions")
+      .update({
+
+        ended_at:
+          session.last_seen
+
+      })
+      .eq(
+        "id",
+        session.id
+      );
+
+  }
+
+}
+
+
+/* ============================================================
+   ACTIVE VISITORS
+   ============================================================ */
+
+async function getActiveVisitors() {
+
+  const cutoff =
+    new Date(
+      Date.now() -
+      45000
+    ).toISOString();
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("gallery_sessions")
+      .select("*")
+      .gte(
+        "last_seen",
+        cutoff
+      )
+      .is(
+        "ended_at",
+        null
+      )
+      .order(
+        "last_seen",
+        {
+          ascending: false
+        }
+      );
+
+
+  if (error) {
+
+    console.error(
+      "active visitor lookup failed:",
+      error
+    );
+
+    return [];
+
+  }
+
+
+  /*
+    Don't count yourself as a visitor.
+  */
+
+  return (
+    data || []
+  ).filter(
+    session =>
+      session.visitor_id !==
+      visitorId
+  );
+
+}
+
+
+/* ============================================================
+   ADMIN PRESENCE PANEL
+   ============================================================ */
+
+function createPresenceDisplay() {
+
+  if (
+    document.getElementById(
+      "livePresence"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  if (!isAdmin)
+    return;
+
+
+  const header =
+    document.querySelector(
+      ".site-header"
+    );
+
+
+  if (!header)
+    return;
+
+
+  const display =
+    document.createElement(
+      "div"
+    );
+
+
+  display.id =
+    "livePresence";
+
+
+  display.className =
+    "live-presence";
+
+
+  display.innerHTML = `
+    <div class="presence-summary">
+
+      <div class="presence-main">
+
+        <span class="presence-heart">
+          ♡
+        </span>
+
+        <span>
+          checking...
+        </span>
+
+      </div>
+
+    </div>
+  `;
+
+
+  header.appendChild(
+    display
+  );
+
+
+  updatePresenceDisplay();
+
+}
+
+
+function removePresenceDisplay() {
+
+  const display =
+    document.getElementById(
+      "livePresence"
+    );
+
+
+  if (display) {
+
+    display.remove();
+
+  }
+
+
+  if (
+    presenceDisplayInterval
+  ) {
+
+    clearInterval(
+      presenceDisplayInterval
+    );
+
+    presenceDisplayInterval =
+      null;
+
+  }
+
+}
+
+
+function startAdminPresenceDisplay() {
+
+  if (!isAdmin)
+    return;
+
+
+  createPresenceDisplay();
+
+
+  if (
+    presenceDisplayInterval
+  ) {
+
+    return;
+
+  }
+
+
+  presenceDisplayInterval =
+    setInterval(
+      updatePresenceDisplay,
+      5000
+    );
+
+}
+
+
+async function updatePresenceDisplay() {
+
+  if (!isAdmin) {
+
+    removePresenceDisplay();
+
+    return;
+
+  }
+
+
+  createPresenceDisplay();
+
+
+  await cleanStaleSessions();
+
+
+  const visitors =
+    await getActiveVisitors();
+
+
+  const display =
+    document.getElementById(
+      "livePresence"
+    );
+
+
+  if (!display)
+    return;
+
+
+  let html = `
+
+    <div class="presence-summary">
+
+      <div class="presence-main">
+
+        <span class="presence-heart">
+          ♡
+        </span>
+
+        <span>
+          mads is online
+        </span>
+
+      </div>
+
+      <div class="visitor-count">
+
+        👀 ${visitors.length}
+
+        ${
+          visitors.length === 1
+            ? "visitor"
+            : "visitors"
+        }
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  if (
+    visitors.length
+  ) {
+
+    html +=
+      `<div class="visitor-list">`;
+
+
+    visitors.forEach(
+      (
+        session,
+        index
+      ) => {
+
+        const duration =
+          getLiveSessionDuration(
+            session
+          );
+
+
+        const currentSectionName =
+          getSectionName(
+            session.current_section_id
+          );
+
+
+        const visitedNames =
+          (
+            session.sections_visited ||
+            []
+          )
+            .map(
+              id =>
+                getSectionName(id)
+            )
+            .filter(Boolean);
+
+
+        html += `
+
+          <div class="visitor-card">
+
+            <div class="visitor-title">
+
+              <strong>
+                Visitor ${index + 1}
+              </strong>
+
+              <span>
+                ${duration}
+              </span>
+
+            </div>
+
+            <div class="visitor-current">
+
+              📍
+              ${escapeHtml(
+                currentSectionName
+              )}
+
+            </div>
+
+            <div class="visitor-sections">
+
+              <span class="visitor-label">
+                sections visited
+              </span>
+
+              <div class="visitor-section-tags">
+
+                ${
+                  visitedNames.length
+                    ? visitedNames
+                        .map(
+                          name =>
+                            `<span class="visitor-tag">
+                              ${escapeHtml(name)}
+                            </span>`
+                        )
+                        .join("")
+                    : `<span class="visitor-muted">
+                        all memories ♡
+                      </span>`
+                }
+
+              </div>
+
+            </div>
+
+            <div class="visitor-total">
+
+              ⏱️ current visit:
+              <strong>
+                ${formatDuration(
+                  session.total_seconds || 0
+                )}
+              </strong>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+    );
+
+
+    html +=
+      `</div>`;
+
+  }
+
+
+  display.innerHTML =
+    html;
+
+}
+
+
+/* ============================================================
+   SESSION DURATION
+   ============================================================ */
+
+function getLiveSessionDuration(
+  session
+) {
+
+  if (
+    !session.started_at
+  ) {
+
+    return "0s";
+
+  }
+
+
+  const started =
+    new Date(
+      session.started_at
+    ).getTime();
+
+
+  const seconds =
+    Math.max(
+      0,
+      Math.floor(
+        (
+          Date.now() -
+          started
+        ) / 1000
+      )
+    );
+
+
+  return formatDuration(
+    seconds
+  );
+
+}
+
+
+/* ============================================================
+   SECTION HELPERS
+   ============================================================ */
+
+function getSectionName(
+  sectionId
+) {
+
+  if (!sectionId) {
+
+    return "all memories ♡";
+
+  }
+
+
+  const section =
+    sections.find(
+      item =>
+        item.id ===
+        sectionId
+    );
+
+
+  return section
+    ? section.title
+    : "unknown section";
+
+}
+
+
+/* ============================================================
    STORAGE
    ============================================================ */
 
@@ -2704,6 +3813,101 @@ function formatDate(
       year: "numeric"
     }
   ).format(date);
+
+}
+
+
+/* ============================================================
+   DURATION
+   ============================================================ */
+
+function formatDuration(
+  seconds
+) {
+
+  seconds =
+    Math.max(
+      0,
+      Math.floor(
+        Number(seconds) || 0
+      )
+    );
+
+
+  if (
+    seconds < 60
+  ) {
+
+    return `${seconds}s`;
+
+  }
+
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+
+  const remainingSeconds =
+    seconds % 60;
+
+
+  if (
+    minutes < 60
+  ) {
+
+    return `${minutes}m ${remainingSeconds}s`;
+
+  }
+
+
+  const hours =
+    Math.floor(
+      minutes / 60
+    );
+
+
+  const remainingMinutes =
+    minutes % 60;
+
+
+  return `${hours}h ${remainingMinutes}m`;
+
+}
+
+
+/* ============================================================
+   ESCAPE HTML
+   ============================================================ */
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value || ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
 }
 
@@ -2880,7 +4084,7 @@ function populateSectionSelect() {
 
 
 /* ============================================================
-   RESET ADD-MEMORY FORM
+   RESET MEMORY FORM
    ============================================================ */
 
 function resetMemoryForm() {
@@ -2915,891 +4119,6 @@ function resetMemoryForm() {
     "memoryFile"
   ).value =
     "";
-
-}
-
-
-/* ============================================================
-   LIVE PRESENCE + VISITOR ANALYTICS
-   ============================================================ */
-
-function getVisitorId() {
-
-  let id =
-    localStorage.getItem(
-      "gallery_visitor_id"
-    );
-
-
-  if (!id) {
-
-    id =
-      crypto.randomUUID();
-
-    localStorage.setItem(
-      "gallery_visitor_id",
-      id
-    );
-
-  }
-
-
-  return id;
-
-}
-
-
-async function startPresence() {
-
-  if (presenceStarted)
-    return;
-
-
-  presenceStarted =
-    true;
-
-
-  await initializeVisitorPresence();
-
-
-  presenceInterval =
-    setInterval(
-      updatePresence,
-      15000
-    );
-
-
-  document.addEventListener(
-    "visibilitychange",
-    () => {
-
-      if (
-        document.visibilityState ===
-        "visible"
-      ) {
-
-        updatePresence();
-
-      }
-
-    }
-  );
-
-}
-
-
-async function initializeVisitorPresence() {
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("gallery_presence")
-      .select("*")
-      .eq(
-        "visitor_id",
-        visitorId
-      )
-      .maybeSingle();
-
-
-  if (error) {
-
-    console.error(
-      "initializeVisitorPresence:",
-      error
-    );
-
-    return;
-
-  }
-
-
-  const now =
-    new Date().toISOString();
-
-
-  if (!data) {
-
-    await supabaseClient
-      .from("gallery_presence")
-      .insert({
-
-        visitor_id:
-          visitorId,
-
-        section_id:
-          currentSection,
-
-        last_seen:
-          now,
-
-        session_started_at:
-          now,
-
-        total_seconds:
-          0,
-
-        sections_visited:
-          currentSection
-            ? [currentSection]
-            : [],
-
-        section_started_at:
-          now
-
-      });
-
-    return;
-
-  }
-
-
-  const lastSeen =
-    new Date(
-      data.last_seen
-    ).getTime();
-
-
-  const inactiveFor =
-    Date.now() -
-    lastSeen;
-
-
-  if (
-    inactiveFor >
-    45000
-  ) {
-
-    await supabaseClient
-      .from("gallery_presence")
-      .update({
-
-        section_id:
-          currentSection,
-
-        last_seen:
-          now,
-
-        session_started_at:
-          now,
-
-        total_seconds:
-          0,
-
-        sections_visited:
-          currentSection
-            ? [currentSection]
-            : [],
-
-        section_started_at:
-          now
-
-      })
-      .eq(
-        "visitor_id",
-        visitorId
-      );
-
-  }
-
-}
-
-
-async function updatePresence() {
-
-  try {
-
-    const {
-      data: existing,
-      error: fetchError
-    } =
-      await supabaseClient
-        .from("gallery_presence")
-        .select("*")
-        .eq(
-          "visitor_id",
-          visitorId
-        )
-        .maybeSingle();
-
-
-    if (fetchError) {
-
-      console.error(
-        "Presence fetch failed:",
-        fetchError
-      );
-
-      return;
-
-    }
-
-
-    if (!existing) {
-
-      await initializeVisitorPresence();
-
-      return;
-
-    }
-
-
-    const now =
-      new Date();
-
-
-    const nowISO =
-      now.toISOString();
-
-
-    const lastSeen =
-      new Date(
-        existing.last_seen
-      );
-
-
-    let elapsed =
-      Math.floor(
-        (
-          now.getTime() -
-          lastSeen.getTime()
-        ) / 1000
-      );
-
-
-    elapsed =
-      Math.max(
-        0,
-        Math.min(
-          elapsed,
-          30
-        )
-      );
-
-
-    let totalSeconds =
-      Number(
-        existing.total_seconds ||
-        0
-      ) + elapsed;
-
-
-    let visited =
-      Array.isArray(
-        existing.sections_visited
-      )
-        ? [
-            ...existing.sections_visited
-          ]
-        : [];
-
-
-    if (
-      currentSection &&
-      !visited.includes(
-        currentSection
-      )
-    ) {
-
-      visited.push(
-        currentSection
-      );
-
-    }
-
-
-    let sectionStartedAt =
-      existing.section_started_at;
-
-
-    if (
-      existing.section_id !==
-      currentSection
-    ) {
-
-      sectionStartedAt =
-        nowISO;
-
-    }
-
-
-    await supabaseClient
-      .from("gallery_presence")
-      .update({
-
-        section_id:
-          currentSection,
-
-        last_seen:
-          nowISO,
-
-        total_seconds:
-          totalSeconds,
-
-        sections_visited:
-          visited,
-
-        section_started_at:
-          sectionStartedAt
-
-      })
-      .eq(
-        "visitor_id",
-        visitorId
-      );
-
-
-    if (isAdmin) {
-
-      updatePresenceDisplay();
-
-    }
-
-  } catch (error) {
-
-    console.error(
-      "Presence update failed:",
-      error
-    );
-
-  }
-
-}
-
-
-async function cleanStalePresence() {
-
-  const cutoff =
-    new Date(
-      Date.now() -
-      45000
-    ).toISOString();
-
-
-  await supabaseClient
-    .from("gallery_presence")
-    .delete()
-    .lt(
-      "last_seen",
-      cutoff
-    );
-
-}
-
-
-async function getActiveVisitors() {
-
-  const cutoff =
-    new Date(
-      Date.now() -
-      45000
-    ).toISOString();
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("gallery_presence")
-      .select("*")
-      .gte(
-        "last_seen",
-        cutoff
-      );
-
-
-  if (error) {
-
-    console.error(
-      "Presence count failed:",
-      error
-    );
-
-    return [];
-
-  }
-
-
-  return (
-    data || []
-  ).filter(
-    visitor =>
-      visitor.visitor_id !==
-      visitorId
-  );
-
-}
-
-
-/* ============================================================
-   ADMIN VISITOR PANEL
-   ============================================================ */
-
-function createPresenceDisplay() {
-
-  if (
-    document.getElementById(
-      "livePresence"
-    )
-  ) {
-
-    return;
-
-  }
-
-
-  if (!isAdmin)
-    return;
-
-
-  const header =
-    document.querySelector(
-      ".site-header"
-    );
-
-
-  if (!header)
-    return;
-
-
-  const display =
-    document.createElement(
-      "div"
-    );
-
-
-  display.id =
-    "livePresence";
-
-
-  display.className =
-    "live-presence";
-
-
-  display.innerHTML =
-    `
-      <div class="presence-summary">
-
-        <div class="presence-main">
-
-          <span class="presence-heart">
-            ♡
-          </span>
-
-          <span>
-            checking...
-          </span>
-
-        </div>
-
-      </div>
-    `;
-
-
-  header.appendChild(
-    display
-  );
-
-
-  updatePresenceDisplay();
-
-}
-
-
-function removePresenceDisplay() {
-
-  const display =
-    document.getElementById(
-      "livePresence"
-    );
-
-
-  if (display) {
-
-    display.remove();
-
-  }
-
-
-  if (
-    presenceDisplayInterval
-  ) {
-
-    clearInterval(
-      presenceDisplayInterval
-    );
-
-    presenceDisplayInterval =
-      null;
-
-  }
-
-}
-
-
-function startAdminPresenceDisplay() {
-
-  if (!isAdmin)
-    return;
-
-
-  createPresenceDisplay();
-
-
-  if (
-    presenceDisplayInterval
-  ) {
-
-    return;
-
-  }
-
-
-  presenceDisplayInterval =
-    setInterval(
-      updatePresenceDisplay,
-      5000
-    );
-
-}
-
-
-async function updatePresenceDisplay() {
-
-  if (!isAdmin) {
-
-    removePresenceDisplay();
-
-    return;
-
-  }
-
-
-  createPresenceDisplay();
-
-
-  await cleanStalePresence();
-
-
-  const visitors =
-    await getActiveVisitors();
-
-
-  const display =
-    document.getElementById(
-      "livePresence"
-    );
-
-
-  if (!display)
-    return;
-
-
-  let html = `
-
-    <div class="presence-summary">
-
-      <div class="presence-main">
-
-        <span class="presence-heart">
-          ♡
-        </span>
-
-        <span>
-          mads is online
-        </span>
-
-      </div>
-
-      <div class="visitor-count">
-        👀 ${visitors.length}
-        ${
-          visitors.length === 1
-            ? "visitor"
-            : "visitors"
-        }
-      </div>
-
-    </div>
-
-  `;
-
-
-  if (
-    visitors.length
-  ) {
-
-    html +=
-      `<div class="visitor-list">`;
-
-
-    visitors.forEach(
-      (
-        visitor,
-        index
-      ) => {
-
-        const duration =
-          getVisitorDuration(
-            visitor
-          );
-
-
-        const currentSectionName =
-          getSectionName(
-            visitor.section_id
-          );
-
-
-        const visitedNames =
-          (
-            visitor.sections_visited ||
-            []
-          )
-            .map(
-              id =>
-                getSectionName(id)
-            )
-            .filter(Boolean);
-
-
-        html += `
-
-          <div class="visitor-card">
-
-            <div class="visitor-title">
-
-              <strong>
-                Visitor ${index + 1}
-              </strong>
-
-              <span>
-                ${duration}
-              </span>
-
-            </div>
-
-            <div class="visitor-current">
-
-              📍
-              ${escapeHtml(
-                currentSectionName
-              )}
-
-            </div>
-
-            <div class="visitor-sections">
-
-              <span class="visitor-label">
-                sections visited
-              </span>
-
-              <div class="visitor-section-tags">
-
-                ${
-                  visitedNames.length
-                    ? visitedNames
-                        .map(
-                          name =>
-                            `<span class="visitor-tag">
-                              ${escapeHtml(name)}
-                            </span>`
-                        )
-                        .join("")
-                    : `<span class="visitor-muted">
-                        all memories ♡
-                      </span>`
-                }
-
-              </div>
-
-            </div>
-
-            <div class="visitor-total">
-
-              ⏱️ total time:
-              <strong>
-                ${formatDuration(
-                  visitor.total_seconds || 0
-                )}
-              </strong>
-
-            </div>
-
-          </div>
-
-        `;
-
-      }
-    );
-
-
-    html +=
-      `</div>`;
-
-  }
-
-
-  display.innerHTML =
-    html;
-
-}
-
-
-/* ============================================================
-   VISITOR HELPERS
-   ============================================================ */
-
-function getVisitorDuration(
-  visitor
-) {
-
-  if (
-    !visitor.session_started_at
-  ) {
-
-    return "0s";
-
-  }
-
-
-  const started =
-    new Date(
-      visitor.session_started_at
-    ).getTime();
-
-
-  const seconds =
-    Math.max(
-      0,
-      Math.floor(
-        (
-          Date.now() -
-          started
-        ) / 1000
-      )
-    );
-
-
-  return formatDuration(
-    seconds
-  );
-
-}
-
-
-function formatDuration(
-  seconds
-) {
-
-  seconds =
-    Math.max(
-      0,
-      Math.floor(
-        Number(seconds) || 0
-      )
-    );
-
-
-  if (
-    seconds < 60
-  ) {
-
-    return `${seconds}s`;
-
-  }
-
-
-  const minutes =
-    Math.floor(
-      seconds / 60
-    );
-
-
-  const remainingSeconds =
-    seconds % 60;
-
-
-  if (
-    minutes < 60
-  ) {
-
-    return `${minutes}m ${remainingSeconds}s`;
-
-  }
-
-
-  const hours =
-    Math.floor(
-      minutes / 60
-    );
-
-
-  const remainingMinutes =
-    minutes % 60;
-
-
-  return `${hours}h ${remainingMinutes}m`;
-
-}
-
-
-function getSectionName(
-  sectionId
-) {
-
-  if (!sectionId) {
-
-    return "all memories ♡";
-
-  }
-
-
-  const section =
-    sections.find(
-      item =>
-        item.id ===
-        sectionId
-    );
-
-
-  return section
-    ? section.title
-    : "unknown section";
-
-}
-
-
-function escapeHtml(
-  value
-) {
-
-  return String(
-    value || ""
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
 
 }
 
@@ -4043,6 +4362,7 @@ function showToast(
     }
 
     @keyframes presenceHeartPulse {
+
       0% {
         transform: scale(1);
         opacity: 0.7;
@@ -4057,6 +4377,7 @@ function showToast(
         transform: scale(1);
         opacity: 0.7;
       }
+
     }
 
   `;
