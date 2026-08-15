@@ -9,11 +9,17 @@ const ADMIN_UID =
 
 const BUCKET_NAME = "gallery";
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-  );
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+);
 
 let currentUser = null;
 let isAdmin = false;
@@ -24,6 +30,14 @@ let memories = [];
 let currentSection = null;
 let currentSort = "newest";
 
+let editingMemoryId = null;
+
+let draggedSectionId = null;
+
+
+/* ============================================================
+   DOM
+   ============================================================ */
 
 const gallery =
   document.getElementById("gallery");
@@ -71,6 +85,10 @@ const toast =
   document.getElementById("toast");
 
 
+/* ============================================================
+   INITIALIZE
+   ============================================================ */
+
 document.addEventListener(
   "DOMContentLoaded",
   initialize
@@ -78,6 +96,8 @@ document.addEventListener(
 
 
 async function initialize() {
+
+  createEditMemoryModal();
 
   setupEventListeners();
 
@@ -94,6 +114,10 @@ async function initialize() {
 }
 
 
+/* ============================================================
+   EVENT LISTENERS
+   ============================================================ */
+
 function setupEventListeners() {
 
   adminButton.addEventListener(
@@ -101,11 +125,15 @@ function setupEventListeners() {
     () => {
 
       if (isAdmin) {
+
         showToast(
           "you're already logged in ♡"
         );
+
       } else {
+
         openModal(loginModal);
+
       }
 
     }
@@ -118,7 +146,24 @@ function setupEventListeners() {
 
       if (!isAdmin) return;
 
+      resetMemoryForm();
+
       populateSectionSelect();
+
+      document.getElementById(
+        "memoryModalTitle"
+      ).textContent =
+        "add a little memory";
+
+      document.getElementById(
+        "memoryModalSubtitle"
+      ).textContent =
+        "keep a little piece of today";
+
+      document.getElementById(
+        "saveMemoryButton"
+      ).textContent =
+        "save memory ♡";
 
       openModal(memoryModal);
 
@@ -131,6 +176,14 @@ function setupEventListeners() {
     () => {
 
       if (!isAdmin) return;
+
+      document.getElementById(
+        "sectionForm"
+      ).reset();
+
+      document.getElementById(
+        "sectionError"
+      ).textContent = "";
 
       openModal(sectionModal);
 
@@ -247,9 +300,7 @@ function setupEventListeners() {
     "keydown",
     event => {
 
-      if (
-        event.key === "Escape"
-      ) {
+      if (event.key === "Escape") {
 
         closeLightbox();
 
@@ -269,6 +320,14 @@ function setupEventListeners() {
       await processSession(
         session
       );
+
+      await loadSections();
+
+      await loadMemories();
+
+      renderNavigation();
+
+      renderGallery();
 
     }
   );
@@ -326,6 +385,38 @@ async function processSession(session) {
   }
 
 
+  /*
+    Verify the user with Supabase Auth rather
+    than trusting only browser-stored session data.
+  */
+
+  const {
+    data: userData,
+    error
+  } =
+    await supabaseClient.auth.getUser();
+
+
+  if (
+    error ||
+    !userData?.user
+  ) {
+
+    currentUser = null;
+
+    isAdmin = false;
+
+    updateAdminUI();
+
+    return;
+
+  }
+
+
+  currentUser =
+    userData.user;
+
+
   if (
     currentUser.id !== ADMIN_UID
   ) {
@@ -360,20 +451,22 @@ function updateAdminUI() {
       "hidden"
     );
 
+    adminButton.textContent =
+      "🔒 admin";
+
   } else {
 
     adminControls.classList.add(
       "hidden"
     );
 
+    adminButton.textContent =
+      "🔒 admin";
+
   }
 
 }
 
-
-/* ============================================================
-   LOGIN
-   ============================================================ */
 
 async function handleLogin(event) {
 
@@ -462,6 +555,10 @@ async function handleLogin(event) {
     .reset();
 
 
+  isAdmin = true;
+
+  updateAdminUI();
+
   showToast(
     "welcome back ♡"
   );
@@ -469,9 +566,19 @@ async function handleLogin(event) {
 }
 
 
+/* ============================================================
+   LOGOUT
+   ============================================================ */
+
 async function logout() {
 
   await supabaseClient.auth.signOut();
+
+  currentUser = null;
+
+  isAdmin = false;
+
+  updateAdminUI();
 
   showToast(
     "logged out ♡"
@@ -494,6 +601,12 @@ async function loadSections() {
       .from("sections")
       .select("*")
       .order(
+        "sort_order",
+        {
+          ascending: true
+        }
+      )
+      .order(
         "created_at",
         {
           ascending: true
@@ -503,7 +616,10 @@ async function loadSections() {
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      "loadSections:",
+      error
+    );
 
     showToast(
       "couldn't load sections"
@@ -525,8 +641,15 @@ function renderNavigation() {
   navigation.innerHTML = "";
 
 
+  /*
+    ALL MEMORIES IS ALWAYS FIRST.
+    It is not a database section.
+  */
+
   const allButton =
-    document.createElement("button");
+    document.createElement(
+      "button"
+    );
 
 
   allButton.className =
@@ -567,19 +690,35 @@ function renderNavigation() {
   );
 
 
+  /*
+    Custom sections.
+  */
+
   sections.forEach(
     section => {
 
       const wrapper =
-        document.createElement("div");
+        document.createElement(
+          "div"
+        );
 
 
       wrapper.className =
         "section-nav-item";
 
 
+      wrapper.draggable =
+        isAdmin;
+
+
+      wrapper.dataset.sectionId =
+        section.id;
+
+
       const button =
-        document.createElement("button");
+        document.createElement(
+          "button"
+        );
 
 
       button.className =
@@ -599,6 +738,16 @@ function renderNavigation() {
 
       button.textContent =
         section.title;
+
+
+      if (
+        section.subtitle
+      ) {
+
+        button.title =
+          section.subtitle;
+
+      }
 
 
       button.addEventListener(
@@ -622,6 +771,38 @@ function renderNavigation() {
 
 
       if (isAdmin) {
+
+        /*
+          Drag handle.
+        */
+
+        const handle =
+          document.createElement(
+            "span"
+          );
+
+
+        handle.className =
+          "section-drag-handle";
+
+
+        handle.textContent =
+          "⠿";
+
+
+        handle.title =
+          "drag to reorder";
+
+
+        wrapper.insertBefore(
+          handle,
+          button
+        );
+
+
+        /*
+          Remove button.
+        */
 
         const removeButton =
           document.createElement(
@@ -659,6 +840,110 @@ function renderNavigation() {
           removeButton
         );
 
+
+        /*
+          Drag events.
+        */
+
+        wrapper.addEventListener(
+          "dragstart",
+          event => {
+
+            draggedSectionId =
+              section.id;
+
+            wrapper.classList.add(
+              "dragging"
+            );
+
+            event.dataTransfer.effectAllowed =
+              "move";
+
+          }
+        );
+
+
+        wrapper.addEventListener(
+          "dragend",
+          () => {
+
+            wrapper.classList.remove(
+              "dragging"
+            );
+
+            draggedSectionId =
+              null;
+
+            clearDragHighlights();
+
+          }
+        );
+
+
+        wrapper.addEventListener(
+          "dragover",
+          event => {
+
+            event.preventDefault();
+
+            if (
+              draggedSectionId &&
+              draggedSectionId !==
+                section.id
+            ) {
+
+              wrapper.classList.add(
+                "drag-over"
+              );
+
+            }
+
+          }
+        );
+
+
+        wrapper.addEventListener(
+          "dragleave",
+          () => {
+
+            wrapper.classList.remove(
+              "drag-over"
+            );
+
+          }
+        );
+
+
+        wrapper.addEventListener(
+          "drop",
+          async event => {
+
+            event.preventDefault();
+
+            wrapper.classList.remove(
+              "drag-over"
+            );
+
+
+            if (
+              !draggedSectionId ||
+              draggedSectionId ===
+                section.id
+            ) {
+
+              return;
+
+            }
+
+
+            await reorderSections(
+              draggedSectionId,
+              section.id
+            );
+
+          }
+        );
+
       }
 
 
@@ -672,8 +957,28 @@ function renderNavigation() {
 }
 
 
+function clearDragHighlights() {
+
+  document
+    .querySelectorAll(
+      ".section-nav-item"
+    )
+    .forEach(
+      element => {
+
+        element.classList.remove(
+          "drag-over",
+          "dragging"
+        );
+
+      }
+    );
+
+}
+
+
 /* ============================================================
-   CREATE SECTION
+   SECTION CREATION
    ============================================================ */
 
 async function handleCreateSection(
@@ -752,6 +1057,19 @@ async function handleCreateSection(
   }
 
 
+  const nextSortOrder =
+    sections.length
+      ? Math.max(
+          ...sections.map(
+            section =>
+              Number(
+                section.sort_order || 0
+              )
+          )
+        ) + 1
+      : 1;
+
+
   const {
     error
   } =
@@ -760,13 +1078,18 @@ async function handleCreateSection(
       .insert({
         title,
         subtitle:
-          subtitle || null
+          subtitle || null,
+        sort_order:
+          nextSortOrder
       });
 
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      "handleCreateSection:",
+      error
+    );
 
     errorElement.textContent =
       "Couldn't create that section.";
@@ -796,7 +1119,141 @@ async function handleCreateSection(
 
 
 /* ============================================================
-   REMOVE SECTION
+   SECTION REORDERING
+   ============================================================ */
+
+async function reorderSections(
+  draggedId,
+  targetId
+) {
+
+  if (!isAdmin) return;
+
+
+  const currentOrder =
+    [...sections];
+
+
+  const draggedIndex =
+    currentOrder.findIndex(
+      section =>
+        section.id === draggedId
+    );
+
+
+  const targetIndex =
+    currentOrder.findIndex(
+      section =>
+        section.id === targetId
+    );
+
+
+  if (
+    draggedIndex === -1 ||
+    targetIndex === -1
+  ) {
+
+    return;
+
+  }
+
+
+  const [
+    draggedSection
+  ] =
+    currentOrder.splice(
+      draggedIndex,
+      1
+    );
+
+
+  currentOrder.splice(
+    targetIndex,
+    0,
+    draggedSection
+  );
+
+
+  /*
+    Optimistically update the UI.
+  */
+
+  sections =
+    currentOrder.map(
+      (
+        section,
+        index
+      ) => ({
+        ...section,
+        sort_order:
+          index + 1
+      })
+    );
+
+
+  renderNavigation();
+
+
+  /*
+    Save every order.
+  */
+
+  for (
+    let index = 0;
+    index < sections.length;
+    index++
+  ) {
+
+    const section =
+      sections[index];
+
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("sections")
+        .update({
+          sort_order:
+            index + 1
+        })
+        .eq(
+          "id",
+          section.id
+        );
+
+
+    if (error) {
+
+      console.error(
+        "reorderSections:",
+        error
+      );
+
+      showToast(
+        "couldn't save the section order"
+      );
+
+      await loadSections();
+
+      renderNavigation();
+
+      return;
+
+    }
+
+  }
+
+
+  showToast(
+    "section order saved ♡"
+  );
+
+}
+
+
+/* ============================================================
+   SECTION REMOVAL
    ============================================================ */
 
 async function removeSection(
@@ -818,9 +1275,7 @@ async function removeSection(
 
 
   /*
-    Setting section_id to NULL first means
-    the memories survive when the section
-    is removed.
+    Move memories into All Memories.
   */
 
   const {
@@ -839,7 +1294,10 @@ async function removeSection(
 
   if (updateError) {
 
-    console.error(updateError);
+    console.error(
+      "removeSection update:",
+      updateError
+    );
 
     showToast(
       "couldn't move the memories"
@@ -849,6 +1307,10 @@ async function removeSection(
 
   }
 
+
+  /*
+    Delete only the section.
+  */
 
   const {
     error: deleteError
@@ -864,7 +1326,10 @@ async function removeSection(
 
   if (deleteError) {
 
-    console.error(deleteError);
+    console.error(
+      "removeSection delete:",
+      deleteError
+    );
 
     showToast(
       "couldn't remove that section"
@@ -917,7 +1382,10 @@ async function loadMemories() {
 
   if (error) {
 
-    console.error(error);
+    console.error(
+      "loadMemories:",
+      error
+    );
 
     showToast(
       "couldn't load memories"
@@ -956,8 +1424,8 @@ function sortMemories(items) {
 
 
       /*
-        Memories with dates always come
-        before memories without dates.
+        Undated memories go after
+        dated memories.
       */
 
       if (
@@ -977,12 +1445,6 @@ function sortMemories(items) {
 
       if (!b.date) return -1;
 
-
-      /*
-        YYYY-MM-DD strings can be safely
-        compared directly. This avoids
-        timezone problems.
-      */
 
       const comparison =
         a.date.localeCompare(
@@ -1007,7 +1469,10 @@ function sortMemories(items) {
 }
 
 
-function compareDateTime(a, b) {
+function compareDateTime(
+  a,
+  b
+) {
 
   return (
     new Date(a).getTime() -
@@ -1124,7 +1589,8 @@ function createMemoryCard(
       "memory-media memory-video";
 
 
-    media.controls = true;
+    media.controls =
+      true;
 
     media.preload =
       "metadata";
@@ -1192,8 +1658,9 @@ function createMemoryCard(
     "error",
     () => {
 
-      media.style.display =
-        "none";
+      media.classList.add(
+        "media-error"
+      );
 
     }
   );
@@ -1302,6 +1769,32 @@ function createMemoryCard(
       "memory-admin";
 
 
+    const editButton =
+      document.createElement(
+        "button"
+      );
+
+
+    editButton.className =
+      "edit-memory";
+
+
+    editButton.textContent =
+      "✏️ edit";
+
+
+    editButton.addEventListener(
+      "click",
+      () => {
+
+        openEditMemory(
+          memory
+        );
+
+      }
+    );
+
+
     const deleteButton =
       document.createElement(
         "button"
@@ -1325,6 +1818,11 @@ function createMemoryCard(
         );
 
       }
+    );
+
+
+    admin.appendChild(
+      editButton
     );
 
 
@@ -1544,6 +2042,11 @@ async function handleAddMemory(
 
     if (insertError) {
 
+      /*
+        Clean up the uploaded file
+        if the database insert fails.
+      */
+
       await supabaseClient.storage
         .from(BUCKET_NAME)
         .remove([
@@ -1560,9 +2063,7 @@ async function handleAddMemory(
     );
 
 
-    document
-      .getElementById("memoryForm")
-      .reset();
+    resetMemoryForm();
 
 
     await loadMemories();
@@ -1577,20 +2078,423 @@ async function handleAddMemory(
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      "handleAddMemory:",
+      error
+    );
 
     errorElement.textContent =
       "Something went wrong saving that memory. Please try again.";
 
   } finally {
 
-    saveButton.disabled = false;
+    saveButton.disabled =
+      false;
 
     progress.classList.add(
       "hidden"
     );
 
   }
+
+}
+
+
+/* ============================================================
+   EDIT MEMORY MODAL
+   ============================================================ */
+
+function createEditMemoryModal() {
+
+  if (
+    document.getElementById(
+      "editMemoryModal"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const modal =
+    document.createElement(
+      "div"
+    );
+
+
+  modal.id =
+    "editMemoryModal";
+
+
+  modal.className =
+    "modal hidden";
+
+
+  modal.innerHTML = `
+    <div class="modal-backdrop"></div>
+
+    <div class="modal-card large-modal">
+
+      <button
+        class="modal-close"
+        id="editMemoryClose"
+        type="button"
+      >
+        ×
+      </button>
+
+      <div class="modal-heading">
+
+        <span>✏️</span>
+
+        <h2>edit memory</h2>
+
+        <p>
+          make a little change ♡
+        </p>
+
+      </div>
+
+      <form id="editMemoryForm">
+
+        <label>
+          Section
+
+          <select id="editMemorySection"></select>
+
+        </label>
+
+        <label>
+          Date
+
+          <input
+            id="editMemoryDate"
+            type="date"
+          >
+
+        </label>
+
+        <label>
+          Location
+
+          <input
+            id="editMemoryLocation"
+            type="text"
+            placeholder="Toronto, Canada"
+          >
+
+        </label>
+
+        <label>
+          Caption
+
+          <textarea
+            id="editMemoryCaption"
+            rows="4"
+            placeholder="the sweetest little day ♡"
+          ></textarea>
+
+        </label>
+
+        <p
+          id="editMemoryError"
+          class="form-error"
+        ></p>
+
+        <button
+          type="submit"
+          class="primary-button full-width"
+          id="saveEditMemoryButton"
+        >
+          save changes ♡
+        </button>
+
+      </form>
+
+    </div>
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+
+  document
+    .getElementById(
+      "editMemoryClose"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        closeModal(
+          modal
+        );
+
+      }
+    );
+
+
+  modal
+    .querySelector(
+      ".modal-backdrop"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        closeModal(
+          modal
+        );
+
+      }
+    );
+
+
+  document
+    .getElementById(
+      "editMemoryForm"
+    )
+    .addEventListener(
+      "submit",
+      saveEditedMemory
+    );
+
+}
+
+
+function openEditMemory(
+  memory
+) {
+
+  if (!isAdmin) return;
+
+
+  editingMemoryId =
+    memory.id;
+
+
+  const select =
+    document.getElementById(
+      "editMemorySection"
+    );
+
+
+  select.innerHTML = "";
+
+
+  const allOption =
+    document.createElement(
+      "option"
+    );
+
+
+  allOption.value =
+    "";
+
+
+  allOption.textContent =
+    "all memories ♡";
+
+
+  select.appendChild(
+    allOption
+  );
+
+
+  sections.forEach(
+    section => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        section.id;
+
+
+      option.textContent =
+        section.title;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  select.value =
+    memory.section_id || "";
+
+
+  document.getElementById(
+    "editMemoryDate"
+  ).value =
+    memory.date || "";
+
+
+  document.getElementById(
+    "editMemoryLocation"
+  ).value =
+    memory.location || "";
+
+
+  document.getElementById(
+    "editMemoryCaption"
+  ).value =
+    memory.caption || "";
+
+
+  document.getElementById(
+    "editMemoryError"
+  ).textContent = "";
+
+
+  openModal(
+    document.getElementById(
+      "editMemoryModal"
+    )
+  );
+
+}
+
+
+async function saveEditedMemory(
+  event
+) {
+
+  event.preventDefault();
+
+
+  if (
+    !isAdmin ||
+    !editingMemoryId
+  ) {
+
+    return;
+
+  }
+
+
+  const saveButton =
+    document.getElementById(
+      "saveEditMemoryButton"
+    );
+
+
+  const errorElement =
+    document.getElementById(
+      "editMemoryError"
+    );
+
+
+  errorElement.textContent = "";
+
+
+  saveButton.disabled =
+    true;
+
+
+  saveButton.textContent =
+    "saving...";
+
+
+  const sectionId =
+    document.getElementById(
+      "editMemorySection"
+    ).value;
+
+
+  const date =
+    document.getElementById(
+      "editMemoryDate"
+    ).value;
+
+
+  const location =
+    document.getElementById(
+      "editMemoryLocation"
+    ).value.trim();
+
+
+  const caption =
+    document.getElementById(
+      "editMemoryCaption"
+    ).value.trim();
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("memories")
+      .update({
+        section_id:
+          sectionId || null,
+
+        date:
+          date || null,
+
+        location:
+          location || null,
+
+        caption:
+          caption || null
+      })
+      .eq(
+        "id",
+        editingMemoryId
+      );
+
+
+  saveButton.disabled =
+    false;
+
+
+  saveButton.textContent =
+    "save changes ♡";
+
+
+  if (error) {
+
+    console.error(
+      "saveEditedMemory:",
+      error
+    );
+
+    errorElement.textContent =
+      "Couldn't save those changes. Please try again.";
+
+    return;
+
+  }
+
+
+  closeModal(
+    document.getElementById(
+      "editMemoryModal"
+    )
+  );
+
+
+  editingMemoryId =
+    null;
+
+
+  await loadMemories();
+
+  renderGallery();
+
+
+  showToast(
+    "memory updated ♡"
+  );
 
 }
 
@@ -1631,6 +2535,7 @@ async function deleteMemory(
   if (databaseError) {
 
     console.error(
+      "deleteMemory database:",
       databaseError
     );
 
@@ -1656,6 +2561,7 @@ async function deleteMemory(
   if (storageError) {
 
     console.error(
+      "deleteMemory storage:",
       storageError
     );
 
@@ -1683,7 +2589,9 @@ async function deleteMemory(
    STORAGE
    ============================================================ */
 
-function getPublicUrl(path) {
+function getPublicUrl(
+  path
+) {
 
   const {
     data
@@ -1868,7 +2776,9 @@ function populateSectionSelect() {
     );
 
 
-  allOption.value = "";
+  allOption.value =
+    "";
+
 
   allOption.textContent =
     "all memories ♡";
@@ -1902,6 +2812,44 @@ function populateSectionSelect() {
 
     }
   );
+
+}
+
+
+/* ============================================================
+   RESET ADD-MEMORY FORM
+   ============================================================ */
+
+function resetMemoryForm() {
+
+  const form =
+    document.getElementById(
+      "memoryForm"
+    );
+
+
+  if (form) {
+
+    form.reset();
+
+  }
+
+
+  document.getElementById(
+    "memoryError"
+  ).textContent = "";
+
+
+  document.getElementById(
+    "uploadProgress"
+  ).classList.add(
+    "hidden"
+  );
+
+
+  document.getElementById(
+    "memoryFile"
+  ).value = "";
 
 }
 
@@ -1972,3 +2920,88 @@ function showToast(
     );
 
 }
+
+
+/* ============================================================
+   SMALL DYNAMIC STYLES FOR NEW ADMIN FEATURES
+   ============================================================ */
+
+(function addDynamicStyles() {
+
+  const style =
+    document.createElement(
+      "style"
+    );
+
+
+  style.textContent = `
+    .section-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .section-nav-item .nav-item {
+      flex: 1;
+    }
+
+    .section-drag-handle {
+      cursor: grab;
+      user-select: none;
+      opacity: 0.55;
+      padding: 4px;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .section-drag-handle:active {
+      cursor: grabbing;
+    }
+
+    .section-nav-item.dragging {
+      opacity: 0.45;
+    }
+
+    .section-nav-item.drag-over {
+      transform: translateY(-2px);
+    }
+
+    .remove-section,
+    .edit-memory,
+    .delete-memory {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .edit-memory {
+      margin-right: 8px;
+    }
+
+    .memory-admin {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .media-error {
+      opacity: 0.4;
+    }
+
+    #editMemoryModal .modal-card {
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    #editMemoryModal textarea {
+      resize: vertical;
+    }
+  `;
+
+
+  document.head.appendChild(
+    style
+  );
+
+})();
