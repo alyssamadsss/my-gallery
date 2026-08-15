@@ -5934,3 +5934,57 @@ setTimeout(
   );
 
 })();
+/* ============================================================
+   ADMIN BUTTON + ONLINE STATUS POSITIONING
+   ============================================================ */
+
+(function customizePresenceUI() {
+
+  const style = document.createElement("style");
+
+  style.textContent = `
+
+    /* Make the online status bigger */
+    .live-presence {
+      font-size: 16px !important;
+      line-height: 1.5;
+    }
+
+    .presence-main {
+      font-size: 18px !important;
+      font-weight: 500;
+    }
+
+    .presence-heart {
+      font-size: 19px !important;
+    }
+
+    /* Move the admin visitor-history button
+       to the upper-right corner */
+    #visitorHistoryButton {
+      position: fixed !important;
+      top: 18px !important;
+      right: 20px !important;
+      z-index: 10000 !important;
+
+      padding: 7px 11px !important;
+      border-radius: 10px !important;
+
+      background: rgba(255, 255, 255, 0.85) !important;
+      backdrop-filter: blur(8px);
+
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+
+      font-size: 12px !important;
+      opacity: 0.75;
+    }
+
+    #visitorHistoryButton:hover {
+      opacity: 1;
+    }
+
+  `;
+
+  document.head.appendChild(style);
+
+})();
