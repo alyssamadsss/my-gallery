@@ -36,9 +36,9 @@ let draggedSectionId = null;
 
 let presenceInterval = null;
 let presenceDisplayInterval = null;
+let publicStatusInterval = null;
 
-let visitorId =
-  getVisitorId();
+let visitorId = getVisitorId();
 
 let presenceStarted = false;
 
@@ -87,9 +87,7 @@ const lightbox =
   document.getElementById("lightbox");
 
 const lightboxContent =
-  document.getElementById(
-    "lightboxContent"
-  );
+  document.getElementById("lightboxContent");
 
 const toast =
   document.getElementById("toast");
@@ -111,6 +109,8 @@ async function initialize() {
 
   setupEventListeners();
 
+  createPublicStatusDisplay();
+
   await checkSession();
 
   await startPresence();
@@ -122,6 +122,10 @@ async function initialize() {
   renderNavigation();
 
   renderGallery();
+
+  await updatePublicStatus();
+
+  startPublicStatusDisplay();
 
 }
 
@@ -161,10 +165,6 @@ function setupEventListeners() {
       resetMemoryForm();
 
       populateSectionSelect();
-
-      document.getElementById(
-        "memoryModalTitle"
-      );
 
       const title =
         document.getElementById(
@@ -344,6 +344,27 @@ function setupEventListeners() {
   );
 
 
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
+
+        updatePresence();
+
+        if (isAdmin) {
+          updateAdminHeartbeat();
+        }
+
+      }
+
+    }
+  );
+
+
   supabaseClient.auth.onAuthStateChange(
     async (_event, session) => {
 
@@ -358,6 +379,8 @@ function setupEventListeners() {
       renderNavigation();
 
       renderGallery();
+
+      await updatePublicStatus();
 
       updatePresenceDisplay();
 
@@ -477,6 +500,8 @@ async function processSession(
   updateAdminUI();
 
   startAdminPresenceDisplay();
+
+  await updateAdminHeartbeat();
 
 }
 
@@ -606,6 +631,10 @@ async function handleLogin(
 
   startAdminPresenceDisplay();
 
+  await updateAdminHeartbeat();
+
+  await updatePublicStatus();
+
   showToast(
     "welcome back ♡"
   );
@@ -619,6 +648,20 @@ async function handleLogin(
 
 async function logout() {
 
+  /*
+    We intentionally stop the admin heartbeat
+    before logging out so the public status
+    will eventually switch to "last edited".
+  */
+
+  await supabaseClient
+    .from("gallery_status")
+    .update({
+      admin_last_seen: null
+    })
+    .eq("id", 1);
+
+
   await supabaseClient.auth.signOut();
 
   currentUser = null;
@@ -628,6 +671,8 @@ async function logout() {
   updateAdminUI();
 
   removePresenceDisplay();
+
+  await updatePublicStatus();
 
   showToast(
     "logged out ♡"
@@ -1140,6 +1185,9 @@ async function handleCreateSection(
   }
 
 
+  await markGalleryEdited();
+
+
   closeModal(
     sectionModal
   );
@@ -1153,6 +1201,8 @@ async function handleCreateSection(
   await loadSections();
 
   renderNavigation();
+
+  await updatePublicStatus();
 
 
   showToast(
@@ -1249,16 +1299,16 @@ async function reorderSections(
     const {
       error
     } =
-      await supabaseClient
-        .from("sections")
-        .update({
-          sort_order:
-            index + 1
-        })
-        .eq(
-          "id",
-          section.id
-        );
+    await supabaseClient
+      .from("sections")
+      .update({
+        sort_order:
+          index + 1
+      })
+      .eq(
+        "id",
+        section.id
+      );
 
 
     if (error) {
@@ -1281,6 +1331,11 @@ async function reorderSections(
     }
 
   }
+
+
+  await markGalleryEdited();
+
+  await updatePublicStatus();
 
 
   showToast(
@@ -1382,6 +1437,8 @@ async function removeSection(
   }
 
 
+  await markGalleryEdited();
+
   await loadSections();
 
   await loadMemories();
@@ -1391,6 +1448,8 @@ async function removeSection(
   renderGallery();
 
   updatePresence();
+
+  await updatePublicStatus();
 
 
   showToast(
@@ -2105,6 +2164,9 @@ async function handleAddMemory(
     }
 
 
+    await markGalleryEdited();
+
+
     closeModal(
       memoryModal
     );
@@ -2116,6 +2178,8 @@ async function handleAddMemory(
     await loadMemories();
 
     renderGallery();
+
+    await updatePublicStatus();
 
 
     showToast(
@@ -2534,6 +2598,9 @@ async function saveEditedMemory(
   }
 
 
+  await markGalleryEdited();
+
+
   closeModal(
     document.getElementById(
       "editMemoryModal"
@@ -2548,6 +2615,8 @@ async function saveEditedMemory(
   await loadMemories();
 
   renderGallery();
+
+  await updatePublicStatus();
 
 
   showToast(
@@ -2618,6 +2687,9 @@ async function deleteMemory(
       ]);
 
 
+  await markGalleryEdited();
+
+
   if (storageError) {
 
     console.error(
@@ -2641,6 +2713,8 @@ async function deleteMemory(
   await loadMemories();
 
   renderGallery();
+
+  await updatePublicStatus();
 
 }
 
@@ -2920,7 +2994,7 @@ function resetMemoryForm() {
 
 
 /* ============================================================
-   LIVE PRESENCE
+   VISITOR ID
    ============================================================ */
 
 function getVisitorId() {
@@ -2949,6 +3023,10 @@ function getVisitorId() {
 }
 
 
+/* ============================================================
+   VISITOR PRESENCE
+   ============================================================ */
+
 async function startPresence() {
 
   if (presenceStarted)
@@ -2968,29 +3046,6 @@ async function startPresence() {
       15000
     );
 
-
-  /*
-    If the visitor changes tabs or minimizes
-    the page, immediately refresh their
-    heartbeat when they come back.
-  */
-
-  document.addEventListener(
-    "visibilitychange",
-    () => {
-
-      if (
-        document.visibilityState ===
-        "visible"
-      ) {
-
-        updatePresence();
-
-      }
-
-    }
-  );
-
 }
 
 
@@ -2998,21 +3053,55 @@ async function updatePresence() {
 
   try {
 
+    const {
+      data: existing
+    } =
+      await supabaseClient
+        .from("gallery_presence")
+        .select(
+          "visitor_id, started_at"
+        )
+        .eq(
+          "visitor_id",
+          visitorId
+        )
+        .maybeSingle();
+
+
+    const payload = {
+      visitor_id:
+        visitorId,
+
+      section_id:
+        currentSection,
+
+      last_seen:
+        new Date().toISOString()
+    };
+
+
+    /*
+      Only set started_at when this visitor
+      doesn't already have an active visit.
+    */
+
+    if (
+      !existing ||
+      !existing.started_at
+    ) {
+
+      payload.started_at =
+        new Date().toISOString();
+
+    }
+
+
     await supabaseClient
       .from(
         "gallery_presence"
       )
       .upsert(
-        {
-          visitor_id:
-            visitorId,
-
-          section_id:
-            currentSection,
-
-          last_seen:
-            new Date().toISOString()
-        },
+        payload,
         {
           onConflict:
             "visitor_id"
@@ -3021,6 +3110,8 @@ async function updatePresence() {
 
 
     if (isAdmin) {
+
+      await updateAdminHeartbeat();
 
       updatePresenceDisplay();
 
@@ -3038,7 +3129,103 @@ async function updatePresence() {
 }
 
 
+/* ============================================================
+   ADMIN HEARTBEAT
+   ============================================================ */
+
+async function updateAdminHeartbeat() {
+
+  if (!isAdmin)
+    return;
+
+
+  try {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("gallery_status")
+        .update({
+          admin_last_seen:
+            new Date().toISOString()
+        })
+        .eq(
+          "id",
+          1
+        );
+
+
+    if (error) {
+
+      console.error(
+        "Admin heartbeat failed:",
+        error
+      );
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Admin heartbeat failed:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   LAST EDITED
+   ============================================================ */
+
+async function markGalleryEdited() {
+
+  if (!isAdmin)
+    return;
+
+
+  const {
+    error
+  } =
+    await supabaseClient
+      .from("gallery_status")
+      .update({
+        last_edited:
+          new Date().toISOString(),
+
+        admin_last_seen:
+          new Date().toISOString()
+      })
+      .eq(
+        "id",
+        1
+      );
+
+
+  if (error) {
+
+    console.error(
+      "markGalleryEdited:",
+      error
+    );
+
+  }
+
+}
+
+
+/* ============================================================
+   CLEAN STALE VISITORS
+   ============================================================ */
+
 async function cleanStalePresence() {
+
+  if (!isAdmin)
+    return;
+
 
   const cutoff =
     new Date(
@@ -3047,20 +3234,41 @@ async function cleanStalePresence() {
     ).toISOString();
 
 
-  await supabaseClient
-    .from(
-      "gallery_presence"
-    )
-    .delete()
-    .lt(
-      "last_seen",
-      cutoff
+  const {
+    error
+  } =
+    await supabaseClient
+      .from(
+        "gallery_presence"
+      )
+      .delete()
+      .lt(
+        "last_seen",
+        cutoff
+      );
+
+
+  if (error) {
+
+    console.error(
+      "cleanStalePresence:",
+      error
     );
+
+  }
 
 }
 
 
+/* ============================================================
+   GET ACTIVE VISITORS
+   ============================================================ */
+
 async function getActiveVisitors() {
+
+  if (!isAdmin)
+    return [];
+
 
   const cutoff =
     new Date(
@@ -3078,22 +3286,28 @@ async function getActiveVisitors() {
         "gallery_presence"
       )
       .select(
-        "visitor_id"
+        "visitor_id, section_id, started_at, last_seen"
       )
       .gte(
         "last_seen",
         cutoff
+      )
+      .order(
+        "started_at",
+        {
+          ascending: true
+        }
       );
 
 
   if (error) {
 
     console.error(
-      "Presence count failed:",
+      "Presence query failed:",
       error
     );
 
-    return 0;
+    return [];
 
   }
 
@@ -3104,7 +3318,196 @@ async function getActiveVisitors() {
     visitor =>
       visitor.visitor_id !==
       visitorId
-  ).length;
+  );
+
+}
+
+
+/* ============================================================
+   PUBLIC STATUS
+   ============================================================ */
+
+function createPublicStatusDisplay() {
+
+  if (
+    document.getElementById(
+      "publicGalleryStatus"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const header =
+    document.querySelector(
+      ".site-header"
+    );
+
+
+  if (!header)
+    return;
+
+
+  const display =
+    document.createElement(
+      "div"
+    );
+
+
+  display.id =
+    "publicGalleryStatus";
+
+
+  display.className =
+    "public-gallery-status";
+
+
+  display.innerHTML =
+    `
+      <span class="public-status-heart">
+        ♡
+      </span>
+
+      <span class="public-status-text">
+        checking...
+      </span>
+    `;
+
+
+  header.appendChild(
+    display
+  );
+
+}
+
+
+function startPublicStatusDisplay() {
+
+  if (
+    publicStatusInterval
+  ) {
+
+    return;
+
+  }
+
+
+  publicStatusInterval =
+    setInterval(
+      updatePublicStatus,
+      15000
+    );
+
+}
+
+
+async function updatePublicStatus() {
+
+  const display =
+    document.getElementById(
+      "publicGalleryStatus"
+    );
+
+
+  if (!display)
+    return;
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("gallery_status")
+      .select(
+        "admin_last_seen, last_edited"
+      )
+      .eq(
+        "id",
+        1
+      )
+      .maybeSingle();
+
+
+  if (error) {
+
+    console.error(
+      "Public status failed:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  if (!data) {
+
+    return;
+
+  }
+
+
+  const lastSeen =
+    data.admin_last_seen
+      ? new Date(
+          data.admin_last_seen
+        ).getTime()
+      : 0;
+
+
+  const isOnline =
+    lastSeen &&
+    Date.now() -
+      lastSeen <
+      45000;
+
+
+  const text =
+    display.querySelector(
+      ".public-status-text"
+    );
+
+
+  if (!text)
+    return;
+
+
+  if (isOnline) {
+
+    text.textContent =
+      "mads is online";
+
+    display.classList.add(
+      "online"
+    );
+
+  } else {
+
+    display.classList.remove(
+      "online"
+    );
+
+
+    if (
+      data.last_edited
+    ) {
+
+      text.textContent =
+        `last edited ${formatRelativeTime(
+          data.last_edited
+        )}`;
+
+    } else {
+
+      text.textContent =
+        "♡";
+
+    }
+
+  }
 
 }
 
@@ -3152,17 +3555,6 @@ function createPresenceDisplay() {
 
   display.className =
     "live-presence";
-
-
-  display.innerHTML =
-    `
-      <span class="presence-heart">
-        ♡
-      </span>
-      <span>
-        mads is online
-      </span>
-    `;
 
 
   header.appendChild(
@@ -3250,7 +3642,7 @@ async function updatePresenceDisplay() {
   await cleanStalePresence();
 
 
-  const count =
+  const visitors =
     await getActiveVisitors();
 
 
@@ -3264,43 +3656,321 @@ async function updatePresenceDisplay() {
     return;
 
 
-  if (count === 0) {
+  display.innerHTML =
+    "";
 
-    display.innerHTML =
-      `
-        <span class="presence-heart">
-          ♡
-        </span>
-        <span>
-          mads is online
-        </span>
-      `;
 
-  } else if (count === 1) {
+  const headerLine =
+    document.createElement(
+      "div"
+    );
 
-    display.innerHTML =
-      `
-        <span class="presence-heart">
-          ♡
-        </span>
-        <span>
-          mads is online · 1 other person is here
-        </span>
-      `;
 
-  } else {
+  headerLine.className =
+    "presence-main-line";
 
-    display.innerHTML =
-      `
-        <span class="presence-heart">
-          ♡
-        </span>
-        <span>
-          mads is online · ${count} other people are here
-        </span>
-      `;
+
+  headerLine.innerHTML =
+    `
+      <span class="presence-heart">
+        ♡
+      </span>
+
+      <span>
+        mads is online
+      </span>
+    `;
+
+
+  display.appendChild(
+    headerLine
+  );
+
+
+  if (
+    visitors.length ===
+    0
+  ) {
+
+    const nobody =
+      document.createElement(
+        "div"
+      );
+
+
+    nobody.className =
+      "presence-sub-line";
+
+
+    nobody.textContent =
+      "no other visitors right now";
+
+
+    display.appendChild(
+      nobody
+    );
+
+
+    return;
 
   }
+
+
+  const countLine =
+    document.createElement(
+      "div"
+    );
+
+
+  countLine.className =
+    "presence-sub-line";
+
+
+  countLine.textContent =
+    visitors.length === 1
+      ? "👀 1 visitor"
+      : `👀 ${visitors.length} visitors`;
+
+
+  display.appendChild(
+    countLine
+  );
+
+
+  const visitorList =
+    document.createElement(
+      "div"
+    );
+
+
+  visitorList.className =
+    "visitor-list";
+
+
+  visitors.forEach(
+    (
+      visitor,
+      index
+    ) => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "visitor-item";
+
+
+      const section =
+        sections.find(
+          section =>
+            section.id ===
+            visitor.section_id
+        );
+
+
+      const sectionName =
+        section
+          ? section.title
+          : "all memories ♡";
+
+
+      const duration =
+        formatDuration(
+          visitor.started_at
+        );
+
+
+      item.innerHTML =
+        `
+          <span class="visitor-name">
+            Visitor ${index + 1}
+          </span>
+
+          <span class="visitor-details">
+            ${escapeHtml(
+              sectionName
+            )} · ${duration}
+          </span>
+        `;
+
+
+      visitorList.appendChild(
+        item
+      );
+
+    }
+  );
+
+
+  display.appendChild(
+    visitorList
+  );
+
+}
+
+
+/* ============================================================
+   TIME HELPERS
+   ============================================================ */
+
+function formatDuration(
+  startTime
+) {
+
+  if (!startTime)
+    return "just now";
+
+
+  const seconds =
+    Math.max(
+      0,
+      Math.floor(
+        (
+          Date.now() -
+          new Date(
+            startTime
+          ).getTime()
+        ) / 1000
+      )
+    );
+
+
+  if (seconds < 60) {
+
+    return `${seconds}s`;
+
+  }
+
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+
+  if (minutes < 60) {
+
+    return `${minutes} min`;
+
+  }
+
+
+  const hours =
+    Math.floor(
+      minutes / 60
+    );
+
+
+  const remainingMinutes =
+    minutes % 60;
+
+
+  if (
+    remainingMinutes ===
+    0
+  ) {
+
+    return `${hours}h`;
+
+  }
+
+
+  return `${hours}h ${remainingMinutes}m`;
+
+}
+
+
+function formatRelativeTime(
+  timestamp
+) {
+
+  const difference =
+    Math.max(
+      0,
+      Date.now() -
+      new Date(
+        timestamp
+      ).getTime()
+    );
+
+
+  const seconds =
+    Math.floor(
+      difference / 1000
+    );
+
+
+  if (seconds < 10) {
+
+    return "just now";
+
+  }
+
+
+  if (seconds < 60) {
+
+    return `${seconds} seconds ago`;
+
+  }
+
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+
+  if (minutes === 1) {
+
+    return "1 minute ago";
+
+  }
+
+
+  if (minutes < 60) {
+
+    return `${minutes} minutes ago`;
+
+  }
+
+
+  const hours =
+    Math.floor(
+      minutes / 60
+    );
+
+
+  if (hours === 1) {
+
+    return "1 hour ago";
+
+  }
+
+
+  if (hours < 24) {
+
+    return `${hours} hours ago`;
+
+  }
+
+
+  const days =
+    Math.floor(
+      hours / 24
+    );
+
+
+  if (days === 1) {
+
+    return "yesterday";
+
+  }
+
+
+  return `${days} days ago`;
 
 }
 
@@ -3308,6 +3978,37 @@ async function updatePresenceDisplay() {
 /* ============================================================
    HELPERS
    ============================================================ */
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value ?? ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
 
 function getFileExtension(
   filename
@@ -3450,7 +4151,7 @@ function showToast(
       resize: vertical;
     }
 
-    .live-presence {
+    .public-gallery-status {
       display: flex;
       align-items: center;
       gap: 6px;
@@ -3460,9 +4161,62 @@ function showToast(
       letter-spacing: 0.1px;
     }
 
+    .public-status-heart {
+      display: inline-block;
+      animation: publicHeartPulse 1.5s ease-in-out infinite;
+      transform-origin: center;
+      font-size: 15px;
+    }
+
+    .public-gallery-status.online
+      .public-status-heart {
+      animation:
+        publicHeartPulse
+        1.5s
+        ease-in-out
+        infinite;
+    }
+
+    @keyframes publicHeartPulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.7;
+      }
+
+      50% {
+        transform: scale(1.25);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 0.7;
+      }
+    }
+
+    .live-presence {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: 8px;
+      font-size: 13px;
+      opacity: 0.78;
+      letter-spacing: 0.1px;
+    }
+
+    .presence-main-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .presence-heart {
       display: inline-block;
-      animation: presenceHeartPulse 1.5s ease-in-out infinite;
+      animation:
+        presenceHeartPulse
+        1.5s
+        ease-in-out
+        infinite;
       transform-origin: center;
       font-size: 15px;
     }
@@ -3482,6 +4236,34 @@ function showToast(
         transform: scale(1);
         opacity: 0.7;
       }
+    }
+
+    .presence-sub-line {
+      font-size: 12px;
+      opacity: 0.72;
+    }
+
+    .visitor-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin-top: 4px;
+      padding-left: 20px;
+    }
+
+    .visitor-item {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      font-size: 12px;
+    }
+
+    .visitor-name {
+      font-weight: 600;
+    }
+
+    .visitor-details {
+      opacity: 0.7;
     }
 
   `;
