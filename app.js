@@ -21,11 +21,6 @@ const supabaseClient = window.supabase.createClient(
   }
 );
 
-
-/* ============================================================
-   GLOBAL STATE
-   ============================================================ */
-
 let currentUser = null;
 let isAdmin = false;
 
@@ -36,16 +31,14 @@ let currentSection = null;
 let currentSort = "newest";
 
 let editingMemoryId = null;
-let draggedSectionId = null;
 
-let visitorId = getVisitorId();
-let currentSessionId = null;
+let draggedSectionId = null;
 
 let presenceInterval = null;
 let presenceDisplayInterval = null;
 
-let sessionStartedAt = null;
-let lastPresenceUpdate = null;
+let visitorId =
+  getVisitorId();
 
 let presenceStarted = false;
 
@@ -94,7 +87,9 @@ const lightbox =
   document.getElementById("lightbox");
 
 const lightboxContent =
-  document.getElementById("lightboxContent");
+  document.getElementById(
+    "lightboxContent"
+  );
 
 const toast =
   document.getElementById("toast");
@@ -114,11 +109,11 @@ async function initialize() {
 
   createEditMemoryModal();
 
-  createVisitHistoryPanel();
-
   setupEventListeners();
 
   await checkSession();
+
+  await startPresence();
 
   await loadSections();
 
@@ -127,8 +122,6 @@ async function initialize() {
   renderNavigation();
 
   renderGallery();
-
-  await startVisitorTracking();
 
 }
 
@@ -179,13 +172,19 @@ function setupEventListeners() {
           "memoryModalSubtitle"
         );
 
-      if (title)
+      if (title) {
+
         title.textContent =
           "add a little memory";
 
-      if (subtitle)
+      }
+
+      if (subtitle) {
+
         subtitle.textContent =
           "keep a little piece of today";
+
+      }
 
       document.getElementById(
         "saveMemoryButton"
@@ -204,9 +203,9 @@ function setupEventListeners() {
 
       if (!isAdmin) return;
 
-      document
-        .getElementById("sectionForm")
-        .reset();
+      document.getElementById(
+        "sectionForm"
+      ).reset();
 
       document.getElementById(
         "sectionError"
@@ -345,41 +344,12 @@ function setupEventListeners() {
   );
 
 
-  document.addEventListener(
-    "visibilitychange",
-    () => {
-
-      if (
-        document.visibilityState ===
-        "visible"
-      ) {
-
-        updateVisitorPresence();
-
-      } else {
-
-        updateVisitorPresence();
-
-      }
-
-    }
-  );
-
-
-  window.addEventListener(
-    "beforeunload",
-    () => {
-
-      updateVisitorPresence();
-
-    }
-  );
-
-
   supabaseClient.auth.onAuthStateChange(
     async (_event, session) => {
 
-      await processSession(session);
+      await processSession(
+        session
+      );
 
       await loadSections();
 
@@ -446,8 +416,6 @@ async function processSession(
 
     removePresenceDisplay();
 
-    removeVisitHistoryButton();
-
     return;
 
   }
@@ -473,8 +441,6 @@ async function processSession(
 
     removePresenceDisplay();
 
-    removeVisitHistoryButton();
-
     return;
 
   }
@@ -495,8 +461,6 @@ async function processSession(
 
     removePresenceDisplay();
 
-    removeVisitHistoryButton();
-
     await supabaseClient.auth.signOut();
 
     showToast(
@@ -514,9 +478,6 @@ async function processSession(
 
   startAdminPresenceDisplay();
 
-  createVisitHistoryButton();
-
-
 }
 
 
@@ -531,8 +492,6 @@ function updateAdminUI() {
     adminButton.textContent =
       "🔒 admin";
 
-    createVisitHistoryButton();
-
   } else {
 
     adminControls.classList.add(
@@ -541,8 +500,6 @@ function updateAdminUI() {
 
     adminButton.textContent =
       "🔒 admin";
-
-    removeVisitHistoryButton();
 
   }
 
@@ -649,14 +606,16 @@ async function handleLogin(
 
   startAdminPresenceDisplay();
 
-  createVisitHistoryButton();
-
   showToast(
     "welcome back ♡"
   );
 
 }
 
+
+/* ============================================================
+   LOGOUT
+   ============================================================ */
 
 async function logout() {
 
@@ -669,10 +628,6 @@ async function logout() {
   updateAdminUI();
 
   removePresenceDisplay();
-
-  removeVisitHistoryButton();
-
-  closeVisitHistory();
 
   showToast(
     "logged out ♡"
@@ -696,11 +651,15 @@ async function loadSections() {
       .select("*")
       .order(
         "sort_order",
-        { ascending: true }
+        {
+          ascending: true
+        }
       )
       .order(
         "created_at",
-        { ascending: true }
+        {
+          ascending: true
+        }
       );
 
 
@@ -744,10 +703,13 @@ function renderNavigation() {
 
   if (
     currentSection === null
-  )
+  ) {
+
     allButton.classList.add(
       "active"
     );
+
+  }
 
 
   allButton.textContent =
@@ -758,9 +720,10 @@ function renderNavigation() {
     "click",
     () => {
 
-      currentSection = null;
+      currentSection =
+        null;
 
-      updateVisitorPresence();
+      updatePresence();
 
       renderNavigation();
 
@@ -809,19 +772,27 @@ function renderNavigation() {
       if (
         currentSection ===
         section.id
-      )
+      ) {
+
         button.classList.add(
           "active"
         );
+
+      }
 
 
       button.textContent =
         section.title;
 
 
-      if (section.subtitle)
+      if (
+        section.subtitle
+      ) {
+
         button.title =
           section.subtitle;
+
+      }
 
 
       button.addEventListener(
@@ -831,7 +802,7 @@ function renderNavigation() {
           currentSection =
             section.id;
 
-          updateVisitorPresence();
+          updatePresence();
 
           renderNavigation();
 
@@ -853,14 +824,18 @@ function renderNavigation() {
             "span"
           );
 
+
         handle.className =
           "section-drag-handle";
+
 
         handle.textContent =
           "⠿";
 
+
         handle.title =
           "drag to reorder";
+
 
         wrapper.insertBefore(
           handle,
@@ -873,11 +848,14 @@ function renderNavigation() {
             "button"
           );
 
+
         removeButton.className =
           "remove-section";
 
+
         removeButton.textContent =
           "×";
+
 
         removeButton.title =
           "Remove section";
@@ -981,12 +959,17 @@ function renderNavigation() {
               "drag-over"
             );
 
+
             if (
               !draggedSectionId ||
               draggedSectionId ===
                 section.id
-            )
+            ) {
+
               return;
+
+            }
+
 
             await reorderSections(
               draggedSectionId,
@@ -1030,7 +1013,7 @@ function clearDragHighlights() {
 
 
 /* ============================================================
-   CREATE SECTION
+   SECTION CREATION
    ============================================================ */
 
 async function handleCreateSection(
@@ -1039,19 +1022,24 @@ async function handleCreateSection(
 
   event.preventDefault();
 
+
   if (!isAdmin) return;
 
 
   const title =
     document
-      .getElementById("sectionTitle")
+      .getElementById(
+        "sectionTitle"
+      )
       .value
       .trim();
 
 
   const subtitle =
     document
-      .getElementById("sectionSubtitle")
+      .getElementById(
+        "sectionSubtitle"
+      )
       .value
       .trim();
 
@@ -1115,7 +1103,8 @@ async function handleCreateSection(
           ...sections.map(
             section =>
               Number(
-                section.sort_order || 0
+                section.sort_order ||
+                0
               )
           )
         ) + 1
@@ -1155,13 +1144,16 @@ async function handleCreateSection(
     sectionModal
   );
 
+
   document
     .getElementById("sectionForm")
     .reset();
 
+
   await loadSections();
 
   renderNavigation();
+
 
   showToast(
     "new section created ♡"
@@ -1171,7 +1163,7 @@ async function handleCreateSection(
 
 
 /* ============================================================
-   REORDER / REMOVE
+   SECTION REORDERING
    ============================================================ */
 
 async function reorderSections(
@@ -1189,22 +1181,27 @@ async function reorderSections(
   const draggedIndex =
     currentOrder.findIndex(
       section =>
-        section.id === draggedId
+        section.id ===
+        draggedId
     );
 
 
   const targetIndex =
     currentOrder.findIndex(
       section =>
-        section.id === targetId
+        section.id ===
+        targetId
     );
 
 
   if (
     draggedIndex === -1 ||
     targetIndex === -1
-  )
+  ) {
+
     return;
+
+  }
 
 
   const [
@@ -1225,7 +1222,10 @@ async function reorderSections(
 
   sections =
     currentOrder.map(
-      (section, index) => ({
+      (
+        section,
+        index
+      ) => ({
         ...section,
         sort_order:
           index + 1
@@ -1290,6 +1290,10 @@ async function reorderSections(
 }
 
 
+/* ============================================================
+   SECTION REMOVAL
+   ============================================================ */
+
 async function removeSection(
   section
 ) {
@@ -1314,7 +1318,8 @@ async function removeSection(
     await supabaseClient
       .from("memories")
       .update({
-        section_id: null
+        section_id:
+          null
       })
       .eq(
         "section_id",
@@ -1369,8 +1374,12 @@ async function removeSection(
   if (
     currentSection ===
     section.id
-  )
-    currentSection = null;
+  ) {
+
+    currentSection =
+      null;
+
+  }
 
 
   await loadSections();
@@ -1381,7 +1390,8 @@ async function removeSection(
 
   renderGallery();
 
-  updateVisitorPresence();
+  updatePresence();
+
 
   showToast(
     "section removed ♡"
@@ -1427,7 +1437,13 @@ async function loadMemories() {
 }
 
 
-function sortMemories(items) {
+/* ============================================================
+   SORTING
+   ============================================================ */
+
+function sortMemories(
+  items
+) {
 
   return [...items].sort(
     (a, b) => {
@@ -1435,26 +1451,35 @@ function sortMemories(items) {
       if (
         currentSort ===
         "recent"
-      )
+      ) {
+
         return compareDateTime(
           b.created_at,
           a.created_at
         );
+
+      }
 
 
       if (
         !a.date &&
         !b.date
-      )
+      ) {
+
         return compareDateTime(
           b.created_at,
           a.created_at
         );
 
+      }
 
-      if (!a.date) return 1;
 
-      if (!b.date) return -1;
+      if (!a.date)
+        return 1;
+
+
+      if (!b.date)
+        return -1;
 
 
       const comparison =
@@ -1466,8 +1491,11 @@ function sortMemories(items) {
       if (
         currentSort ===
         "oldest"
-      )
+      ) {
+
         return comparison;
+
+      }
 
 
       return -comparison;
@@ -1478,7 +1506,10 @@ function sortMemories(items) {
 }
 
 
-function compareDateTime(a, b) {
+function compareDateTime(
+  a,
+  b
+) {
 
   return (
     new Date(a).getTime() -
@@ -1487,6 +1518,10 @@ function compareDateTime(a, b) {
 
 }
 
+
+/* ============================================================
+   GALLERY
+   ============================================================ */
 
 function renderGallery() {
 
@@ -1499,14 +1534,18 @@ function renderGallery() {
 
 
   if (
-    currentSection !== null
-  )
+    currentSection !==
+    null
+  ) {
+
     visibleMemories =
       memories.filter(
         memory =>
           memory.section_id ===
           currentSection
       );
+
+  }
 
 
   visibleMemories =
@@ -1516,7 +1555,8 @@ function renderGallery() {
 
 
   if (
-    visibleMemories.length === 0
+    visibleMemories.length ===
+    0
   ) {
 
     emptyState.classList.remove(
@@ -1552,7 +1592,9 @@ function renderGallery() {
    MEMORY CARD
    ============================================================ */
 
-function createMemoryCard(memory) {
+function createMemoryCard(
+  memory
+) {
 
   const card =
     document.createElement(
@@ -1583,15 +1625,19 @@ function createMemoryCard(memory) {
         "video"
       );
 
+
     media.className =
       "memory-media memory-video";
 
-    media.controls = true;
+
+    media.controls =
+      true;
 
     media.preload =
       "metadata";
 
-    media.playsInline = true;
+    media.playsInline =
+      true;
 
     media.src =
       publicUrl;
@@ -1616,15 +1662,19 @@ function createMemoryCard(memory) {
         "img"
       );
 
+
     media.className =
       "memory-media";
+
 
     media.loading =
       "lazy";
 
+
     media.alt =
       memory.caption ||
       "A little memory";
+
 
     media.src =
       publicUrl;
@@ -1679,13 +1729,16 @@ function createMemoryCard(memory) {
         "div"
       );
 
+
     date.className =
       "memory-date";
+
 
     date.textContent =
       formatDate(
         memory.date
       );
+
 
     details.appendChild(
       date
@@ -1694,18 +1747,23 @@ function createMemoryCard(memory) {
   }
 
 
-  if (memory.location) {
+  if (
+    memory.location
+  ) {
 
     const location =
       document.createElement(
         "div"
       );
 
+
     location.className =
       "memory-location";
 
+
     location.textContent =
       `📍 ${memory.location}`;
+
 
     details.appendChild(
       location
@@ -1724,11 +1782,14 @@ function createMemoryCard(memory) {
         "div"
       );
 
+
     caption.className =
       "memory-caption";
 
+
     caption.textContent =
       memory.caption;
+
 
     details.appendChild(
       caption
@@ -1744,6 +1805,7 @@ function createMemoryCard(memory) {
         "div"
       );
 
+
     admin.className =
       "memory-admin";
 
@@ -1753,8 +1815,10 @@ function createMemoryCard(memory) {
         "button"
       );
 
+
     editButton.className =
       "edit-memory";
+
 
     editButton.textContent =
       "✏️ edit";
@@ -1777,8 +1841,10 @@ function createMemoryCard(memory) {
         "button"
       );
 
+
     deleteButton.className =
       "delete-memory";
+
 
     deleteButton.textContent =
       "delete";
@@ -1800,9 +1866,11 @@ function createMemoryCard(memory) {
       editButton
     );
 
+
     admin.appendChild(
       deleteButton
     );
+
 
     details.appendChild(
       admin
@@ -1825,9 +1893,12 @@ function createMemoryCard(memory) {
    ADD MEMORY
    ============================================================ */
 
-async function handleAddMemory(event) {
+async function handleAddMemory(
+  event
+) {
 
   event.preventDefault();
+
 
   if (!isAdmin) return;
 
@@ -1836,6 +1907,7 @@ async function handleAddMemory(event) {
     document.getElementById(
       "memoryFile"
     );
+
 
   const file =
     fileInput.files[0];
@@ -1922,14 +1994,16 @@ async function handleAddMemory(event) {
   }
 
 
-  saveButton.disabled = true;
+  saveButton.disabled =
+    true;
 
   progress.classList.remove(
     "hidden"
   );
 
 
-  let uploadedPath = null;
+  let uploadedPath =
+    null;
 
 
   try {
@@ -1967,16 +2041,21 @@ async function handleAddMemory(event) {
           {
             cacheControl:
               "3600",
+
             upsert:
               false,
+
             contentType:
               file.type
           }
         );
 
 
-    if (uploadError)
+    if (uploadError) {
+
       throw uploadError;
+
+    }
 
 
     const {
@@ -1987,19 +2066,24 @@ async function handleAddMemory(event) {
         .insert({
           file_path:
             uploadedPath,
+
           type:
             isVideo
               ? "video"
               : "image",
+
           section_id:
             sectionId ||
             null,
+
           date:
             date ||
             null,
+
           location:
             location ||
             null,
+
           caption:
             caption ||
             null
@@ -2009,7 +2093,9 @@ async function handleAddMemory(event) {
     if (insertError) {
 
       await supabaseClient.storage
-        .from(BUCKET_NAME)
+        .from(
+          BUCKET_NAME
+        )
         .remove([
           uploadedPath
         ]);
@@ -2023,15 +2109,19 @@ async function handleAddMemory(event) {
       memoryModal
     );
 
+
     resetMemoryForm();
+
 
     await loadMemories();
 
     renderGallery();
 
+
     showToast(
       "memory saved ♡"
     );
+
 
   } catch (error) {
 
@@ -2058,7 +2148,7 @@ async function handleAddMemory(event) {
 
 
 /* ============================================================
-   EDIT MEMORY
+   EDIT MEMORY MODAL
    ============================================================ */
 
 function createEditMemoryModal() {
@@ -2067,8 +2157,11 @@ function createEditMemoryModal() {
     document.getElementById(
       "editMemoryModal"
     )
-  )
+  ) {
+
     return;
+
+  }
 
 
   const modal =
@@ -2079,6 +2172,7 @@ function createEditMemoryModal() {
 
   modal.id =
     "editMemoryModal";
+
 
   modal.className =
     "modal hidden";
@@ -2093,42 +2187,61 @@ function createEditMemoryModal() {
         class="modal-close"
         id="editMemoryClose"
         type="button"
-      >×</button>
+      >
+        ×
+      </button>
 
       <div class="modal-heading">
+
         <span>✏️</span>
+
         <h2>edit memory</h2>
-        <p>make a little change ♡</p>
+
+        <p>
+          make a little change ♡
+        </p>
+
       </div>
 
       <form id="editMemoryForm">
 
         <label>
           Section
+
           <select id="editMemorySection"></select>
+
         </label>
 
         <label>
           Date
-          <input id="editMemoryDate" type="date">
+
+          <input
+            id="editMemoryDate"
+            type="date"
+          >
+
         </label>
 
         <label>
           Location
+
           <input
             id="editMemoryLocation"
             type="text"
             placeholder="Toronto, Canada"
           >
+
         </label>
 
         <label>
           Caption
+
           <textarea
             id="editMemoryCaption"
             rows="4"
             placeholder="the sweetest little day ♡"
           ></textarea>
+
         </label>
 
         <p
@@ -2145,6 +2258,7 @@ function createEditMemoryModal() {
         </button>
 
       </form>
+
     </div>
   `;
 
@@ -2160,7 +2274,13 @@ function createEditMemoryModal() {
     )
     .addEventListener(
       "click",
-      () => closeModal(modal)
+      () => {
+
+        closeModal(
+          modal
+        );
+
+      }
     );
 
 
@@ -2170,7 +2290,13 @@ function createEditMemoryModal() {
     )
     .addEventListener(
       "click",
-      () => closeModal(modal)
+      () => {
+
+        closeModal(
+          modal
+        );
+
+      }
     );
 
 
@@ -2186,7 +2312,9 @@ function createEditMemoryModal() {
 }
 
 
-function openEditMemory(memory) {
+function openEditMemory(
+  memory
+) {
 
   if (!isAdmin) return;
 
@@ -2201,7 +2329,8 @@ function openEditMemory(memory) {
     );
 
 
-  select.innerHTML = "";
+  select.innerHTML =
+    "";
 
 
   const allOption =
@@ -2209,10 +2338,14 @@ function openEditMemory(memory) {
       "option"
     );
 
-  allOption.value = "";
+
+  allOption.value =
+    "";
+
 
   allOption.textContent =
     "all memories ♡";
+
 
   select.appendChild(
     allOption
@@ -2227,11 +2360,14 @@ function openEditMemory(memory) {
           "option"
         );
 
+
       option.value =
         section.id;
 
+
       option.textContent =
         section.title;
+
 
       select.appendChild(
         option
@@ -2249,19 +2385,22 @@ function openEditMemory(memory) {
   document.getElementById(
     "editMemoryDate"
   ).value =
-    memory.date || "";
+    memory.date ||
+    "";
 
 
   document.getElementById(
     "editMemoryLocation"
   ).value =
-    memory.location || "";
+    memory.location ||
+    "";
 
 
   document.getElementById(
     "editMemoryCaption"
   ).value =
-    memory.caption || "";
+    memory.caption ||
+    "";
 
 
   document.getElementById(
@@ -2279,7 +2418,9 @@ function openEditMemory(memory) {
 }
 
 
-async function saveEditedMemory(event) {
+async function saveEditedMemory(
+  event
+) {
 
   event.preventDefault();
 
@@ -2287,8 +2428,11 @@ async function saveEditedMemory(event) {
   if (
     !isAdmin ||
     !editingMemoryId
-  )
+  ) {
+
     return;
+
+  }
 
 
   const saveButton =
@@ -2303,9 +2447,13 @@ async function saveEditedMemory(event) {
     );
 
 
-  errorElement.textContent = "";
+  errorElement.textContent =
+    "";
 
-  saveButton.disabled = true;
+
+  saveButton.disabled =
+    true;
+
 
   saveButton.textContent =
     "saving...";
@@ -2342,13 +2490,20 @@ async function saveEditedMemory(event) {
       .from("memories")
       .update({
         section_id:
-          sectionId || null,
+          sectionId ||
+          null,
+
         date:
-          date || null,
+          date ||
+          null,
+
         location:
-          location || null,
+          location ||
+          null,
+
         caption:
-          caption || null
+          caption ||
+          null
       })
       .eq(
         "id",
@@ -2356,7 +2511,9 @@ async function saveEditedMemory(event) {
       );
 
 
-  saveButton.disabled = false;
+  saveButton.disabled =
+    false;
+
 
   saveButton.textContent =
     "save changes ♡";
@@ -2392,6 +2549,7 @@ async function saveEditedMemory(event) {
 
   renderGallery();
 
+
   showToast(
     "memory updated ♡"
   );
@@ -2403,7 +2561,9 @@ async function saveEditedMemory(event) {
    DELETE MEMORY
    ============================================================ */
 
-async function deleteMemory(memory) {
+async function deleteMemory(
+  memory
+) {
 
   if (!isAdmin) return;
 
@@ -2450,7 +2610,9 @@ async function deleteMemory(memory) {
     error: storageError
   } =
     await supabaseClient.storage
-      .from(BUCKET_NAME)
+      .from(
+        BUCKET_NAME
+      )
       .remove([
         memory.file_path
       ]);
@@ -2484,1611 +2646,23 @@ async function deleteMemory(memory) {
 
 
 /* ============================================================
-   VISITOR ID
-   ============================================================ */
-
-function getVisitorId() {
-
-  let id =
-    localStorage.getItem(
-      "gallery_visitor_id"
-    );
-
-
-  if (!id) {
-
-    id =
-      crypto.randomUUID();
-
-    localStorage.setItem(
-      "gallery_visitor_id",
-      id
-    );
-
-  }
-
-
-  return id;
-
-}
-
-
-/* ============================================================
-   VISITOR TRACKING
-   ============================================================ */
-
-async function startVisitorTracking() {
-
-  if (presenceStarted)
-    return;
-
-
-  presenceStarted = true;
-
-
-  await startOrResumeSession();
-
-
-  presenceInterval =
-    setInterval(
-      updateVisitorPresence,
-      15000
-    );
-
-
-  if (isAdmin)
-    startAdminPresenceDisplay();
-
-
-}
-
-
-async function startOrResumeSession() {
-
-  const now =
-    new Date();
-
-
-  const {
-    data: visitor,
-    error: visitorError
-  } =
-    await supabaseClient
-      .from("gallery_visitors")
-      .select("*")
-      .eq(
-        "visitor_id",
-        visitorId
-      )
-      .maybeSingle();
-
-
-  if (visitorError) {
-
-    console.error(
-      "visitor lookup failed:",
-      visitorError
-    );
-
-    return;
-
-  }
-
-
-  const cutoff =
-    new Date(
-      Date.now() - 45000
-    ).toISOString();
-
-
-  const {
-    data: activeSession,
-    error: sessionError
-  } =
-    await supabaseClient
-      .from("gallery_sessions")
-      .select("*")
-      .eq(
-        "visitor_id",
-        visitorId
-      )
-      .gte(
-        "last_seen",
-        cutoff
-      )
-      .is(
-        "ended_at",
-        null
-      )
-      .order(
-        "last_seen",
-        {
-          ascending: false
-        }
-      )
-      .limit(1)
-      .maybeSingle();
-
-
-  if (sessionError) {
-
-    console.error(
-      "active session lookup failed:",
-      sessionError
-    );
-
-    return;
-
-  }
-
-
-  if (activeSession) {
-
-    currentSessionId =
-      activeSession.id;
-
-    sessionStartedAt =
-      new Date(
-        activeSession.started_at
-      );
-
-    lastPresenceUpdate =
-      new Date(
-        activeSession.last_seen
-      );
-
-    return;
-
-  }
-
-
-  if (!visitor) {
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from("gallery_visitors")
-        .insert({
-          visitor_id:
-            visitorId,
-          first_seen:
-            now.toISOString(),
-          last_seen:
-            now.toISOString(),
-          visit_count:
-            1,
-          total_seconds:
-            0
-        });
-
-
-    if (error) {
-
-      console.error(
-        "visitor creation failed:",
-        error
-      );
-
-    }
-
-  } else {
-
-    const {
-      error
-    } =
-      await supabaseClient
-        .from("gallery_visitors")
-        .update({
-          last_seen:
-            now.toISOString(),
-          visit_count:
-            Number(
-              visitor.visit_count || 0
-            ) + 1
-        })
-        .eq(
-          "visitor_id",
-          visitorId
-        );
-
-
-    if (error) {
-
-      console.error(
-        "visitor update failed:",
-        error
-      );
-
-    }
-
-  }
-
-
-  const {
-    data: newSession,
-    error: newSessionError
-  } =
-    await supabaseClient
-      .from("gallery_sessions")
-      .insert({
-        visitor_id:
-          visitorId,
-
-        started_at:
-          now.toISOString(),
-
-        last_seen:
-          now.toISOString(),
-
-        ended_at:
-          null,
-
-        total_seconds:
-          0,
-
-        current_section_id:
-          currentSection,
-
-        sections_visited:
-          currentSection
-            ? [currentSection]
-            : []
-      })
-      .select()
-      .single();
-
-
-  if (newSessionError) {
-
-    console.error(
-      "new session creation failed:",
-      newSessionError
-    );
-
-    return;
-
-  }
-
-
-  currentSessionId =
-    newSession.id;
-
-  sessionStartedAt =
-    now;
-
-  lastPresenceUpdate =
-    now;
-
-}
-
-
-async function updateVisitorPresence() {
-
-  if (!currentSessionId)
-    return;
-
-
-  try {
-
-    const now =
-      new Date();
-
-
-    let elapsedSeconds = 0;
-
-
-    if (lastPresenceUpdate) {
-
-      elapsedSeconds =
-        Math.floor(
-          (
-            now.getTime() -
-            lastPresenceUpdate.getTime()
-          ) / 1000
-        );
-
-    }
-
-
-    elapsedSeconds =
-      Math.max(
-        0,
-        Math.min(
-          elapsedSeconds,
-          30
-        )
-      );
-
-
-    lastPresenceUpdate =
-      now;
-
-
-    const {
-      data: session,
-      error: fetchError
-    } =
-      await supabaseClient
-        .from("gallery_sessions")
-        .select("*")
-        .eq(
-          "id",
-          currentSessionId
-        )
-        .maybeSingle();
-
-
-    if (fetchError) {
-
-      console.error(
-        "session fetch failed:",
-        fetchError
-      );
-
-      return;
-
-    }
-
-
-    if (!session) {
-
-      currentSessionId = null;
-
-      await startOrResumeSession();
-
-      return;
-
-    }
-
-
-    let visited =
-      Array.isArray(
-        session.sections_visited
-      )
-        ? [
-            ...session.sections_visited
-          ]
-        : [];
-
-
-    if (
-      currentSection &&
-      !visited.includes(
-        currentSection
-      )
-    ) {
-
-      visited.push(
-        currentSection
-      );
-
-    }
-
-
-    const newTotal =
-      Number(
-        session.total_seconds || 0
-      ) +
-      elapsedSeconds;
-
-
-    const {
-      error: updateError
-    } =
-      await supabaseClient
-        .from("gallery_sessions")
-        .update({
-          last_seen:
-            now.toISOString(),
-
-          ended_at:
-            null,
-
-          total_seconds:
-            newTotal,
-
-          current_section_id:
-            currentSection,
-
-          sections_visited:
-            visited
-        })
-        .eq(
-          "id",
-          currentSessionId
-        );
-
-
-    if (updateError) {
-
-      console.error(
-        "session update failed:",
-        updateError
-      );
-
-      return;
-
-    }
-
-
-    await supabaseClient
-      .from("gallery_visitors")
-      .update({
-        last_seen:
-          now.toISOString()
-      })
-      .eq(
-        "visitor_id",
-        visitorId
-      );
-
-
-    if (isAdmin)
-      updatePresenceDisplay();
-
-  } catch (error) {
-
-    console.error(
-      "visitor presence failed:",
-      error
-    );
-
-  }
-
-}
-
-
-/* ============================================================
-   STALE SESSION CLEANUP
-   ============================================================ */
-
-async function cleanStaleSessions() {
-
-  const cutoff =
-    new Date(
-      Date.now() - 45000
-    ).toISOString();
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("gallery_sessions")
-      .select(
-        "id,last_seen,ended_at"
-      )
-      .lt(
-        "last_seen",
-        cutoff
-      )
-      .is(
-        "ended_at",
-        null
-      );
-
-
-  if (error) {
-
-    console.error(
-      "stale session lookup failed:",
-      error
-    );
-
-    return;
-
-  }
-
-
-  if (!data?.length)
-    return;
-
-
-  for (
-    const session of data
-  ) {
-
-    await supabaseClient
-      .from("gallery_sessions")
-      .update({
-        ended_at:
-          session.last_seen
-      })
-      .eq(
-        "id",
-        session.id
-      );
-
-  }
-
-}
-
-
-/* ============================================================
-   ACTIVE VISITORS
-   ============================================================ */
-
-async function getActiveVisitors() {
-
-  const cutoff =
-    new Date(
-      Date.now() - 45000
-    ).toISOString();
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("gallery_sessions")
-      .select("*")
-      .gte(
-        "last_seen",
-        cutoff
-      )
-      .is(
-        "ended_at",
-        null
-      )
-      .order(
-        "last_seen",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (error) {
-
-    console.error(
-      "active visitor lookup failed:",
-      error
-    );
-
-    return [];
-
-  }
-
-
-  return (
-    data || []
-  ).filter(
-    session =>
-      session.visitor_id !==
-      visitorId
-  );
-
-}
-
-
-/* ============================================================
-   ADMIN LIVE PRESENCE
-   ============================================================ */
-
-function createPresenceDisplay() {
-
-  if (
-    document.getElementById(
-      "livePresence"
-    )
-  )
-    return;
-
-
-  if (!isAdmin)
-    return;
-
-
-  const header =
-    document.querySelector(
-      ".site-header"
-    );
-
-
-  if (!header)
-    return;
-
-
-  const display =
-    document.createElement(
-      "div"
-    );
-
-
-  display.id =
-    "livePresence";
-
-  display.className =
-    "live-presence";
-
-
-  display.innerHTML = `
-    <div class="presence-summary">
-      <div class="presence-main">
-        <span class="presence-heart">♡</span>
-        <span>checking...</span>
-      </div>
-    </div>
-  `;
-
-
-  header.appendChild(
-    display
-  );
-
-
-  updatePresenceDisplay();
-
-}
-
-
-function removePresenceDisplay() {
-
-  const display =
-    document.getElementById(
-      "livePresence"
-    );
-
-
-  if (display)
-    display.remove();
-
-
-  if (
-    presenceDisplayInterval
-  ) {
-
-    clearInterval(
-      presenceDisplayInterval
-    );
-
-    presenceDisplayInterval =
-      null;
-
-  }
-
-}
-
-
-function startAdminPresenceDisplay() {
-
-  if (!isAdmin)
-    return;
-
-
-  createPresenceDisplay();
-
-
-  if (
-    presenceDisplayInterval
-  )
-    return;
-
-
-  presenceDisplayInterval =
-    setInterval(
-      updatePresenceDisplay,
-      5000
-    );
-
-}
-
-
-async function updatePresenceDisplay() {
-
-  if (!isAdmin) {
-
-    removePresenceDisplay();
-
-    return;
-
-  }
-
-
-  createPresenceDisplay();
-
-  await cleanStaleSessions();
-
-
-  const visitors =
-    await getActiveVisitors();
-
-
-  const display =
-    document.getElementById(
-      "livePresence"
-    );
-
-
-  if (!display)
-    return;
-
-
-  let html = `
-
-    <div class="presence-summary">
-
-      <div class="presence-main">
-
-        <span class="presence-heart">
-          ♡
-        </span>
-
-        <span>
-          mads is online
-        </span>
-
-      </div>
-
-      <div class="visitor-count">
-
-        👀 ${visitors.length}
-
-        ${
-          visitors.length === 1
-            ? "visitor"
-            : "visitors"
-        }
-
-      </div>
-
-    </div>
-
-  `;
-
-
-  if (visitors.length) {
-
-    html +=
-      `<div class="visitor-list">`;
-
-
-    visitors.forEach(
-      (
-        session,
-        index
-      ) => {
-
-        const duration =
-          getLiveSessionDuration(
-            session
-          );
-
-
-        const currentSectionName =
-          getSectionName(
-            session.current_section_id
-          );
-
-
-        const visitedNames =
-          (
-            session.sections_visited ||
-            []
-          )
-            .map(
-              id =>
-                getSectionName(id)
-            )
-            .filter(Boolean);
-
-
-        html += `
-
-          <div class="visitor-card">
-
-            <div class="visitor-title">
-
-              <strong>
-                Visitor ${index + 1}
-              </strong>
-
-              <span>
-                ${duration}
-              </span>
-
-            </div>
-
-            <div class="visitor-current">
-
-              📍
-              ${escapeHtml(
-                currentSectionName
-              )}
-
-            </div>
-
-            <div class="visitor-sections">
-
-              <span class="visitor-label">
-                sections visited
-              </span>
-
-              <div class="visitor-section-tags">
-
-                ${
-                  visitedNames.length
-                    ? visitedNames
-                        .map(
-                          name =>
-                            `<span class="visitor-tag">
-                              ${escapeHtml(name)}
-                            </span>`
-                        )
-                        .join("")
-                    : `<span class="visitor-muted">
-                        all memories ♡
-                      </span>`
-                }
-
-              </div>
-
-            </div>
-
-            <div class="visitor-total">
-
-              ⏱️ current visit:
-              <strong>
-                ${formatDuration(
-                  session.total_seconds || 0
-                )}
-              </strong>
-
-            </div>
-
-          </div>
-
-        `;
-
-      }
-    );
-
-
-    html +=
-      `</div>`;
-
-  }
-
-
-  display.innerHTML =
-    html;
-
-}
-
-
-/* ============================================================
-   VISIT HISTORY BUTTON
-   ============================================================ */
-
-function createVisitHistoryButton() {
-
-  if (!isAdmin)
-    return;
-
-
-  if (
-    document.getElementById(
-      "visitHistoryButton"
-    )
-  )
-    return;
-
-
-  const container =
-    adminControls ||
-    document.querySelector(
-      ".site-header"
-    );
-
-
-  if (!container)
-    return;
-
-
-  const button =
-    document.createElement(
-      "button"
-    );
-
-
-  button.id =
-    "visitHistoryButton";
-
-
-  button.type =
-    "button";
-
-
-  button.className =
-    "visit-history-button";
-
-
-  button.innerHTML =
-    "♡ visit history";
-
-
-  button.addEventListener(
-    "click",
-    openVisitHistory
-  );
-
-
-  container.appendChild(
-    button
-  );
-
-}
-
-
-function removeVisitHistoryButton() {
-
-  const button =
-    document.getElementById(
-      "visitHistoryButton"
-    );
-
-
-  if (button)
-    button.remove();
-
-}
-
-
-/* ============================================================
-   VISIT HISTORY PANEL
-   ============================================================ */
-
-function createVisitHistoryPanel() {
-
-  if (
-    document.getElementById(
-      "visitHistoryModal"
-    )
-  )
-    return;
-
-
-  const modal =
-    document.createElement(
-      "div"
-    );
-
-
-  modal.id =
-    "visitHistoryModal";
-
-
-  modal.className =
-    "modal hidden";
-
-
-  modal.innerHTML = `
-
-    <div
-      class="modal-backdrop"
-      id="visitHistoryBackdrop"
-    ></div>
-
-    <div class="modal-card visit-history-card">
-
-      <button
-        class="modal-close"
-        id="visitHistoryClose"
-        type="button"
-      >
-        ×
-      </button>
-
-      <div class="modal-heading">
-
-        <span>♡</span>
-
-        <h2>visit history</h2>
-
-        <p>
-          every visit to your little gallery
-        </p>
-
-      </div>
-
-      <div
-        id="visitHistorySummary"
-        class="visit-history-summary"
-      >
-        loading...
-      </div>
-
-      <div
-        id="visitHistoryList"
-        class="visit-history-list"
-      >
-        loading...
-      </div>
-
-    </div>
-
-  `;
-
-
-  document.body.appendChild(
-    modal
-  );
-
-
-  document
-    .getElementById(
-      "visitHistoryClose"
-    )
-    .addEventListener(
-      "click",
-      closeVisitHistory
-    );
-
-
-  document
-    .getElementById(
-      "visitHistoryBackdrop"
-    )
-    .addEventListener(
-      "click",
-      closeVisitHistory
-    );
-
-}
-
-
-async function openVisitHistory() {
-
-  if (!isAdmin)
-    return;
-
-
-  const modal =
-    document.getElementById(
-      "visitHistoryModal"
-    );
-
-
-  if (!modal)
-    return;
-
-
-  modal.classList.remove(
-    "hidden"
-  );
-
-
-  await loadVisitHistory();
-
-}
-
-
-function closeVisitHistory() {
-
-  const modal =
-    document.getElementById(
-      "visitHistoryModal"
-    );
-
-
-  if (modal)
-    modal.classList.add(
-      "hidden"
-    );
-
-}
-
-
-async function loadVisitHistory() {
-
-  if (!isAdmin)
-    return;
-
-
-  const summary =
-    document.getElementById(
-      "visitHistorySummary"
-    );
-
-
-  const list =
-    document.getElementById(
-      "visitHistoryList"
-    );
-
-
-  if (!summary || !list)
-    return;
-
-
-  summary.textContent =
-    "loading visit history...";
-
-
-  list.innerHTML =
-    "";
-
-
-  const {
-    data: visitors,
-    error: visitorError
-  } =
-    await supabaseClient
-      .from("gallery_visitors")
-      .select("*")
-      .order(
-        "last_seen",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (visitorError) {
-
-    console.error(
-      "visit history visitors:",
-      visitorError
-    );
-
-    summary.textContent =
-      "couldn't load visitor history.";
-
-
-    list.innerHTML = `
-      <div class="visit-history-empty">
-        Please check your Supabase permissions.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const {
-    data: sessions,
-    error: sessionError
-  } =
-    await supabaseClient
-      .from("gallery_sessions")
-      .select("*")
-      .order(
-        "started_at",
-        {
-          ascending: false
-        }
-      );
-
-
-  if (sessionError) {
-
-    console.error(
-      "visit history sessions:",
-      sessionError
-    );
-
-    summary.textContent =
-      "couldn't load sessions.";
-
-
-    list.innerHTML = `
-      <div class="visit-history-empty">
-        Please check your Supabase permissions.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const visitorRows =
-    visitors || [];
-
-
-  const sessionRows =
-    sessions || [];
-
-
-  summary.innerHTML = `
-
-    <div class="history-stat">
-
-      <strong>
-        ${visitorRows.length}
-      </strong>
-
-      <span>
-        ${
-          visitorRows.length === 1
-            ? "unique visitor"
-            : "unique visitors"
-        }
-      </span>
-
-    </div>
-
-    <div class="history-stat">
-
-      <strong>
-        ${sessionRows.length}
-      </strong>
-
-      <span>
-        ${
-          sessionRows.length === 1
-            ? "total visit"
-            : "total visits"
-        }
-      </span>
-
-    </div>
-
-  `;
-
-
-  if (!sessionRows.length) {
-
-    list.innerHTML = `
-      <div class="visit-history-empty">
-        no visits yet ♡
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const grouped =
-    new Map();
-
-
-  sessionRows.forEach(
-    session => {
-
-      if (
-        !grouped.has(
-          session.visitor_id
-        )
-      ) {
-
-        grouped.set(
-          session.visitor_id,
-          []
-        );
-
-      }
-
-
-      grouped
-        .get(session.visitor_id)
-        .push(session);
-
-    }
-  );
-
-
-  let html = "";
-
-  let visitorNumber = 0;
-
-
-  grouped.forEach(
-    (
-      visitorSessions,
-      visitorKey
-    ) => {
-
-      visitorNumber++;
-
-
-      const visitor =
-        visitorRows.find(
-          item =>
-            item.visitor_id ===
-            visitorKey
-        );
-
-
-      const visitCount =
-        visitor?.visit_count ||
-        visitorSessions.length;
-
-
-      html += `
-
-        <div class="history-visitor">
-
-          <div class="history-visitor-header">
-
-            <div>
-
-              <strong>
-                Visitor ${visitorNumber}
-              </strong>
-
-              <span class="history-visitor-id">
-                ${escapeHtml(
-                  visitorKey
-                )}
-              </span>
-
-            </div>
-
-            <div class="history-visit-count">
-
-              ${visitCount}
-              ${
-                visitCount === 1
-                  ? "visit"
-                  : "visits"
-              }
-
-            </div>
-
-          </div>
-
-      `;
-
-
-      visitorSessions.forEach(
-        (
-          session,
-          index
-        ) => {
-
-          const started =
-            session.started_at
-              ? new Date(
-                  session.started_at
-                )
-              : null;
-
-
-          const ended =
-            session.ended_at
-              ? new Date(
-                  session.ended_at
-                )
-              : null;
-
-
-          const visitNumber =
-            visitorSessions.length -
-            index;
-
-
-          const sectionsVisited =
-            (
-              session.sections_visited ||
-              []
-            )
-              .map(
-                id =>
-                  getSectionName(id)
-              )
-              .filter(Boolean);
-
-
-          const sectionText =
-            sectionsVisited.length
-              ? sectionsVisited
-                  .map(
-                    section =>
-                      `<span class="visitor-tag">
-                        ${escapeHtml(
-                          section
-                        )}
-                      </span>`
-                  )
-                  .join("")
-              : `
-                <span class="visitor-muted">
-                  all memories ♡
-                </span>
-              `;
-
-
-          html += `
-
-            <div class="history-session">
-
-              <div class="history-session-top">
-
-                <strong>
-                  Visit ${visitNumber}
-                </strong>
-
-                <span>
-                  ${formatDuration(
-                    session.total_seconds || 0
-                  )}
-                </span>
-
-              </div>
-
-              <div class="history-row">
-
-                <span>
-                  📅
-                  ${formatHistoryDate(
-                    started
-                  )}
-                </span>
-
-              </div>
-
-              <div class="history-row">
-
-                <span>
-                  ${
-                    ended
-                      ? `ended: ${formatHistoryTime(
-                          ended
-                        )}`
-                      : "currently active"
-                  }
-                </span>
-
-              </div>
-
-              <div class="history-sections">
-
-                <span class="visitor-label">
-                  sections visited
-                </span>
-
-                <div class="visitor-section-tags">
-
-                  ${sectionText}
-
-                </div>
-
-              </div>
-
-            </div>
-
-          `;
-
-        }
-      );
-
-
-      html += `
-        </div>
-      `;
-
-    }
-  );
-
-
-  list.innerHTML =
-    html;
-
-}
-
-
-/* ============================================================
-   HISTORY DATE HELPERS
-   ============================================================ */
-
-function formatHistoryDate(date) {
-
-  if (!date)
-    return "unknown date";
-
-
-  return new Intl.DateTimeFormat(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-      year: "numeric"
-    }
-  ).format(date);
-
-}
-
-
-function formatHistoryTime(date) {
-
-  if (!date)
-    return "—";
-
-
-  return new Intl.DateTimeFormat(
-    undefined,
-    {
-      hour: "numeric",
-      minute: "2-digit",
-      second: "2-digit"
-    }
-  ).format(date);
-
-}
-
-
-/* ============================================================
-   SESSION DURATION
-   ============================================================ */
-
-function getLiveSessionDuration(
-  session
-) {
-
-  if (!session.started_at)
-    return "0s";
-
-
-  const started =
-    new Date(
-      session.started_at
-    ).getTime();
-
-
-  const seconds =
-    Math.max(
-      0,
-      Math.floor(
-        (
-          Date.now() -
-          started
-        ) / 1000
-      )
-    );
-
-
-  return formatDuration(
-    seconds
-  );
-
-}
-
-
-/* ============================================================
-   SECTION HELPERS
-   ============================================================ */
-
-function getSectionName(
-  sectionId
-) {
-
-  if (!sectionId)
-    return "all memories ♡";
-
-
-  const section =
-    sections.find(
-      item =>
-        item.id ===
-        sectionId
-    );
-
-
-  return section
-    ? section.title
-    : "unknown section";
-
-}
-
-
-/* ============================================================
    STORAGE
    ============================================================ */
 
-function getPublicUrl(path) {
+function getPublicUrl(
+  path
+) {
 
   const {
     data
   } =
     supabaseClient.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(path);
+      .from(
+        BUCKET_NAME
+      )
+      .getPublicUrl(
+        path
+      );
 
 
   return data.publicUrl;
@@ -4100,7 +2674,9 @@ function getPublicUrl(path) {
    DATE
    ============================================================ */
 
-function formatDate(dateString) {
+function formatDate(
+  dateString
+) {
 
   const [
     year,
@@ -4133,87 +2709,6 @@ function formatDate(dateString) {
 
 
 /* ============================================================
-   DURATION
-   ============================================================ */
-
-function formatDuration(seconds) {
-
-  seconds =
-    Math.max(
-      0,
-      Math.floor(
-        Number(seconds) || 0
-      )
-    );
-
-
-  if (seconds < 60)
-    return `${seconds}s`;
-
-
-  const minutes =
-    Math.floor(
-      seconds / 60
-    );
-
-
-  const remainingSeconds =
-    seconds % 60;
-
-
-  if (minutes < 60)
-    return `${minutes}m ${remainingSeconds}s`;
-
-
-  const hours =
-    Math.floor(
-      minutes / 60
-    );
-
-
-  const remainingMinutes =
-    minutes % 60;
-
-
-  return `${hours}h ${remainingMinutes}m`;
-
-}
-
-
-/* ============================================================
-   ESCAPE HTML
-   ============================================================ */
-
-function escapeHtml(value) {
-
-  return String(
-    value || ""
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-    .replace(
-      /"/g,
-      "&quot;"
-    )
-    .replace(
-      /'/g,
-      "&#039;"
-    );
-
-}
-
-
-/* ============================================================
    LIGHTBOX
    ============================================================ */
 
@@ -4226,7 +2721,9 @@ function openLightbox(
     "";
 
 
-  if (type === "video") {
+  if (
+    type === "video"
+  ) {
 
     const video =
       document.createElement(
@@ -4296,9 +2793,9 @@ function closeLightbox() {
    MODALS
    ============================================================ */
 
-function openModal(modal) {
-
-  if (!modal) return;
+function openModal(
+  modal
+) {
 
   modal.classList.remove(
     "hidden"
@@ -4307,7 +2804,9 @@ function openModal(modal) {
 }
 
 
-function closeModal(modal) {
+function closeModal(
+  modal
+) {
 
   if (!modal) return;
 
@@ -4343,6 +2842,7 @@ function populateSectionSelect() {
   allOption.value =
     "";
 
+
   allOption.textContent =
     "all memories ♡";
 
@@ -4364,6 +2864,7 @@ function populateSectionSelect() {
       option.value =
         section.id;
 
+
       option.textContent =
         section.title;
 
@@ -4379,7 +2880,7 @@ function populateSectionSelect() {
 
 
 /* ============================================================
-   RESET MEMORY FORM
+   RESET ADD-MEMORY FORM
    ============================================================ */
 
 function resetMemoryForm() {
@@ -4390,8 +2891,11 @@ function resetMemoryForm() {
     );
 
 
-  if (form)
+  if (form) {
+
     form.reset();
+
+  }
 
 
   document.getElementById(
@@ -4416,6 +2920,891 @@ function resetMemoryForm() {
 
 
 /* ============================================================
+   LIVE PRESENCE + VISITOR ANALYTICS
+   ============================================================ */
+
+function getVisitorId() {
+
+  let id =
+    localStorage.getItem(
+      "gallery_visitor_id"
+    );
+
+
+  if (!id) {
+
+    id =
+      crypto.randomUUID();
+
+    localStorage.setItem(
+      "gallery_visitor_id",
+      id
+    );
+
+  }
+
+
+  return id;
+
+}
+
+
+async function startPresence() {
+
+  if (presenceStarted)
+    return;
+
+
+  presenceStarted =
+    true;
+
+
+  await initializeVisitorPresence();
+
+
+  presenceInterval =
+    setInterval(
+      updatePresence,
+      15000
+    );
+
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
+
+        updatePresence();
+
+      }
+
+    }
+  );
+
+}
+
+
+async function initializeVisitorPresence() {
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("gallery_presence")
+      .select("*")
+      .eq(
+        "visitor_id",
+        visitorId
+      )
+      .maybeSingle();
+
+
+  if (error) {
+
+    console.error(
+      "initializeVisitorPresence:",
+      error
+    );
+
+    return;
+
+  }
+
+
+  const now =
+    new Date().toISOString();
+
+
+  if (!data) {
+
+    await supabaseClient
+      .from("gallery_presence")
+      .insert({
+
+        visitor_id:
+          visitorId,
+
+        section_id:
+          currentSection,
+
+        last_seen:
+          now,
+
+        session_started_at:
+          now,
+
+        total_seconds:
+          0,
+
+        sections_visited:
+          currentSection
+            ? [currentSection]
+            : [],
+
+        section_started_at:
+          now
+
+      });
+
+    return;
+
+  }
+
+
+  const lastSeen =
+    new Date(
+      data.last_seen
+    ).getTime();
+
+
+  const inactiveFor =
+    Date.now() -
+    lastSeen;
+
+
+  if (
+    inactiveFor >
+    45000
+  ) {
+
+    await supabaseClient
+      .from("gallery_presence")
+      .update({
+
+        section_id:
+          currentSection,
+
+        last_seen:
+          now,
+
+        session_started_at:
+          now,
+
+        total_seconds:
+          0,
+
+        sections_visited:
+          currentSection
+            ? [currentSection]
+            : [],
+
+        section_started_at:
+          now
+
+      })
+      .eq(
+        "visitor_id",
+        visitorId
+      );
+
+  }
+
+}
+
+
+async function updatePresence() {
+
+  try {
+
+    const {
+      data: existing,
+      error: fetchError
+    } =
+      await supabaseClient
+        .from("gallery_presence")
+        .select("*")
+        .eq(
+          "visitor_id",
+          visitorId
+        )
+        .maybeSingle();
+
+
+    if (fetchError) {
+
+      console.error(
+        "Presence fetch failed:",
+        fetchError
+      );
+
+      return;
+
+    }
+
+
+    if (!existing) {
+
+      await initializeVisitorPresence();
+
+      return;
+
+    }
+
+
+    const now =
+      new Date();
+
+
+    const nowISO =
+      now.toISOString();
+
+
+    const lastSeen =
+      new Date(
+        existing.last_seen
+      );
+
+
+    let elapsed =
+      Math.floor(
+        (
+          now.getTime() -
+          lastSeen.getTime()
+        ) / 1000
+      );
+
+
+    elapsed =
+      Math.max(
+        0,
+        Math.min(
+          elapsed,
+          30
+        )
+      );
+
+
+    let totalSeconds =
+      Number(
+        existing.total_seconds ||
+        0
+      ) + elapsed;
+
+
+    let visited =
+      Array.isArray(
+        existing.sections_visited
+      )
+        ? [
+            ...existing.sections_visited
+          ]
+        : [];
+
+
+    if (
+      currentSection &&
+      !visited.includes(
+        currentSection
+      )
+    ) {
+
+      visited.push(
+        currentSection
+      );
+
+    }
+
+
+    let sectionStartedAt =
+      existing.section_started_at;
+
+
+    if (
+      existing.section_id !==
+      currentSection
+    ) {
+
+      sectionStartedAt =
+        nowISO;
+
+    }
+
+
+    await supabaseClient
+      .from("gallery_presence")
+      .update({
+
+        section_id:
+          currentSection,
+
+        last_seen:
+          nowISO,
+
+        total_seconds:
+          totalSeconds,
+
+        sections_visited:
+          visited,
+
+        section_started_at:
+          sectionStartedAt
+
+      })
+      .eq(
+        "visitor_id",
+        visitorId
+      );
+
+
+    if (isAdmin) {
+
+      updatePresenceDisplay();
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Presence update failed:",
+      error
+    );
+
+  }
+
+}
+
+
+async function cleanStalePresence() {
+
+  const cutoff =
+    new Date(
+      Date.now() -
+      45000
+    ).toISOString();
+
+
+  await supabaseClient
+    .from("gallery_presence")
+    .delete()
+    .lt(
+      "last_seen",
+      cutoff
+    );
+
+}
+
+
+async function getActiveVisitors() {
+
+  const cutoff =
+    new Date(
+      Date.now() -
+      45000
+    ).toISOString();
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from("gallery_presence")
+      .select("*")
+      .gte(
+        "last_seen",
+        cutoff
+      );
+
+
+  if (error) {
+
+    console.error(
+      "Presence count failed:",
+      error
+    );
+
+    return [];
+
+  }
+
+
+  return (
+    data || []
+  ).filter(
+    visitor =>
+      visitor.visitor_id !==
+      visitorId
+  );
+
+}
+
+
+/* ============================================================
+   ADMIN VISITOR PANEL
+   ============================================================ */
+
+function createPresenceDisplay() {
+
+  if (
+    document.getElementById(
+      "livePresence"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  if (!isAdmin)
+    return;
+
+
+  const header =
+    document.querySelector(
+      ".site-header"
+    );
+
+
+  if (!header)
+    return;
+
+
+  const display =
+    document.createElement(
+      "div"
+    );
+
+
+  display.id =
+    "livePresence";
+
+
+  display.className =
+    "live-presence";
+
+
+  display.innerHTML =
+    `
+      <div class="presence-summary">
+
+        <div class="presence-main">
+
+          <span class="presence-heart">
+            ♡
+          </span>
+
+          <span>
+            checking...
+          </span>
+
+        </div>
+
+      </div>
+    `;
+
+
+  header.appendChild(
+    display
+  );
+
+
+  updatePresenceDisplay();
+
+}
+
+
+function removePresenceDisplay() {
+
+  const display =
+    document.getElementById(
+      "livePresence"
+    );
+
+
+  if (display) {
+
+    display.remove();
+
+  }
+
+
+  if (
+    presenceDisplayInterval
+  ) {
+
+    clearInterval(
+      presenceDisplayInterval
+    );
+
+    presenceDisplayInterval =
+      null;
+
+  }
+
+}
+
+
+function startAdminPresenceDisplay() {
+
+  if (!isAdmin)
+    return;
+
+
+  createPresenceDisplay();
+
+
+  if (
+    presenceDisplayInterval
+  ) {
+
+    return;
+
+  }
+
+
+  presenceDisplayInterval =
+    setInterval(
+      updatePresenceDisplay,
+      5000
+    );
+
+}
+
+
+async function updatePresenceDisplay() {
+
+  if (!isAdmin) {
+
+    removePresenceDisplay();
+
+    return;
+
+  }
+
+
+  createPresenceDisplay();
+
+
+  await cleanStalePresence();
+
+
+  const visitors =
+    await getActiveVisitors();
+
+
+  const display =
+    document.getElementById(
+      "livePresence"
+    );
+
+
+  if (!display)
+    return;
+
+
+  let html = `
+
+    <div class="presence-summary">
+
+      <div class="presence-main">
+
+        <span class="presence-heart">
+          ♡
+        </span>
+
+        <span>
+          mads is online
+        </span>
+
+      </div>
+
+      <div class="visitor-count">
+        👀 ${visitors.length}
+        ${
+          visitors.length === 1
+            ? "visitor"
+            : "visitors"
+        }
+      </div>
+
+    </div>
+
+  `;
+
+
+  if (
+    visitors.length
+  ) {
+
+    html +=
+      `<div class="visitor-list">`;
+
+
+    visitors.forEach(
+      (
+        visitor,
+        index
+      ) => {
+
+        const duration =
+          getVisitorDuration(
+            visitor
+          );
+
+
+        const currentSectionName =
+          getSectionName(
+            visitor.section_id
+          );
+
+
+        const visitedNames =
+          (
+            visitor.sections_visited ||
+            []
+          )
+            .map(
+              id =>
+                getSectionName(id)
+            )
+            .filter(Boolean);
+
+
+        html += `
+
+          <div class="visitor-card">
+
+            <div class="visitor-title">
+
+              <strong>
+                Visitor ${index + 1}
+              </strong>
+
+              <span>
+                ${duration}
+              </span>
+
+            </div>
+
+            <div class="visitor-current">
+
+              📍
+              ${escapeHtml(
+                currentSectionName
+              )}
+
+            </div>
+
+            <div class="visitor-sections">
+
+              <span class="visitor-label">
+                sections visited
+              </span>
+
+              <div class="visitor-section-tags">
+
+                ${
+                  visitedNames.length
+                    ? visitedNames
+                        .map(
+                          name =>
+                            `<span class="visitor-tag">
+                              ${escapeHtml(name)}
+                            </span>`
+                        )
+                        .join("")
+                    : `<span class="visitor-muted">
+                        all memories ♡
+                      </span>`
+                }
+
+              </div>
+
+            </div>
+
+            <div class="visitor-total">
+
+              ⏱️ total time:
+              <strong>
+                ${formatDuration(
+                  visitor.total_seconds || 0
+                )}
+              </strong>
+
+            </div>
+
+          </div>
+
+        `;
+
+      }
+    );
+
+
+    html +=
+      `</div>`;
+
+  }
+
+
+  display.innerHTML =
+    html;
+
+}
+
+
+/* ============================================================
+   VISITOR HELPERS
+   ============================================================ */
+
+function getVisitorDuration(
+  visitor
+) {
+
+  if (
+    !visitor.session_started_at
+  ) {
+
+    return "0s";
+
+  }
+
+
+  const started =
+    new Date(
+      visitor.session_started_at
+    ).getTime();
+
+
+  const seconds =
+    Math.max(
+      0,
+      Math.floor(
+        (
+          Date.now() -
+          started
+        ) / 1000
+      )
+    );
+
+
+  return formatDuration(
+    seconds
+  );
+
+}
+
+
+function formatDuration(
+  seconds
+) {
+
+  seconds =
+    Math.max(
+      0,
+      Math.floor(
+        Number(seconds) || 0
+      )
+    );
+
+
+  if (
+    seconds < 60
+  ) {
+
+    return `${seconds}s`;
+
+  }
+
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+
+  const remainingSeconds =
+    seconds % 60;
+
+
+  if (
+    minutes < 60
+  ) {
+
+    return `${minutes}m ${remainingSeconds}s`;
+
+  }
+
+
+  const hours =
+    Math.floor(
+      minutes / 60
+    );
+
+
+  const remainingMinutes =
+    minutes % 60;
+
+
+  return `${hours}h ${remainingMinutes}m`;
+
+}
+
+
+function getSectionName(
+  sectionId
+) {
+
+  if (!sectionId) {
+
+    return "all memories ♡";
+
+  }
+
+
+  const section =
+    sections.find(
+      item =>
+        item.id ===
+        sectionId
+    );
+
+
+  return section
+    ? section.title
+    : "unknown section";
+
+}
+
+
+function escapeHtml(
+  value
+) {
+
+  return String(
+    value || ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+/* ============================================================
    HELPERS
    ============================================================ */
 
@@ -4427,8 +3816,13 @@ function getFileExtension(
     filename.split(".");
 
 
-  if (parts.length < 2)
+  if (
+    parts.length < 2
+  ) {
+
     return "file";
+
+  }
 
 
   return parts
@@ -4445,7 +3839,9 @@ function getFileExtension(
 let toastTimeout;
 
 
-function showToast(message) {
+function showToast(
+  message
+) {
 
   clearTimeout(
     toastTimeout
@@ -4646,132 +4042,7 @@ function showToast(message) {
       margin-top: 6px;
     }
 
-    .visit-history-button {
-      border: 0;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 999px;
-      margin-left: 8px;
-      background: rgba(255,255,255,0.7);
-      font: inherit;
-      font-size: 13px;
-      transition: transform 0.15s ease;
-    }
-
-    .visit-history-button:hover {
-      transform: translateY(-1px);
-    }
-
-    .visit-history-card {
-      width: min(760px, 92vw);
-      max-height: 88vh;
-      overflow-y: auto;
-    }
-
-    .visit-history-summary {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .history-stat {
-      flex: 1;
-      min-width: 130px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.5);
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .history-stat strong {
-      font-size: 20px;
-    }
-
-    .history-stat span {
-      font-size: 12px;
-      opacity: 0.65;
-    }
-
-    .visit-history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .history-visitor {
-      border-radius: 14px;
-      padding: 14px;
-      background: rgba(255,255,255,0.45);
-    }
-
-    .history-visitor-header {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-
-    .history-visitor-header > div:first-child {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .history-visitor-id {
-      font-size: 9px;
-      opacity: 0.35;
-      word-break: break-all;
-    }
-
-    .history-visit-count {
-      font-size: 12px;
-      opacity: 0.65;
-      white-space: nowrap;
-    }
-
-    .history-session {
-      padding: 11px 12px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.6);
-      margin-top: 7px;
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .history-session-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 5px;
-    }
-
-    .history-session-top span {
-      opacity: 0.65;
-    }
-
-    .history-row {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      opacity: 0.7;
-    }
-
-    .history-sections {
-      margin-top: 6px;
-    }
-
-    .visit-history-empty {
-      padding: 25px;
-      text-align: center;
-      opacity: 0.6;
-    }
-
     @keyframes presenceHeartPulse {
-
       0% {
         transform: scale(1);
         opacity: 0.7;
@@ -4786,7 +4057,6 @@ function showToast(message) {
         transform: scale(1);
         opacity: 0.7;
       }
-
     }
 
   `;
