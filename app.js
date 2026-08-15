@@ -5491,3 +5491,446 @@ setTimeout(
   },
   1000
 );
+(function fixVisitorHistoryGrouping() {
+
+  const originalLoadVisitorHistory =
+    window.loadVisitorHistory;
+
+  window.loadVisitorHistory = async function () {
+
+    const content =
+      document.getElementById(
+        "visitorHistoryContent"
+      );
+
+    if (!content) return;
+
+    content.innerHTML = `
+      <div class="visitor-history-loading">
+        loading history...
+      </div>
+    `;
+
+    try {
+
+      const myVisitorId =
+        localStorage.getItem(
+          "gallery_visitor_id"
+        );
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient
+          .from("gallery_visit_history")
+          .select("*")
+          .order(
+            "started_at",
+            {
+              ascending: false
+            }
+          );
+
+      if (error) {
+
+        console.error(
+          "loadVisitorHistory:",
+          error
+        );
+
+        content.innerHTML = `
+          <div class="visitor-history-error">
+            couldn't load visitor history ♡
+          </div>
+        `;
+
+        return;
+      }
+
+      /*
+        Hide ONLY your own visitor ID.
+
+        Other logged-in visitors are still shown.
+      */
+
+      const otherVisits =
+        (data || []).filter(
+          visit =>
+            visit.visitor_id !==
+            myVisitorId
+        );
+
+      if (
+        otherVisits.length === 0
+      ) {
+
+        content.innerHTML = `
+          <div class="visitor-history-empty">
+            <div>♡</div>
+            <p>no other visits recorded yet</p>
+          </div>
+        `;
+
+        return;
+      }
+
+      /*
+        Group visits by visitor_id.
+      */
+
+      const grouped =
+        new Map();
+
+      otherVisits.forEach(
+        visit => {
+
+          if (
+            !grouped.has(
+              visit.visitor_id
+            )
+          ) {
+
+            grouped.set(
+              visit.visitor_id,
+              []
+            );
+
+          }
+
+          grouped
+            .get(visit.visitor_id)
+            .push(visit);
+
+        }
+      );
+
+
+      content.innerHTML = "";
+
+
+      let visitorNumber = 1;
+
+
+      grouped.forEach(
+        (
+          visits,
+          visitorId
+        ) => {
+
+          const visitorCard =
+            document.createElement(
+              "div"
+            );
+
+          visitorCard.className =
+            "visitor-group";
+
+
+          /*
+            Newest visits first.
+          */
+
+          visits.sort(
+            (
+              a,
+              b
+            ) =>
+              new Date(
+                b.started_at
+              ) -
+              new Date(
+                a.started_at
+              )
+          );
+
+
+          const visitsHtml =
+            visits
+              .map(
+                (
+                  visit,
+                  visitIndex
+                ) => {
+
+                  const started =
+                    new Date(
+                      visit.started_at
+                    );
+
+
+                  const dateText =
+                    started.toLocaleDateString(
+                      undefined,
+                      {
+                        month:
+                          "short",
+
+                        day:
+                          "numeric",
+
+                        year:
+                          "numeric"
+                      }
+                    );
+
+
+                  const timeText =
+                    started.toLocaleTimeString(
+                      undefined,
+                      {
+                        hour:
+                          "numeric",
+
+                        minute:
+                          "2-digit"
+                      }
+                    );
+
+
+                  const duration =
+                    formatDuration(
+                      visit.duration_seconds ||
+                      0
+                    );
+
+
+                  const sectionNames =
+                    (
+                      visit.sections_visited ||
+                      []
+                    )
+                      .map(
+                        id =>
+                          getSectionName(
+                            id
+                          )
+                      )
+                      .filter(Boolean);
+
+
+                  const sectionsHtml =
+                    sectionNames.length
+                      ? sectionNames
+                          .map(
+                            name =>
+                              `<span class="history-section-tag">
+                                ${escapeHtml(
+                                  name
+                                )}
+                              </span>`
+                          )
+                          .join("")
+                      : `
+                          <span class="history-section-tag">
+                            all memories ♡
+                          </span>
+                        `;
+
+
+                  return `
+
+                    <div class="grouped-visit">
+
+                      <div class="grouped-visit-top">
+
+                        <strong>
+                          Visit ${
+                            visits.length -
+                            visitIndex
+                          }
+                        </strong>
+
+                        <span>
+                          ${escapeHtml(
+                            dateText
+                          )}
+                          ·
+                          ${escapeHtml(
+                            timeText
+                          )}
+                        </span>
+
+                      </div>
+
+
+                      <div class="history-entry-duration">
+
+                        ⏱️
+
+                        <strong>
+                          ${escapeHtml(
+                            duration
+                          )}
+                        </strong>
+
+                      </div>
+
+
+                      <div class="history-entry-sections">
+
+                        <span class="history-label">
+                          sections visited
+                        </span>
+
+                        <div class="history-section-tags">
+
+                          ${sectionsHtml}
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  `;
+
+                }
+              )
+              .join("");
+
+
+          visitorCard.innerHTML = `
+
+            <div class="visitor-group-header">
+
+              <div>
+
+                <strong>
+                  Visitor ${visitorNumber}
+                </strong>
+
+                <span class="visitor-group-count">
+                  ${visits.length}
+                  ${
+                    visits.length === 1
+                      ? "visit"
+                      : "visits"
+                  }
+                </span>
+
+              </div>
+
+              <div class="visitor-group-id">
+                ${escapeHtml(
+                  visitorId
+                )}
+              </div>
+
+            </div>
+
+
+            <div class="grouped-visits">
+
+              ${visitsHtml}
+
+            </div>
+
+          `;
+
+
+          content.appendChild(
+            visitorCard
+          );
+
+
+          visitorNumber++;
+
+        }
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Grouped visitor history failed:",
+        error
+      );
+
+      content.innerHTML = `
+        <div class="visitor-history-error">
+          couldn't load visitor history ♡
+        </div>
+      `;
+
+    }
+
+  };
+
+
+  /*
+    Extra styling for grouped visitors.
+  */
+
+  const style =
+    document.createElement(
+      "style"
+    );
+
+
+  style.textContent = `
+
+    .visitor-group {
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.7);
+    }
+
+    .visitor-group-header {
+      padding: 13px 15px;
+      background: rgba(255,255,255,0.85);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .visitor-group-header > div:first-child {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .visitor-group-count {
+      font-size: 11px;
+      opacity: 0.5;
+    }
+
+    .visitor-group-id {
+      margin-top: 4px;
+      font-size: 9px;
+      opacity: 0.35;
+      word-break: break-all;
+    }
+
+    .grouped-visits {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .grouped-visit {
+      padding: 12px 15px;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .grouped-visit:last-child {
+      border-bottom: 0;
+    }
+
+    .grouped-visit-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .grouped-visit-top span {
+      opacity: 0.55;
+      font-size: 12px;
+    }
+
+  `;
+
+
+  document.head.appendChild(
+    style
+  );
+
+})();
