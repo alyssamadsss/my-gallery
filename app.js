@@ -34,6 +34,14 @@ let editingMemoryId = null;
 
 let draggedSectionId = null;
 
+let presenceInterval = null;
+let presenceDisplayInterval = null;
+
+let visitorId =
+  getVisitorId();
+
+let presenceStarted = false;
+
 
 /* ============================================================
    DOM
@@ -79,7 +87,9 @@ const lightbox =
   document.getElementById("lightbox");
 
 const lightboxContent =
-  document.getElementById("lightboxContent");
+  document.getElementById(
+    "lightboxContent"
+  );
 
 const toast =
   document.getElementById("toast");
@@ -102,6 +112,8 @@ async function initialize() {
   setupEventListeners();
 
   await checkSession();
+
+  await startPresence();
 
   await loadSections();
 
@@ -152,13 +164,27 @@ function setupEventListeners() {
 
       document.getElementById(
         "memoryModalTitle"
-      ).textContent =
-        "add a little memory";
+      );
 
-      document.getElementById(
-        "memoryModalSubtitle"
-      ).textContent =
-        "keep a little piece of today";
+      const title =
+        document.getElementById(
+          "memoryModalTitle"
+        );
+
+      const subtitle =
+        document.getElementById(
+          "memoryModalSubtitle"
+        );
+
+      if (title) {
+        title.textContent =
+          "add a little memory";
+      }
+
+      if (subtitle) {
+        subtitle.textContent =
+          "keep a little piece of today";
+      }
 
       document.getElementById(
         "saveMemoryButton"
@@ -236,40 +262,44 @@ function setupEventListeners() {
 
   document
     .querySelectorAll("[data-close]")
-    .forEach(button => {
+    .forEach(
+      button => {
 
-      button.addEventListener(
-        "click",
-        () => {
+        button.addEventListener(
+          "click",
+          () => {
 
-          closeModal(
-            document.getElementById(
-              button.dataset.close
-            )
-          );
+            closeModal(
+              document.getElementById(
+                button.dataset.close
+              )
+            );
 
-        }
-      );
+          }
+        );
 
-    });
+      }
+    );
 
 
   document
     .querySelectorAll(".modal-backdrop")
-    .forEach(backdrop => {
+    .forEach(
+      backdrop => {
 
-      backdrop.addEventListener(
-        "click",
-        () => {
+        backdrop.addEventListener(
+          "click",
+          () => {
 
-          closeModal(
-            backdrop.parentElement
-          );
+            closeModal(
+              backdrop.parentElement
+            );
 
-        }
-      );
+          }
+        );
 
-    });
+      }
+    );
 
 
   document
@@ -329,6 +359,8 @@ function setupEventListeners() {
 
       renderGallery();
 
+      updatePresenceDisplay();
+
     }
   );
 
@@ -368,7 +400,9 @@ async function checkSession() {
 }
 
 
-async function processSession(session) {
+async function processSession(
+  session
+) {
 
   currentUser =
     session?.user || null;
@@ -380,15 +414,12 @@ async function processSession(session) {
 
     updateAdminUI();
 
+    removePresenceDisplay();
+
     return;
 
   }
 
-
-  /*
-    Verify the user with Supabase Auth rather
-    than trusting only browser-stored session data.
-  */
 
   const {
     data: userData,
@@ -408,6 +439,8 @@ async function processSession(session) {
 
     updateAdminUI();
 
+    removePresenceDisplay();
+
     return;
 
   }
@@ -418,12 +451,15 @@ async function processSession(session) {
 
 
   if (
-    currentUser.id !== ADMIN_UID
+    currentUser.id !==
+    ADMIN_UID
   ) {
 
     isAdmin = false;
 
     updateAdminUI();
+
+    removePresenceDisplay();
 
     await supabaseClient.auth.signOut();
 
@@ -439,6 +475,8 @@ async function processSession(session) {
   isAdmin = true;
 
   updateAdminUI();
+
+  startAdminPresenceDisplay();
 
 }
 
@@ -468,7 +506,9 @@ function updateAdminUI() {
 }
 
 
-async function handleLogin(event) {
+async function handleLogin(
+  event
+) {
 
   event.preventDefault();
 
@@ -492,7 +532,8 @@ async function handleLogin(event) {
     );
 
 
-  errorElement.textContent = "";
+  errorElement.textContent =
+    "";
 
 
   const button =
@@ -535,7 +576,8 @@ async function handleLogin(event) {
 
 
   if (
-    data.user.id !== ADMIN_UID
+    data.user.id !==
+    ADMIN_UID
   ) {
 
     await supabaseClient.auth.signOut();
@@ -548,7 +590,10 @@ async function handleLogin(event) {
   }
 
 
-  closeModal(loginModal);
+  closeModal(
+    loginModal
+  );
+
 
   document
     .getElementById("loginForm")
@@ -558,6 +603,8 @@ async function handleLogin(event) {
   isAdmin = true;
 
   updateAdminUI();
+
+  startAdminPresenceDisplay();
 
   showToast(
     "welcome back ♡"
@@ -579,6 +626,8 @@ async function logout() {
   isAdmin = false;
 
   updateAdminUI();
+
+  removePresenceDisplay();
 
   showToast(
     "logged out ♡"
@@ -638,13 +687,9 @@ async function loadSections() {
 
 function renderNavigation() {
 
-  navigation.innerHTML = "";
+  navigation.innerHTML =
+    "";
 
-
-  /*
-    ALL MEMORIES IS ALWAYS FIRST.
-    It is not a database section.
-  */
 
   const allButton =
     document.createElement(
@@ -675,7 +720,10 @@ function renderNavigation() {
     "click",
     () => {
 
-      currentSection = null;
+      currentSection =
+        null;
+
+      updatePresence();
 
       renderNavigation();
 
@@ -689,10 +737,6 @@ function renderNavigation() {
     allButton
   );
 
-
-  /*
-    Custom sections.
-  */
 
   sections.forEach(
     section => {
@@ -726,7 +770,8 @@ function renderNavigation() {
 
 
       if (
-        currentSection === section.id
+        currentSection ===
+        section.id
       ) {
 
         button.classList.add(
@@ -757,6 +802,8 @@ function renderNavigation() {
           currentSection =
             section.id;
 
+          updatePresence();
+
           renderNavigation();
 
           renderGallery();
@@ -771,10 +818,6 @@ function renderNavigation() {
 
 
       if (isAdmin) {
-
-        /*
-          Drag handle.
-        */
 
         const handle =
           document.createElement(
@@ -799,10 +842,6 @@ function renderNavigation() {
           button
         );
 
-
-        /*
-          Remove button.
-        */
 
         const removeButton =
           document.createElement(
@@ -840,10 +879,6 @@ function renderNavigation() {
           removeButton
         );
 
-
-        /*
-          Drag events.
-        */
 
         wrapper.addEventListener(
           "dragstart",
@@ -993,14 +1028,18 @@ async function handleCreateSection(
 
   const title =
     document
-      .getElementById("sectionTitle")
+      .getElementById(
+        "sectionTitle"
+      )
       .value
       .trim();
 
 
   const subtitle =
     document
-      .getElementById("sectionSubtitle")
+      .getElementById(
+        "sectionSubtitle"
+      )
       .value
       .trim();
 
@@ -1011,7 +1050,8 @@ async function handleCreateSection(
     );
 
 
-  errorElement.textContent = "";
+  errorElement.textContent =
+    "";
 
 
   if (!title) {
@@ -1063,7 +1103,8 @@ async function handleCreateSection(
           ...sections.map(
             section =>
               Number(
-                section.sort_order || 0
+                section.sort_order ||
+                0
               )
           )
         ) + 1
@@ -1099,7 +1140,10 @@ async function handleCreateSection(
   }
 
 
-  closeModal(sectionModal);
+  closeModal(
+    sectionModal
+  );
+
 
   document
     .getElementById("sectionForm")
@@ -1137,14 +1181,16 @@ async function reorderSections(
   const draggedIndex =
     currentOrder.findIndex(
       section =>
-        section.id === draggedId
+        section.id ===
+        draggedId
     );
 
 
   const targetIndex =
     currentOrder.findIndex(
       section =>
-        section.id === targetId
+        section.id ===
+        targetId
     );
 
 
@@ -1174,10 +1220,6 @@ async function reorderSections(
   );
 
 
-  /*
-    Optimistically update the UI.
-  */
-
   sections =
     currentOrder.map(
       (
@@ -1193,10 +1235,6 @@ async function reorderSections(
 
   renderNavigation();
 
-
-  /*
-    Save every order.
-  */
 
   for (
     let index = 0;
@@ -1274,17 +1312,14 @@ async function removeSection(
   if (!confirmed) return;
 
 
-  /*
-    Move memories into All Memories.
-  */
-
   const {
     error: updateError
   } =
     await supabaseClient
       .from("memories")
       .update({
-        section_id: null
+        section_id:
+          null
       })
       .eq(
         "section_id",
@@ -1307,10 +1342,6 @@ async function removeSection(
 
   }
 
-
-  /*
-    Delete only the section.
-  */
 
   const {
     error: deleteError
@@ -1341,10 +1372,12 @@ async function removeSection(
 
 
   if (
-    currentSection === section.id
+    currentSection ===
+    section.id
   ) {
 
-    currentSection = null;
+    currentSection =
+      null;
 
   }
 
@@ -1356,6 +1389,8 @@ async function removeSection(
   renderNavigation();
 
   renderGallery();
+
+  updatePresence();
 
 
   showToast(
@@ -1406,13 +1441,16 @@ async function loadMemories() {
    SORTING
    ============================================================ */
 
-function sortMemories(items) {
+function sortMemories(
+  items
+) {
 
   return [...items].sort(
     (a, b) => {
 
       if (
-        currentSort === "recent"
+        currentSort ===
+        "recent"
       ) {
 
         return compareDateTime(
@@ -1422,11 +1460,6 @@ function sortMemories(items) {
 
       }
 
-
-      /*
-        Undated memories go after
-        dated memories.
-      */
 
       if (
         !a.date &&
@@ -1441,9 +1474,12 @@ function sortMemories(items) {
       }
 
 
-      if (!a.date) return 1;
+      if (!a.date)
+        return 1;
 
-      if (!b.date) return -1;
+
+      if (!b.date)
+        return -1;
 
 
       const comparison =
@@ -1453,7 +1489,8 @@ function sortMemories(items) {
 
 
       if (
-        currentSort === "oldest"
+        currentSort ===
+        "oldest"
       ) {
 
         return comparison;
@@ -1488,7 +1525,8 @@ function compareDateTime(
 
 function renderGallery() {
 
-  gallery.innerHTML = "";
+  gallery.innerHTML =
+    "";
 
 
   let visibleMemories =
@@ -1496,7 +1534,8 @@ function renderGallery() {
 
 
   if (
-    currentSection !== null
+    currentSection !==
+    null
   ) {
 
     visibleMemories =
@@ -1516,7 +1555,8 @@ function renderGallery() {
 
 
   if (
-    visibleMemories.length === 0
+    visibleMemories.length ===
+    0
   ) {
 
     emptyState.classList.remove(
@@ -1576,7 +1616,8 @@ function createMemoryCard(
 
 
   if (
-    memory.type === "video"
+    memory.type ===
+    "video"
   ) {
 
     media =
@@ -1914,7 +1955,8 @@ async function handleAddMemory(
     );
 
 
-  errorElement.textContent = "";
+  errorElement.textContent =
+    "";
 
 
   if (!file) {
@@ -1952,14 +1994,16 @@ async function handleAddMemory(
   }
 
 
-  saveButton.disabled = true;
+  saveButton.disabled =
+    true;
 
   progress.classList.remove(
     "hidden"
   );
 
 
-  let uploadedPath = null;
+  let uploadedPath =
+    null;
 
 
   try {
@@ -1988,7 +2032,9 @@ async function handleAddMemory(
       error: uploadError
     } =
       await supabaseClient.storage
-        .from(BUCKET_NAME)
+        .from(
+          BUCKET_NAME
+        )
         .upload(
           uploadedPath,
           file,
@@ -2027,28 +2073,29 @@ async function handleAddMemory(
               : "image",
 
           section_id:
-            sectionId || null,
+            sectionId ||
+            null,
 
           date:
-            date || null,
+            date ||
+            null,
 
           location:
-            location || null,
+            location ||
+            null,
 
           caption:
-            caption || null
+            caption ||
+            null
         });
 
 
     if (insertError) {
 
-      /*
-        Clean up the uploaded file
-        if the database insert fails.
-      */
-
       await supabaseClient.storage
-        .from(BUCKET_NAME)
+        .from(
+          BUCKET_NAME
+        )
         .remove([
           uploadedPath
         ]);
@@ -2282,7 +2329,8 @@ function openEditMemory(
     );
 
 
-  select.innerHTML = "";
+  select.innerHTML =
+    "";
 
 
   const allOption =
@@ -2330,30 +2378,35 @@ function openEditMemory(
 
 
   select.value =
-    memory.section_id || "";
+    memory.section_id ||
+    "";
 
 
   document.getElementById(
     "editMemoryDate"
   ).value =
-    memory.date || "";
+    memory.date ||
+    "";
 
 
   document.getElementById(
     "editMemoryLocation"
   ).value =
-    memory.location || "";
+    memory.location ||
+    "";
 
 
   document.getElementById(
     "editMemoryCaption"
   ).value =
-    memory.caption || "";
+    memory.caption ||
+    "";
 
 
   document.getElementById(
     "editMemoryError"
-  ).textContent = "";
+  ).textContent =
+    "";
 
 
   openModal(
@@ -2394,7 +2447,8 @@ async function saveEditedMemory(
     );
 
 
-  errorElement.textContent = "";
+  errorElement.textContent =
+    "";
 
 
   saveButton.disabled =
@@ -2436,16 +2490,20 @@ async function saveEditedMemory(
       .from("memories")
       .update({
         section_id:
-          sectionId || null,
+          sectionId ||
+          null,
 
         date:
-          date || null,
+          date ||
+          null,
 
         location:
-          location || null,
+          location ||
+          null,
 
         caption:
-          caption || null
+          caption ||
+          null
       })
       .eq(
         "id",
@@ -2552,7 +2610,9 @@ async function deleteMemory(
     error: storageError
   } =
     await supabaseClient.storage
-      .from(BUCKET_NAME)
+      .from(
+        BUCKET_NAME
+      )
       .remove([
         memory.file_path
       ]);
@@ -2597,7 +2657,9 @@ function getPublicUrl(
     data
   } =
     supabaseClient.storage
-      .from(BUCKET_NAME)
+      .from(
+        BUCKET_NAME
+      )
       .getPublicUrl(
         path
       );
@@ -2767,7 +2829,8 @@ function populateSectionSelect() {
     );
 
 
-  select.innerHTML = "";
+  select.innerHTML =
+    "";
 
 
   const allOption =
@@ -2837,7 +2900,8 @@ function resetMemoryForm() {
 
   document.getElementById(
     "memoryError"
-  ).textContent = "";
+  ).textContent =
+    "";
 
 
   document.getElementById(
@@ -2849,7 +2913,394 @@ function resetMemoryForm() {
 
   document.getElementById(
     "memoryFile"
-  ).value = "";
+  ).value =
+    "";
+
+}
+
+
+/* ============================================================
+   LIVE PRESENCE
+   ============================================================ */
+
+function getVisitorId() {
+
+  let id =
+    localStorage.getItem(
+      "gallery_visitor_id"
+    );
+
+
+  if (!id) {
+
+    id =
+      crypto.randomUUID();
+
+    localStorage.setItem(
+      "gallery_visitor_id",
+      id
+    );
+
+  }
+
+
+  return id;
+
+}
+
+
+async function startPresence() {
+
+  if (presenceStarted)
+    return;
+
+
+  presenceStarted =
+    true;
+
+
+  await updatePresence();
+
+
+  presenceInterval =
+    setInterval(
+      updatePresence,
+      15000
+    );
+
+
+  /*
+    If the visitor changes tabs or minimizes
+    the page, immediately refresh their
+    heartbeat when they come back.
+  */
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
+
+        updatePresence();
+
+      }
+
+    }
+  );
+
+}
+
+
+async function updatePresence() {
+
+  try {
+
+    await supabaseClient
+      .from(
+        "gallery_presence"
+      )
+      .upsert(
+        {
+          visitor_id:
+            visitorId,
+
+          section_id:
+            currentSection,
+
+          last_seen:
+            new Date().toISOString()
+        },
+        {
+          onConflict:
+            "visitor_id"
+        }
+      );
+
+
+    if (isAdmin) {
+
+      updatePresenceDisplay();
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Presence update failed:",
+      error
+    );
+
+  }
+
+}
+
+
+async function cleanStalePresence() {
+
+  const cutoff =
+    new Date(
+      Date.now() -
+      45000
+    ).toISOString();
+
+
+  await supabaseClient
+    .from(
+      "gallery_presence"
+    )
+    .delete()
+    .lt(
+      "last_seen",
+      cutoff
+    );
+
+}
+
+
+async function getActiveVisitors() {
+
+  const cutoff =
+    new Date(
+      Date.now() -
+      45000
+    ).toISOString();
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient
+      .from(
+        "gallery_presence"
+      )
+      .select(
+        "visitor_id"
+      )
+      .gte(
+        "last_seen",
+        cutoff
+      );
+
+
+  if (error) {
+
+    console.error(
+      "Presence count failed:",
+      error
+    );
+
+    return 0;
+
+  }
+
+
+  return (
+    data || []
+  ).filter(
+    visitor =>
+      visitor.visitor_id !==
+      visitorId
+  ).length;
+
+}
+
+
+/* ============================================================
+   ADMIN PRESENCE DISPLAY
+   ============================================================ */
+
+function createPresenceDisplay() {
+
+  if (
+    document.getElementById(
+      "livePresence"
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  if (!isAdmin)
+    return;
+
+
+  const header =
+    document.querySelector(
+      ".site-header"
+    );
+
+
+  if (!header)
+    return;
+
+
+  const display =
+    document.createElement(
+      "div"
+    );
+
+
+  display.id =
+    "livePresence";
+
+
+  display.className =
+    "live-presence";
+
+
+  display.innerHTML =
+    `
+      <span class="presence-heart">
+        ♡
+      </span>
+      <span>
+        mads is online
+      </span>
+    `;
+
+
+  header.appendChild(
+    display
+  );
+
+
+  updatePresenceDisplay();
+
+}
+
+
+function removePresenceDisplay() {
+
+  const display =
+    document.getElementById(
+      "livePresence"
+    );
+
+
+  if (display) {
+
+    display.remove();
+
+  }
+
+
+  if (
+    presenceDisplayInterval
+  ) {
+
+    clearInterval(
+      presenceDisplayInterval
+    );
+
+    presenceDisplayInterval =
+      null;
+
+  }
+
+}
+
+
+function startAdminPresenceDisplay() {
+
+  if (!isAdmin)
+    return;
+
+
+  createPresenceDisplay();
+
+
+  if (
+    presenceDisplayInterval
+  ) {
+
+    return;
+
+  }
+
+
+  presenceDisplayInterval =
+    setInterval(
+      updatePresenceDisplay,
+      15000
+    );
+
+}
+
+
+async function updatePresenceDisplay() {
+
+  if (!isAdmin) {
+
+    removePresenceDisplay();
+
+    return;
+
+  }
+
+
+  createPresenceDisplay();
+
+
+  await cleanStalePresence();
+
+
+  const count =
+    await getActiveVisitors();
+
+
+  const display =
+    document.getElementById(
+      "livePresence"
+    );
+
+
+  if (!display)
+    return;
+
+
+  if (count === 0) {
+
+    display.innerHTML =
+      `
+        <span class="presence-heart">
+          ♡
+        </span>
+        <span>
+          mads is online
+        </span>
+      `;
+
+  } else if (count === 1) {
+
+    display.innerHTML =
+      `
+        <span class="presence-heart">
+          ♡
+        </span>
+        <span>
+          mads is online · 1 other person is here
+        </span>
+      `;
+
+  } else {
+
+    display.innerHTML =
+      `
+        <span class="presence-heart">
+          ♡
+        </span>
+        <span>
+          mads is online · ${count} other people are here
+        </span>
+      `;
+
+  }
 
 }
 
@@ -2923,7 +3374,7 @@ function showToast(
 
 
 /* ============================================================
-   SMALL DYNAMIC STYLES FOR NEW ADMIN FEATURES
+   DYNAMIC STYLES
    ============================================================ */
 
 (function addDynamicStyles() {
@@ -2935,6 +3386,7 @@ function showToast(
 
 
   style.textContent = `
+
     .section-nav-item {
       display: flex;
       align-items: center;
@@ -2997,6 +3449,41 @@ function showToast(
     #editMemoryModal textarea {
       resize: vertical;
     }
+
+    .live-presence {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      font-size: 13px;
+      opacity: 0.72;
+      letter-spacing: 0.1px;
+    }
+
+    .presence-heart {
+      display: inline-block;
+      animation: presenceHeartPulse 1.5s ease-in-out infinite;
+      transform-origin: center;
+      font-size: 15px;
+    }
+
+    @keyframes presenceHeartPulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.7;
+      }
+
+      50% {
+        transform: scale(1.25);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 0.7;
+      }
+    }
+
   `;
 
 
