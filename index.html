@@ -1641,5 +1641,32 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
+  <script>
+/* Remove the large "all memories" heading */
+(function () {
+  function hideBigHeading() {
+    const heading = document.getElementById("heading");
+
+    if (heading) {
+      heading.style.display = "none";
+    }
+  }
+
+  hideBigHeading();
+
+  document.addEventListener("DOMContentLoaded", hideBigHeading);
+
+  const observer = new MutationObserver(hideBigHeading);
+
+  const heading = document.getElementById("heading");
+
+  if (heading) {
+    observer.observe(heading, {
+      childList: true,
+      subtree: true
+    });
+  }
+})();
+</script>
 </body>
 </html>
