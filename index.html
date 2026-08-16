@@ -3,1198 +3,3557 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>my memories ♡</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{
-  --bg:#fff9fb;--pink:#f5dce5;--pink2:#fff2f6;--border:#efd2de;
-  --text:#634f59;--muted:#9e8992;--danger:#a85d74;--shadow:0 10px 28px rgba(99,79,89,.08)
-}
-*{box-sizing:border-box} body{margin:0;background:linear-gradient(#fffafd,#fff);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.page{max-width:1500px;margin:auto;padding:28px 24px 70px}
-.header{text-align:center;padding:8px 10px 22px}.header h1{margin:0;font:500 clamp(32px,4vw,50px) Georgia,serif;color:#6b5460}.header p{margin:8px 0 0;color:var(--muted);font-size:13px}
-.actions,.sections,.sort{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}
-.actions{margin-bottom:16px}.sections{margin-bottom:14px}
-button,select,input,textarea{font:inherit}.btn{border:1px solid var(--border);border-radius:999px;padding:9px 15px;background:#fff;color:#765766;cursor:pointer}.btn.primary{background:var(--pink)}.btn:hover{transform:translateY(-1px)}
-.admin-only{display:none}
-.tab{display:inline-flex;align-items:center;gap:3px;padding:4px 6px 4px 12px;border:1px solid var(--border);border-radius:999px;background:#fff}.tab.active{background:var(--pink2)}
-.tab button{border:0;background:transparent;color:var(--text);cursor:pointer;font-size:12px;padding:5px 3px}.remove-section{display:none;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:50%}.remove-section:hover{background:var(--pink2);color:var(--danger)}body.admin .remove-section{display:block}
-.sort{margin-bottom:24px;color:var(--muted);font-size:12px}.sort select{border:1px solid var(--border);border-radius:12px;padding:7px 10px;background:#fff;color:var(--text)}
-.heading{text-align:center;margin-bottom:18px}.heading h2{margin:0;font:500 24px Georgia,serif}.heading p{margin:5px 0 0;color:var(--muted);font-size:12px;white-space:pre-wrap}
-.gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,18px);align-items:start}
-.card{background:#fff;border:1px solid rgba(239,210,222,.65);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
-.media{width:100%;overflow:hidden;background:#fff}.media img,.media video{display:block;max-width:100%;height:auto}.media img{width:auto;margin:0 auto;cursor:zoom-in}.media video{width:100%;background:#000}
-.info{padding:11px 13px 13px}.date{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}.location{font-size:11px;color:#987682;margin-bottom:6px}.caption{font:14px/1.5 Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere}
-.card-actions{display:none;justify-content:flex-end;padding:0 10px 10px}body.admin .card-actions{display:flex}.delete-memory{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:11px}.empty{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted);font:14px Georgia,serif}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(45,30,37,.55);backdrop-filter:blur(5px);z-index:1000}.modal.open{display:flex}
-.modal-card{position:relative;width:min(520px,100%);max-height:90vh;overflow:auto;padding:24px;background:#fff;border-radius:22px;box-shadow:0 24px 80px rgba(0,0,0,.2)}.modal-card h2{margin:0 0 5px;font:500 24px Georgia,serif}.sub{margin:0 0 18px;color:var(--muted);font-size:12px}.close{position:absolute;right:14px;top:12px;border:0;border-radius:50%;width:34px;height:34px;background:var(--pink2);color:var(--text);font-size:20px;cursor:pointer}.field{margin-bottom:14px}.field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600} .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--text)}.field textarea{min-height:95px;resize:vertical}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.status{display:none;padding:9px 11px;margin-bottom:14px;border-radius:10px;background:var(--pink2);color:var(--muted);font-size:12px}
-.lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(25,18,22,.82);z-index:1200}.lightbox.open{display:flex}.lb-inner{position:relative;max-width:96vw;max-height:95vh;background:#111;border-radius:18px;overflow:hidden}.lb-inner img,.lb-inner video{display:block;max-width:94vw;max-height:82vh;width:auto;height:auto;background:#111}.lb-caption{padding:10px 14px;background:#fff;color:var(--text);font-size:12px;white-space:pre-wrap}
-@media(max-width:950px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.page{padding-left:9px;padding-right:9px}.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card{border-radius:14px}.info{padding:9px 10px 11px}}
-/* Move section navigation to the left */
-#sectionsNav {
-  justify-content: flex-start !important;
-  align-items: flex-start !important;
-  width: 100% !important;
-  text-align: left !important;
+  --bg:#fff9fb;
+  --pink:#f5dce5;
+  --pink2:#fff2f6;
+  --border:#efd2de;
+  --text:#634f59;
+  --muted:#9e8992;
+  --danger:#a85d74;
+  --shadow:0 10px 28px rgba(99,79,89,.08);
 }
 
-#sectionsNav .tab {
-  margin-left: 0 !important;
+*{
+  box-sizing:border-box;
 }
 
-.sections-nav {
-  justify-content: flex-start !important;
-  text-align: left !important;
+body{
+  margin:0;
+  background:linear-gradient(#fffafd,#fff);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+.page{
+  max-width:1500px;
+  margin:auto;
+  padding:28px 24px 70px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+  text-align:center;
+  padding:8px 10px 22px;
+}
+
+.header h1{
+  margin:0;
+  font:500 clamp(32px,4vw,50px) Georgia,serif;
+  color:#6b5460;
+}
+
+.header p{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* =========================
+   LYSS PRESENCE
+========================= */
+
+#lyss-presence{
+  position:fixed;
+  top:22px;
+  right:24px;
+  z-index:9999;
+
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  color:#765766;
+  font-size:13px;
+
+  pointer-events:none;
+}
+
+#lyss-heart{
+  display:inline-block;
+  font-family:Georgia,serif;
+  font-size:32px;
+  line-height:1;
+  color:#a85d74;
+  transform-origin:center;
+}
+
+#lyss-presence.online #lyss-heart{
+  animation:lyssHeartPulse 1.2s ease-in-out infinite;
+}
+
+#lyss-presence.offline #lyss-heart{
+  opacity:.6;
+}
+
+#lyss-presence-text{
+  white-space:nowrap;
+}
+
+@keyframes lyssHeartPulse{
+  0%,100%{
+    transform:scale(1);
+  }
+
+  50%{
+    transform:scale(1.25);
+  }
+}
+
+@media(max-width:600px){
+  #lyss-presence{
+    top:14px;
+    right:14px;
+    font-size:11px;
+  }
+
+  #lyss-heart{
+    font-size:27px;
+  }
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.actions,
+.sections,
+.sort{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.actions{
+  justify-content:center;
+  margin-bottom:16px;
+}
+
+.sections{
+  justify-content:flex-start;
+  margin-bottom:14px;
+}
+
+button,
+select,
+input,
+textarea{
+  font:inherit;
+}
+
+.btn{
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:9px 15px;
+  background:#fff;
+  color:#765766;
+  cursor:pointer;
+}
+
+.btn.primary{
+  background:var(--pink);
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+}
+
+.admin-only{
+  display:none;
+}
+
+/* =========================
+   SECTIONS
+========================= */
+
+.tab{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:4px 6px 4px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff;
+}
+
+.tab.active{
+  background:var(--pink2);
+}
+
+.tab button{
+  border:0;
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  font-size:12px;
+  padding:5px 3px;
+}
+
+.remove-section{
+  display:none;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:16px;
+  padding:2px 6px;
+  border-radius:50%;
+}
+
+.remove-section:hover{
+  background:var(--pink2);
+  color:var(--danger);
+}
+
+body.admin .remove-section{
+  display:block;
+}
+
+/* =========================
+   SORT
+========================= */
+
+.sort{
+  justify-content:center;
+  margin-bottom:24px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.sort select{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:7px 10px;
+  background:#fff;
+  color:var(--text);
+}
+
+/* =========================
+   HEADING
+========================= */
+
+.heading{
+  text-align:center;
+  margin-bottom:18px;
+}
+
+.heading h2{
+  margin:0;
+  font:500 24px Georgia,serif;
+}
+
+.heading p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:12px;
+  white-space:pre-wrap;
+}
+
+/* =========================
+   GALLERY
+========================= */
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(10px,1.4vw,18px);
+  align-items:start;
+}
+
+.card{
+  background:#fff;
+  border:1px solid rgba(239,210,222,.65);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+
+.media{
+  width:100%;
+  overflow:hidden;
+  background:#fff;
+}
+
+.media img,
+.media video{
+  display:block;
+  max-width:100%;
+  height:auto;
+}
+
+.media img{
+  width:auto;
+  margin:0 auto;
+  cursor:zoom-in;
+}
+
+.media video{
+  width:100%;
+  background:#000;
+}
+
+.info{
+  padding:11px 13px 13px;
+}
+
+.date{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+
+.location{
+  font-size:11px;
+  color:#987682;
+  margin-bottom:6px;
+}
+
+.caption{
+  font:14px/1.5 Georgia,serif;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+.card-actions{
+  display:none;
+  justify-content:flex-end;
+  padding:0 10px 10px;
+}
+
+body.admin .card-actions{
+  display:flex;
+}
+
+.delete-memory{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:11px;
+}
+
+.empty{
+  grid-column:1/-1;
+  text-align:center;
+  padding:50px 20px;
+  color:var(--muted);
+  font:14px Georgia,serif;
+}
+
+/* =========================
+   MODALS
+========================= */
+
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(45,30,37,.55);
+  backdrop-filter:blur(5px);
+  z-index:1000;
+}
+
+.modal.open{
+  display:flex;
+}
+
+.modal-card{
+  position:relative;
+  width:min(520px,100%);
+  max-height:90vh;
+  overflow:auto;
+  padding:24px;
+  background:#fff;
+  border-radius:22px;
+  box-shadow:0 24px 80px rgba(0,0,0,.2);
+}
+
+.modal-card h2{
+  margin:0 0 5px;
+  font:500 24px Georgia,serif;
+}
+
+.sub{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.close{
+  position:absolute;
+  right:14px;
+  top:12px;
+  border:0;
+  border-radius:50%;
+  width:34px;
+  height:34px;
+  background:var(--pink2);
+  color:var(--text);
+  font-size:20px;
+  cursor:pointer;
+}
+
+.field{
+  margin-bottom:14px;
+}
+
+.field label{
+  display:block;
+  margin-bottom:6px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  color:var(--text);
+}
+
+.field textarea{
+  min-height:95px;
+  resize:vertical;
+}
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:12px;
+}
+
+.status{
+  display:none;
+  padding:9px 11px;
+  margin-bottom:14px;
+  border-radius:10px;
+  background:var(--pink2);
+  color:var(--muted);
+  font-size:12px;
+}
+
+/* =========================
+   LIGHTBOX
+========================= */
+
+.lightbox{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(25,18,22,.82);
+  z-index:1200;
+}
+
+.lightbox.open{
+  display:flex;
+}
+
+.lb-inner{
+  position:relative;
+  max-width:96vw;
+  max-height:95vh;
+  background:#111;
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.lb-inner img,
+.lb-inner video{
+  display:block;
+  max-width:94vw;
+  max-height:82vh;
+  width:auto;
+  height:auto;
+  background:#111;
+}
+
+.lb-caption{
+  padding:10px 14px;
+  background:#fff;
+  color:var(--text);
+  font-size:12px;
+  white-space:pre-wrap;
+}
+
+/* =========================
+   ADMIN EXTRA TOOLS
+========================= */
+
+.extra-memory-tools{
+  display:none;
+  flex-wrap:wrap;
+  gap:5px;
+  padding:0 10px 10px;
+  justify-content:flex-start;
+}
+
+body.admin .extra-memory-tools{
+  display:flex;
+}
+
+.extra-memory-tools button,
+.extra-section-tools button{
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--text);
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:11px;
+  cursor:pointer;
+}
+
+.extra-memory-tools button:hover,
+.extra-section-tools button:hover{
+  background:var(--pink2);
+}
+
+body.admin .card{
+  cursor:grab;
+}
+
+body.admin .card:active{
+  cursor:grabbing;
+}
+
+.extra-section-tools{
+  display:none;
+  align-items:center;
+  gap:2px;
+  margin-left:2px;
+}
+
+body.admin .extra-section-tools{
+  display:flex;
+}
+
+.extra-section-tools button{
+  padding:3px 7px;
+  font-size:10px;
+}
+
+.memory-dragging,
+.section-dragging{
+  opacity:.45;
+}
+
+body.admin .tab{
+  cursor:grab;
+}
+
+/* =========================
+   EDIT POPUP
+========================= */
+
+#extraEditBox{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(45,30,37,.55);
+  backdrop-filter:blur(5px);
+}
+
+#extraEditBox.open{
+  display:flex;
+}
+
+#extraEditBox .extra-edit-card{
+  width:min(500px,100%);
+  background:#fff;
+  border-radius:22px;
+  padding:24px;
+  box-shadow:0 24px 80px rgba(0,0,0,.2);
+}
+
+#extraEditBox h2{
+  margin:0 0 5px;
+  font:500 24px Georgia,serif;
+  color:var(--text);
+}
+
+#extraEditBox p{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+#extraEditBox label{
+  display:block;
+  margin:12px 0 6px;
+  font-size:12px;
+  font-weight:600;
+}
+
+#extraEditBox input,
+#extraEditBox textarea{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 12px;
+  color:var(--text);
+  background:#fff;
+  font:inherit;
+}
+
+#extraEditBox textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+.extra-edit-buttons{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:18px;
+}
+
+.extra-edit-buttons button{
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:9px 15px;
+  background:#fff;
+  color:var(--text);
+  cursor:pointer;
+}
+
+.extra-edit-buttons .save-extra{
+  background:var(--pink);
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:950px){
+  .gallery{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:560px){
+  .page{
+    padding-left:9px;
+    padding-right:9px;
+  }
+
+  .gallery{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+
+  .card{
+    border-radius:14px;
+  }
+
+  .info{
+    padding:9px 10px 11px;
+  }
 }
 </style>
 </head>
+
 <body>
+
 <main class="page">
- 
+
   <header class="header">
     <h1>my memories ♡</h1>
     <p>photos, videos &amp; little memories</p>
   </header>
 
-<div class="actions">
-  <button class="btn" id="adminBtn">🔒 admin</button>
-  <button class="btn admin-only" id="logoutBtn">log out</button>
-  <button class="btn admin-only" id="addBtn">＋ add a little memory</button>
-  <button class="btn admin-only" id="newSectionBtn">＋ new section</button>
-</div>
+  <div class="actions">
+    <button class="btn" id="adminBtn">🔒 admin</button>
 
-<nav class="sections" id="sectionsNav"></nav>
-<div class="heading" id="heading"></div>
+    <button class="btn admin-only" id="logoutBtn">
+      log out
+    </button>
 
-<div class="sort">
-  <span>sort by</span>
-  <select id="sortSelect">
-    <option value="newest">newest first</option>
-    <option value="oldest">oldest first</option>
-    <option value="recently_added">recently added</option>
-  </select>
-</div>
+    <button class="btn admin-only" id="addBtn">
+      ＋ add a little memory
+    </button>
 
-<section class="gallery" id="gallery"><div class="empty">loading memories ♡</div></section>
+    <button class="btn admin-only" id="newSectionBtn">
+      ＋ new section
+    </button>
+  </div>
+
+  <nav class="sections" id="sectionsNav"></nav>
+
+  <div class="heading" id="heading"></div>
+
+  <div class="sort">
+    <span>sort by</span>
+
+    <select id="sortSelect">
+      <option value="newest">newest first</option>
+      <option value="oldest">oldest first</option>
+      <option value="recently_added">recently added</option>
+    </select>
+  </div>
+
+  <section class="gallery" id="gallery">
+    <div class="empty">
+      loading memories ♡
+    </div>
+  </section>
+
 </main>
 
-<div class="modal" id="loginModal"><div class="modal-card">
-  <button class="close" data-close="loginModal">×</button>
-  <h2>admin ♡</h2><p class="sub">log in to manage your gallery</p>
-  <div class="status" id="loginStatus"></div>
-  <div class="field"><label>Email</label><input id="email" type="email" autocomplete="email"></div>
-  <div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password"></div>
-  <div class="modal-actions"><button class="btn" data-close="loginModal">cancel</button><button class="btn primary" id="loginSubmit">log in ♡</button></div>
-</div></div>
 
-<div class="modal" id="memoryModal"><div class="modal-card">
-  <button class="close" data-close="memoryModal">×</button>
-  <h2>add a little memory ♡</h2><p class="sub">photos, videos, dates, places &amp; captions</p>
-  <div class="field"><label>Photo or video</label><input id="memoryFile" type="file" accept="image/*,video/*"></div>
-  <div class="field"><label>Section</label><select id="memorySection"></select></div>
-  <div class="field"><label>Date — optional</label><input id="memoryDate" type="date"></div>
-  <div class="field"><label>Location — optional</label><input id="memoryLocation" type="text" placeholder="Toronto, Canada"></div>
-  <div class="field"><label>Caption — optional</label><textarea id="memoryCaption" placeholder="a little memory ♡"></textarea></div>
-  <div class="modal-actions"><button class="btn" data-close="memoryModal">cancel</button><button class="btn primary" id="saveMemory">add memory ♡</button></div>
-</div></div>
+<!-- =========================
+     LYSS PRESENCE
+========================= -->
 
-<div class="modal" id="sectionModal"><div class="modal-card">
-  <button class="close" data-close="sectionModal">×</button>
-  <h2>new section ♡</h2><p class="sub">create another album for your memories</p>
-  <div class="field"><label>Section name</label><input id="sectionName" placeholder="summer ♡"></div>
-  <div class="field"><label>Subtitle — optional</label><textarea id="sectionSubtitle" placeholder="sunny days & tiny adventures"></textarea></div>
-  <div class="modal-actions"><button class="btn" data-close="sectionModal">cancel</button><button class="btn primary" id="saveSection">create section ♡</button></div>
-</div></div>
-
-<div class="lightbox" id="lightbox">
-  <div class="lb-inner">
-    <button class="close" id="lbClose">×</button>
-    <div id="lbMedia"></div>
-    <div class="lb-caption" id="lbCaption"></div>
-  </div>
+<div id="lyss-presence" class="offline">
+  <span id="lyss-heart">♡</span>
+  <span id="lyss-presence-text">
+    lyss was last active…
+  </span>
 </div>
 
+
+<!-- =========================
+     LOGIN MODAL
+========================= -->
+
+<div class="modal" id="loginModal">
+
+  <div class="modal-card">
+
+    <button class="close" data-close="loginModal">
+      ×
+    </button>
+
+    <h2>admin ♡</h2>
+
+    <p class="sub">
+      log in to manage your gallery
+    </p>
+
+    <div class="status" id="loginStatus"></div>
+
+    <div class="field">
+      <label>Email</label>
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+      >
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input
+        id="password"
+        type="password"
+        autocomplete="current-password"
+      >
+    </div>
+
+    <div class="modal-actions">
+
+      <button
+        class="btn"
+        data-close="loginModal"
+      >
+        cancel
+      </button>
+
+      <button
+        class="btn primary"
+        id="loginSubmit"
+      >
+        log in ♡
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     MEMORY MODAL
+========================= -->
+
+<div class="modal" id="memoryModal">
+
+  <div class="modal-card">
+
+    <button class="close" data-close="memoryModal">
+      ×
+    </button>
+
+    <h2>add a little memory ♡</h2>
+
+    <p class="sub">
+      photos, videos, dates, places &amp; captions
+    </p>
+
+    <div class="field">
+      <label>Photo or video</label>
+
+      <input
+        id="memoryFile"
+        type="file"
+        accept="image/*,video/*"
+      >
+    </div>
+
+    <div class="field">
+      <label>Section</label>
+
+      <select id="memorySection"></select>
+    </div>
+
+    <div class="field">
+      <label>Date — optional</label>
+
+      <input
+        id="memoryDate"
+        type="date"
+      >
+    </div>
+
+    <div class="field">
+      <label>Location — optional</label>
+
+      <input
+        id="memoryLocation"
+        type="text"
+        placeholder="Toronto, Canada"
+      >
+    </div>
+
+    <div class="field">
+      <label>Caption — optional</label>
+
+      <textarea
+        id="memoryCaption"
+        placeholder="a little memory ♡"
+      ></textarea>
+    </div>
+
+    <div class="modal-actions">
+
+      <button
+        class="btn"
+        data-close="memoryModal"
+      >
+        cancel
+      </button>
+
+      <button
+        class="btn primary"
+        id="saveMemory"
+      >
+        add memory ♡
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     SECTION MODAL
+========================= -->
+
+<div class="modal" id="sectionModal">
+
+  <div class="modal-card">
+
+    <button class="close" data-close="sectionModal">
+      ×
+    </button>
+
+    <h2>new section ♡</h2>
+
+    <p class="sub">
+      create another album for your memories
+    </p>
+
+    <div class="field">
+      <label>Section name</label>
+
+      <input
+        id="sectionName"
+        placeholder="summer ♡"
+      >
+    </div>
+
+    <div class="field">
+      <label>Subtitle — optional</label>
+
+      <textarea
+        id="sectionSubtitle"
+        placeholder="sunny days & tiny adventures"
+      ></textarea>
+    </div>
+
+    <div class="modal-actions">
+
+      <button
+        class="btn"
+        data-close="sectionModal"
+      >
+        cancel
+      </button>
+
+      <button
+        class="btn primary"
+        id="saveSection"
+      >
+        create section ♡
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     LIGHTBOX
+========================= -->
+
+<div class="lightbox" id="lightbox">
+
+  <div class="lb-inner">
+
+    <button
+      class="close"
+      id="lbClose"
+    >
+      ×
+    </button>
+
+    <div id="lbMedia"></div>
+
+    <div
+      class="lb-caption"
+      id="lbCaption"
+    ></div>
+
+  </div>
+
+</div>
+
+
 <script>
-const SUPABASE_URL = "https://jaubryfyktdfzxqbrzue.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_qNcbkgifCJVk0cX7A7oRXg_AtlSlAld";
-const ADMIN_UID = "dabf4e39-9760-4041-be58-b6a6c42e0351";
 
-const MEMORIES_TABLE = "memories";
-const SECTIONS_TABLE = "sections";
-const STORAGE_BUCKET = "gallery";
+/* =========================================================
+   SUPABASE
+========================================================= */
 
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL =
+  "https://jaubryfyktdfzxqbrzue.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "sb_publishable_qNcbkgifCJVk0cX7A7oRXg_AtlSlAld";
+
+const ADMIN_UID =
+  "dabf4e39-9760-4041-be58-b6a6c42e0351";
+
+const MEMORIES_TABLE =
+  "memories";
+
+const SECTIONS_TABLE =
+  "sections";
+
+const STORAGE_BUCKET =
+  "gallery";
+
+const db =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+
+/* =========================================================
+   APP STATE
+========================================================= */
 
 let currentUser = null;
+
 let sections = [];
-let activeSectionId = null; // null = All Memories
+
+let activeSectionId = null;
+
 let sortMode = "newest";
 
-const $ = id => document.getElementById(id);
 
-function admin(){return !!currentUser && currentUser.id === ADMIN_UID;}
-function openModal(id){$(id).classList.add("open")}
-function closeModal(id){$(id).classList.remove("open")}
+/* =========================================================
+   HELPERS
+========================================================= */
 
-document.querySelectorAll("[data-close]").forEach(b=>{
-  b.addEventListener("click",()=>closeModal(b.dataset.close));
-});
+const $ = id =>
+  document.getElementById(id);
+
+
+function admin(){
+  return !!currentUser &&
+         currentUser.id === ADMIN_UID;
+}
+
+
+function openModal(id){
+  $(id).classList.add("open");
+}
+
+
+function closeModal(id){
+  $(id).classList.remove("open");
+}
+
+
+document
+  .querySelectorAll("[data-close]")
+  .forEach(button => {
+
+    button.addEventListener(
+      "click",
+      () => closeModal(button.dataset.close)
+    );
+
+  });
+
+
+/* =========================================================
+   ADMIN UI
+========================================================= */
 
 function updateAdminUI(){
-  document.body.classList.toggle("admin",admin());
-  document.querySelectorAll(".admin-only").forEach(e=>{
-    e.style.display = admin() ? "inline-flex" : "none";
-  });
+
+  document.body.classList.toggle(
+    "admin",
+    admin()
+  );
+
+  document
+    .querySelectorAll(".admin-only")
+    .forEach(element => {
+
+      element.style.display =
+        admin()
+          ? "inline-flex"
+          : "none";
+
+    });
+
 }
+
+
+/* =========================================================
+   DATE HELPERS
+========================================================= */
 
 function formatDate(value){
+
   if(!value) return "";
-  const s=String(value).trim();
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
-    const [y,m,d]=s.split("-").map(Number);
-    return new Date(y,m-1,d).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+
+  const s =
+    String(value).trim();
+
+  if(
+    /^\d{4}-\d{2}-\d{2}$/.test(s)
+  ){
+
+    const [
+      y,
+      m,
+      d
+    ] =
+      s.split("-").map(Number);
+
+    return new Date(
+      y,
+      m - 1,
+      d
+    ).toLocaleDateString(
+      undefined,
+      {
+        year:"numeric",
+        month:"long",
+        day:"numeric"
+      }
+    );
+
   }
-  const parsed=Date.parse(s);
-  return Number.isNaN(parsed)?s:new Date(parsed).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+
+  const parsed =
+    Date.parse(s);
+
+  if(Number.isNaN(parsed))
+    return s;
+
+  return new Date(parsed)
+    .toLocaleDateString(
+      undefined,
+      {
+        year:"numeric",
+        month:"long",
+        day:"numeric"
+      }
+    );
 }
+
 
 function sortValue(value){
+
   if(!value) return null;
-  const s=String(value).trim();
-  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return Number(s.replaceAll("-",""));
-  const t=Date.parse(s);
-  return Number.isNaN(t)?null:t;
+
+  const s =
+    String(value).trim();
+
+  if(
+    /^\d{4}-\d{2}-\d{2}$/.test(s)
+  ){
+
+    return Number(
+      s.replaceAll("-","")
+    );
+
+  }
+
+  const t =
+    Date.parse(s);
+
+  return Number.isNaN(t)
+    ? null
+    : t;
 }
+
 
 function sortMemories(rows){
-  return [...rows].sort((a,b)=>{
-    if(sortMode==="recently_added"){
-      return new Date(b.created_at||0)-new Date(a.created_at||0);
-    }
-    const da=sortValue(a.date), db=sortValue(b.date);
-    if(da===null&&db===null) return new Date(b.created_at||0)-new Date(a.created_at||0);
-    if(da===null) return 1;
-    if(db===null) return -1;
-    return sortMode==="oldest" ? da-db : db-da;
-  });
-}
 
-function publicUrl(path){
-  if(!path) return "";
-  if(/^https?:\/\//i.test(path)) return path;
-  return db.storage.from(STORAGE_BUCKET).getPublicUrl(path).data.publicUrl;
-}
+  return [...rows].sort(
+    (a,b) => {
 
-function renderHeading(){
-   if(activeSectionId===null){
-    $("heading").innerHTML="";
-    return;
-  }
-  const s=sections.find(x=>x.id===activeSectionId);
-  if(!s){activeSectionId=null;return renderHeading();}
-  $("heading").innerHTML="";
-  const h=document.createElement("h2"); h.textContent=s.title; $("heading").appendChild(h);
-  if(s.subtitle){const p=document.createElement("p");p.textContent=s.subtitle;$("heading").appendChild(p);}
-}
+      if(sortMode === "recently_added"){
 
-function renderSections(){
-  const nav=$("sectionsNav");
-  nav.innerHTML="";
-
-  const all=document.createElement("div");
-  all.className="tab"+(activeSectionId===null?" active":"");
-  const allBtn=document.createElement("button");
-  allBtn.textContent="all memories ♡";
-  allBtn.addEventListener("click",async()=>{activeSectionId=null;renderSections();await loadGallery();});
-  all.appendChild(allBtn);nav.appendChild(all);
-
-  sections.forEach(s=>{
-    const wrap=document.createElement("div");
-    wrap.className="tab"+(activeSectionId===s.id?" active":"");
-
-    const pick=document.createElement("button");
-    pick.textContent=s.title;
-    pick.addEventListener("click",async()=>{activeSectionId=s.id;renderSections();await loadGallery();});
-    wrap.appendChild(pick);
-
-    const rem=document.createElement("button");
-    rem.className="remove-section";
-    rem.type="button";
-    rem.title="Remove section";
-    rem.textContent="×";
-    rem.addEventListener("click",e=>{e.stopPropagation();removeSection(s);});
-    wrap.appendChild(rem);
-
-    nav.appendChild(wrap);
-  });
-
-  updateAdminUI();
-}
-
-function populateSectionSelect(){
-  const sel=$("memorySection");
-  sel.innerHTML="";
-  const all=document.createElement("option");
-  all.value="";all.textContent="All memories ♡";sel.appendChild(all);
-  sections.forEach(s=>{
-    const o=document.createElement("option");
-    o.value=s.id;o.textContent=s.title;sel.appendChild(o);
-  });
-}
-
-async function loadSections(){
-  const {data,error}=await db.from(SECTIONS_TABLE).select("id,title,subtitle,created_at").order("created_at",{ascending:true});
-  if(error){console.error(error);sections=[];} else sections=data||[];
-  renderSections();populateSectionSelect();renderHeading();
-}
-
-async function loadGallery(){
-  renderHeading();
-  const g=$("gallery");
-  g.innerHTML='<div class="empty">loading memories ♡</div>';
-
-  let q=db.from(MEMORIES_TABLE).select("*");
-  if(activeSectionId!==null) q=q.eq("section_id",activeSectionId);
-
-  const {data,error}=await q;
-  if(error){
-    console.error(error);
-    g.innerHTML='<div class="empty">couldn\'t load memories ♡</div>';
-    return;
-  }
-
-  const rows=sortMemories(data||[]);
-  g.innerHTML="";
-  if(!rows.length){g.innerHTML='<div class="empty">no memories here yet ♡</div>';return;}
-
-  rows.forEach(memory=>{
-    const card=document.createElement("article");card.className="card";
-    const media=document.createElement("div");media.className="media";
-    const url=publicUrl(memory.file_path);
-    const video=memory.type==="video" || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(memory.file_path||"");
-
-    if(video){
-      const v=document.createElement("video");v.src=url;v.controls=true;v.preload="metadata";v.playsInline=true;media.appendChild(v);
-    }else{
-      const img=document.createElement("img");img.src=url;img.loading="lazy";img.decoding="async";img.alt=memory.caption||"Memory photo";
-      img.addEventListener("click",()=>openLightbox(memory,false));
-      media.appendChild(img);
-    }
-    card.appendChild(media);
-
-    const info=document.createElement("div");info.className="info";
-    if(memory.date){const d=document.createElement("div");d.className="date";d.textContent=formatDate(memory.date);info.appendChild(d);}
-    if(memory.location){const l=document.createElement("div");l.className="location";l.textContent="📍 "+memory.location;info.appendChild(l);}
-    if(memory.caption){const c=document.createElement("div");c.className="caption";c.textContent=memory.caption;info.appendChild(c);}
-    if(info.children.length)card.appendChild(info);
-
-    if(admin()){
-      const actions=document.createElement("div");actions.className="card-actions";
-      const del=document.createElement("button");del.className="delete-memory";del.textContent="delete";
-      del.addEventListener("click",()=>deleteMemory(memory));
-      actions.appendChild(del);card.appendChild(actions);
-    }
-
-    g.appendChild(card);
-  });
-}
-
-async function deleteMemory(memory){
-  if(!admin())return;
-  if(!confirm("Delete this memory and its stored file?"))return;
-
-  const {error}=await db.from(MEMORIES_TABLE).delete().eq("id",memory.id);
-  if(error){alert("Couldn't delete the memory ♡\\n\\n"+error.message);return;}
-
-  if(memory.file_path){
-    const r=await db.storage.from(STORAGE_BUCKET).remove([memory.file_path]);
-    if(r.error)console.error(r.error);
-  }
-  await loadGallery();
-}
-
-async function removeSection(section){
-  if(!admin())return;
-  if(!confirm(`Remove "${section.title}"?\\n\\nIts memories will be kept and moved to All Memories.`))return;
-
-  const moved=await db.from(MEMORIES_TABLE).update({section_id:null}).eq("section_id",section.id);
-  if(moved.error){alert("Couldn't move the memories.\\n\\n"+moved.error.message);return;}
-
-  const removed=await db.from(SECTIONS_TABLE).delete().eq("id",section.id);
-  if(removed.error){alert("Couldn't remove the section.\\n\\n"+removed.error.message);return;}
-
-  if(activeSectionId===section.id)activeSectionId=null;
-  await loadSections();await loadGallery();
-}
-
-$("sortSelect").addEventListener("change",e=>{sortMode=e.target.value;loadGallery();});
-
-$("adminBtn").addEventListener("click",()=>{if(!admin())openModal("loginModal");});
-
-$("loginSubmit").addEventListener("click",async()=>{
-  const email=$("email").value.trim(), password=$("password").value, status=$("loginStatus"), btn=$("loginSubmit");
-  status.style.display="none";
-  if(!email||!password){status.textContent="Please enter your email and password ♡";status.style.display="block";return;}
-  btn.disabled=true;btn.textContent="logging in...";
-  const {data,error}=await db.auth.signInWithPassword({email,password});
-  btn.disabled=false;btn.textContent="log in ♡";
-  if(error){status.textContent=error.message;status.style.display="block";return;}
-  if(!data.user||data.user.id!==ADMIN_UID){
-    await db.auth.signOut();status.textContent="This account isn't the gallery admin ♡";status.style.display="block";return;
-  }
-  currentUser=data.user;closeModal("loginModal");updateAdminUI();renderSections();
-});
-
-$("logoutBtn").addEventListener("click",async()=>{
-  await db.auth.signOut();currentUser=null;updateAdminUI();renderSections();
-});
-
-$("addBtn").addEventListener("click",()=>{populateSectionSelect();openModal("memoryModal");});
-
-$("saveMemory").addEventListener("click",async()=>{
-  if(!admin())return;
-  const file=$("memoryFile").files[0];
-  if(!file){alert("Please choose a photo or video ♡");return;}
-  const btn=$("saveMemory");btn.disabled=true;btn.textContent="saving... ♡";
-
-  const sectionId=$("memorySection").value||null;
-  const date=$("memoryDate").value||null;
-  const location=$("memoryLocation").value.trim();
-  const caption=$("memoryCaption").value.trim();
-  const type=file.type.startsWith("video/")?"video":"image";
-  const safe=file.name.normalize("NFKD").replace(/[^\w.\- ]/g,"").replace(/\s+/g,"-");
-  const path=`uploads/${crypto.randomUUID()}-${safe}`;
-
-  const up=await db.storage.from(STORAGE_BUCKET).upload(path,file,{contentType:file.type,cacheControl:"3600",upsert:false});
-  if(up.error){alert("Upload failed ♡\\n\\n"+up.error.message);btn.disabled=false;btn.textContent="add memory ♡";return;}
-
-  const ins=await db.from(MEMORIES_TABLE).insert({file_path:path,type,section_id:sectionId,date,location,caption});
-  if(ins.error){
-    await db.storage.from(STORAGE_BUCKET).remove([path]);
-    alert("Couldn't save the memory ♡\\n\\n"+ins.error.message);
-    btn.disabled=false;btn.textContent="add memory ♡";return;
-  }
-
-  $("memoryFile").value="";$("memorySection").value="";$("memoryDate").value="";$("memoryLocation").value="";$("memoryCaption").value="";
-  btn.disabled=false;btn.textContent="add memory ♡";closeModal("memoryModal");await loadGallery();
-});
-
-$("newSectionBtn").addEventListener("click",()=>openModal("sectionModal"));
-
-$("saveSection").addEventListener("click",async()=>{
-  if(!admin())return;
-  const title=$("sectionName").value.trim(), subtitle=$("sectionSubtitle").value.trim();
-  if(!title){alert("Please give the section a name ♡");return;}
-  if(title.toLowerCase()==="all memories ♡"){alert("All Memories is built in and cannot be created as a section.");return;}
-  if(sections.some(s=>s.title.trim().toLowerCase()===title.toLowerCase())){alert("That section already exists ♡");return;}
-
-  const btn=$("saveSection");btn.disabled=true;btn.textContent="creating... ♡";
-  const ins=await db.from(SECTIONS_TABLE).insert({title,subtitle});
-  btn.disabled=false;btn.textContent="create section ♡";
-  if(ins.error){alert("Couldn't create the section ♡\\n\\n"+ins.error.message);return;}
-  $("sectionName").value="";$("sectionSubtitle").value="";closeModal("sectionModal");await loadSections();
-});
-
-function openLightbox(memory,isVideo){
-  const wrap=$("lbMedia"), caption=$("lbCaption");wrap.innerHTML="";caption.textContent=memory.caption||"";
-  const url=publicUrl(memory.file_path);
-  if(isVideo){const v=document.createElement("video");v.src=url;v.controls=true;v.playsInline=true;wrap.appendChild(v);}
-  else{const img=document.createElement("img");img.src=url;img.alt=memory.caption||"Memory photo";wrap.appendChild(img);}
-  openModal("lightbox");
-}
-
-$("lbClose").addEventListener("click",()=>closeModal("lightbox"));
-$("lightbox").addEventListener("click",e=>{if(e.target.id==="lightbox")closeModal("lightbox")});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal.open,.lightbox.open").forEach(x=>x.classList.remove("open"));});
-
-db.auth.onAuthStateChange((_event,session)=>{
-  currentUser=session?.user||null;
-  if(currentUser&&currentUser.id!==ADMIN_UID){db.auth.signOut();currentUser=null;}
-  updateAdminUI();renderSections();
-});
-
-(async function start(){
-  const {data}=await db.auth.getSession();
-  currentUser=data.session?.user||null;
-  if(currentUser&&currentUser.id!==ADMIN_UID){await db.auth.signOut();currentUser=null;}
-  updateAdminUI();
-  await loadSections();
-  await loadGallery();
-})();
-
-<script>
-/* =========================================================
-   EXTRA ADMIN TOOLS
-   Add this at the VERY BOTTOM of index.html, before </body>
-   ========================================================= */
-
-(function () {
-  "use strict";
-
-  /* ---------- styles ---------- */
-
-  const style = document.createElement("style");
-
-  style.textContent = `
-    /* Keep the gallery starting from the left */
-    .gallery {
-      justify-content: start !important;
-      justify-items: start !important;
-      align-content: start !important;
-    }
-
-    /* Admin controls on memories */
-    body.admin .extra-memory-tools {
-      display: flex !important;
-    }
-
-    .extra-memory-tools {
-      display: none;
-      flex-wrap: wrap;
-      gap: 5px;
-      padding: 0 10px 10px;
-      justify-content: flex-start;
-    }
-
-    .extra-memory-tools button,
-    .extra-section-tools button {
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--text);
-      border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 11px;
-      cursor: pointer;
-    }
-
-    .extra-memory-tools button:hover,
-    .extra-section-tools button:hover {
-      background: var(--pink2);
-    }
-
-    .memory-dragging {
-      opacity: .45;
-    }
-
-    body.admin .card {
-      cursor: grab;
-    }
-
-    body.admin .card:active {
-      cursor: grabbing;
-    }
-
-    /* Section tools */
-    body.admin .extra-section-tools {
-      display: flex !important;
-    }
-
-    .extra-section-tools {
-      display: none;
-      align-items: center;
-      gap: 2px;
-      margin-left: 2px;
-    }
-
-    .extra-section-tools button {
-      padding: 3px 7px;
-      font-size: 10px;
-    }
-
-    .section-dragging {
-      opacity: .45;
-    }
-
-    body.admin .tab {
-      cursor: grab;
-    }
-
-    /* Edit box */
-    #extraEditBox {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(45,30,37,.55);
-      backdrop-filter: blur(5px);
-    }
-
-    #extraEditBox.open {
-      display: flex;
-    }
-
-    #extraEditBox .extra-edit-card {
-      width: min(500px, 100%);
-      background: #fff;
-      border-radius: 22px;
-      padding: 24px;
-      box-shadow: 0 24px 80px rgba(0,0,0,.2);
-    }
-
-    #extraEditBox h2 {
-      margin: 0 0 5px;
-      font: 500 24px Georgia, serif;
-      color: var(--text);
-    }
-
-    #extraEditBox p {
-      margin: 0 0 18px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    #extraEditBox label {
-      display: block;
-      margin: 12px 0 6px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    #extraEditBox input,
-    #extraEditBox textarea {
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      color: var(--text);
-      background: #fff;
-      font: inherit;
-    }
-
-    #extraEditBox textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    #extraEditBox .extra-edit-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 18px;
-    }
-
-    #extraEditBox button {
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 9px 15px;
-      background: #fff;
-      color: var(--text);
-      cursor: pointer;
-    }
-
-    #extraEditBox .save-extra {
-      background: var(--pink);
-    }
-  `;
-
-  document.head.appendChild(style);
-
-
-  /* ---------- helpers ---------- */
-
-  function isAdmin() {
-    return typeof admin === "function" && admin();
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, function (c) {
-      return {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      }[c];
-    });
-  }
-
-  function storageKey(type, sectionId) {
-    return "lyss_" + type + "_" + (sectionId || "all");
-  }
-
-  function getSavedOrder(type, sectionId) {
-    try {
-      return JSON.parse(
-        localStorage.getItem(storageKey(type, sectionId)) || "[]"
-      );
-    } catch {
-      return [];
-    }
-  }
-
-  function saveOrder(type, sectionId, ids) {
-    localStorage.setItem(
-      storageKey(type, sectionId),
-      JSON.stringify(ids)
-    );
-  }
-
-  function applySavedOrder(items, type, sectionId) {
-    const saved = getSavedOrder(type, sectionId);
-
-    if (!saved.length) return items;
-
-    const position = new Map(
-      saved.map((id, index) => [String(id), index])
-    );
-
-    return [...items].sort(function (a, b) {
-      const pa = position.has(String(a.id))
-        ? position.get(String(a.id))
-        : 999999;
-
-      const pb = position.has(String(b.id))
-        ? position.get(String(b.id))
-        : 999999;
-
-      return pa - pb;
-    });
-  }
-
-
-  /* =========================================================
-     EDIT POPUP
-     ========================================================= */
-
-  function showEditBox(title, fields, saveFunction) {
-
-    document.getElementById("extraEditBox")?.remove();
-
-    const overlay = document.createElement("div");
-    overlay.id = "extraEditBox";
-    overlay.className = "open";
-
-    let fieldsHtml = "";
-
-    fields.forEach(function (field) {
-
-      if (field.type === "textarea") {
-
-        fieldsHtml += `
-          <label>${escapeHtml(field.label)}</label>
-          <textarea id="extraField_${escapeHtml(field.key)}">${escapeHtml(field.value || "")}</textarea>
-        `;
-
-      } else {
-
-        fieldsHtml += `
-          <label>${escapeHtml(field.label)}</label>
-          <input
-            id="extraField_${escapeHtml(field.key)}"
-            type="${escapeHtml(field.type || "text")}"
-            value="${escapeHtml(field.value || "")}"
-          >
-        `;
-
-      }
-    });
-
-    overlay.innerHTML = `
-      <div class="extra-edit-card">
-
-        <h2>${escapeHtml(title)}</h2>
-
-        <p>edit this little detail ♡</p>
-
-        ${fieldsHtml}
-
-        <div class="extra-edit-buttons">
-          <button id="extraCancel">cancel</button>
-          <button class="save-extra" id="extraSave">save ♡</button>
-        </div>
-
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-
-    function close() {
-      overlay.remove();
-    }
-
-    overlay.querySelector("#extraCancel").onclick = close;
-
-    overlay.addEventListener("click", function (event) {
-      if (event.target === overlay) close();
-    });
-
-    overlay.querySelector("#extraSave").onclick = async function () {
-
-      const values = {};
-
-      fields.forEach(function (field) {
-        values[field.key] =
-          document.getElementById("extraField_" + field.key).value;
-      });
-
-      const button = overlay.querySelector("#extraSave");
-
-      button.disabled = true;
-      button.textContent = "saving...";
-
-      try {
-
-        await saveFunction(values);
-
-        close();
-
-        if (typeof loadSections === "function") {
-          await loadSections();
-        }
-
-        if (typeof loadGallery === "function") {
-          await loadGallery();
-        }
-
-      } catch (error) {
-
-        console.error(error);
-
-        alert(
-          "Couldn't save the changes ♡\n\n" +
-          (error.message || error)
+        return (
+          new Date(b.created_at || 0) -
+          new Date(a.created_at || 0)
         );
 
-        button.disabled = false;
-        button.textContent = "save ♡";
       }
-    };
+
+      const da =
+        sortValue(a.date);
+
+      const dbValue =
+        sortValue(b.date);
+
+      if(
+        da === null &&
+        dbValue === null
+      ){
+
+        return (
+          new Date(b.created_at || 0) -
+          new Date(a.created_at || 0)
+        );
+
+      }
+
+      if(da === null) return 1;
+
+      if(dbValue === null) return -1;
+
+      return sortMode === "oldest"
+        ? da - dbValue
+        : dbValue - da;
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function publicUrl(path){
+
+  if(!path) return "";
+
+  if(
+    /^https?:\/\//i.test(path)
+  ){
+
+    return path;
+
   }
 
+  return db
+    .storage
+    .from(STORAGE_BUCKET)
+    .getPublicUrl(path)
+    .data
+    .publicUrl;
+}
 
-  /* =========================================================
-     EDIT MEMORY
-     ========================================================= */
 
-  async function editMemory(memory) {
+/* =========================================================
+   HEADING
+========================================================= */
 
-    if (!isAdmin()) return;
+function renderHeading(){
 
-    showEditBox(
-      "edit memory ♡",
-      [
-        {
-          key: "date",
-          label: "Date",
-          type: "date",
-          value: memory.date || ""
-        },
-        {
-          key: "location",
-          label: "Location",
-          type: "text",
-          value: memory.location || ""
-        },
-        {
-          key: "caption",
-          label: "Caption",
-          type: "textarea",
-          value: memory.caption || ""
-        }
-      ],
-      async function (values) {
+  if(activeSectionId === null){
 
-        const { error } = await db
-          .from(MEMORIES_TABLE)
-          .update({
-            date: values.date || null,
-            location: values.location.trim() || null,
-            caption: values.caption.trim() || null
-          })
-          .eq("id", memory.id);
+    $("heading").innerHTML = "";
 
-        if (error) throw error;
+    return;
+  }
+
+  const section =
+    sections.find(
+      x => x.id === activeSectionId
+    );
+
+  if(!section){
+
+    activeSectionId = null;
+
+    return renderHeading();
+
+  }
+
+  $("heading").innerHTML = "";
+
+  const h =
+    document.createElement("h2");
+
+  h.textContent =
+    section.title;
+
+  $("heading")
+    .appendChild(h);
+
+  if(section.subtitle){
+
+    const p =
+      document.createElement("p");
+
+    p.textContent =
+      section.subtitle;
+
+    $("heading")
+      .appendChild(p);
+
+  }
+
+}
+
+
+/* =========================================================
+   SECTIONS
+========================================================= */
+
+function renderSections(){
+
+  const nav =
+    $("sectionsNav");
+
+  nav.innerHTML = "";
+
+
+  /* All memories */
+
+  const all =
+    document.createElement("div");
+
+  all.className =
+    "tab" +
+    (
+      activeSectionId === null
+        ? " active"
+        : ""
+    );
+
+
+  const allButton =
+    document.createElement("button");
+
+  allButton.textContent =
+    "all memories ♡";
+
+
+  allButton.addEventListener(
+    "click",
+    async () => {
+
+      activeSectionId = null;
+
+      renderSections();
+
+      await loadGallery();
+
+    }
+  );
+
+
+  all.appendChild(allButton);
+
+  nav.appendChild(all);
+
+
+  /* Other sections */
+
+  sections.forEach(section => {
+
+    const wrap =
+      document.createElement("div");
+
+    wrap.className =
+      "tab" +
+      (
+        activeSectionId === section.id
+          ? " active"
+          : ""
+      );
+
+
+    const pick =
+      document.createElement("button");
+
+    pick.textContent =
+      section.title;
+
+
+    pick.addEventListener(
+      "click",
+      async () => {
+
+        activeSectionId =
+          section.id;
+
+        renderSections();
+
+        await loadGallery();
+
       }
     );
+
+
+    wrap.appendChild(pick);
+
+
+    const remove =
+      document.createElement("button");
+
+    remove.className =
+      "remove-section";
+
+    remove.type =
+      "button";
+
+    remove.title =
+      "Remove section";
+
+    remove.textContent =
+      "×";
+
+
+    remove.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        removeSection(section);
+
+      }
+    );
+
+
+    wrap.appendChild(remove);
+
+
+    nav.appendChild(wrap);
+
+  });
+
+
+  updateAdminUI();
+
+  if(admin()){
+
+    setTimeout(
+      addSectionTools,
+      20
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SECTION SELECT
+========================================================= */
+
+function populateSectionSelect(){
+
+  const select =
+    $("memorySection");
+
+  select.innerHTML = "";
+
+
+  const all =
+    document.createElement("option");
+
+  all.value = "";
+
+  all.textContent =
+    "All memories ♡";
+
+  select.appendChild(all);
+
+
+  sections.forEach(section => {
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      section.id;
+
+    option.textContent =
+      section.title;
+
+    select.appendChild(option);
+
+  });
+
+}
+
+
+/* =========================================================
+   LOAD SECTIONS
+========================================================= */
+
+async function loadSections(){
+
+  const result =
+    await db
+      .from(SECTIONS_TABLE)
+      .select(
+        "id,title,subtitle,created_at"
+      )
+      .order(
+        "created_at",
+        {
+          ascending:true
+        }
+      );
+
+
+  if(result.error){
+
+    console.error(
+      "Sections:",
+      result.error
+    );
+
+    sections = [];
+
+  }else{
+
+    sections =
+      result.data || [];
+
   }
 
 
-  /* =========================================================
-     LOAD CURRENT MEMORIES
-     ========================================================= */
+  renderSections();
 
-  async function getCurrentMemories() {
+  populateSectionSelect();
 
-    let query = db
+  renderHeading();
+
+}
+
+
+/* =========================================================
+   LOAD GALLERY
+========================================================= */
+
+async function loadGallery(){
+
+  renderHeading();
+
+
+  const gallery =
+    $("gallery");
+
+  gallery.innerHTML =
+    '<div class="empty">loading memories ♡</div>';
+
+
+  let query =
+    db
       .from(MEMORIES_TABLE)
       .select("*");
 
-    if (activeSectionId !== null) {
-      query = query.eq("section_id", activeSectionId);
-    }
 
-    const result = await query;
+  if(activeSectionId !== null){
 
-    if (result.error) throw result.error;
+    query =
+      query.eq(
+        "section_id",
+        activeSectionId
+      );
 
-    let rows = result.data || [];
+  }
 
-    if (typeof sortMemories === "function") {
-      rows = sortMemories(rows);
-    }
 
-    rows = applySavedOrder(
+  const result =
+    await query;
+
+
+  if(result.error){
+
+    console.error(
+      "Gallery:",
+      result.error
+    );
+
+    gallery.innerHTML =
+      '<div class="empty">couldn\'t load memories ♡</div>';
+
+    return;
+
+  }
+
+
+  let rows =
+    sortMemories(
+      result.data || []
+    );
+
+
+  rows =
+    applySavedOrder(
       rows,
       "memories",
       activeSectionId
     );
 
-    return rows;
+
+  gallery.innerHTML = "";
+
+
+  if(!rows.length){
+
+    gallery.innerHTML =
+      '<div class="empty">no memories here yet ♡</div>';
+
+    return;
+
   }
 
 
-  /* =========================================================
-     ADD MEMORY EDIT BUTTONS + DRAGGING
-     ========================================================= */
+  rows.forEach(
+    memory => {
 
-  async function addMemoryTools() {
+      const card =
+        document.createElement("article");
 
-    if (!isAdmin()) return;
+      card.className =
+        "card";
 
-    const gallery = document.getElementById("gallery");
+      card.dataset.memoryId =
+        memory.id;
 
-    if (!gallery) return;
 
-    let memories;
+      /* Media */
 
-    try {
-      memories = await getCurrentMemories();
-    } catch (error) {
-      console.error("memory tools:", error);
-      return;
-    }
+      const media =
+        document.createElement("div");
 
-    const cards = [...gallery.querySelectorAll(".card")];
+      media.className =
+        "media";
 
-    cards.forEach(function (card, index) {
 
-      const memory = memories[index];
+      const url =
+        publicUrl(
+          memory.file_path
+        );
 
-      if (!memory) return;
 
-      card.dataset.memoryId = memory.id;
-      card.draggable = true;
+      const isVideo =
+        memory.type === "video" ||
+        /\.(mp4|webm|ogg|mov)(\?|$)/i
+          .test(
+            memory.file_path || ""
+          );
 
-      /* Don't add twice */
-      if (!card.querySelector(".extra-memory-tools")) {
 
-        const tools = document.createElement("div");
+      if(isVideo){
 
-        tools.className = "extra-memory-tools";
+        const video =
+          document.createElement("video");
 
-        tools.innerHTML = `
-          <button type="button" class="extra-edit-memory">
-            ✏️ edit
-          </button>
+        video.src =
+          url;
 
-          <button type="button" class="extra-delete-memory">
-            🗑️ delete
-          </button>
-        `;
+        video.controls =
+          true;
 
-        tools
-          .querySelector(".extra-edit-memory")
-          .onclick = function (event) {
-            event.stopPropagation();
-            editMemory(memory);
-          };
+        video.preload =
+          "metadata";
 
-        tools
-          .querySelector(".extra-delete-memory")
-          .onclick = async function (event) {
+        video.playsInline =
+          true;
 
-            event.stopPropagation();
+        media.appendChild(video);
 
-            if (!confirm(
-              "Delete this memory and its stored file?"
-            )) return;
+      }else{
 
-            await deleteMemory(memory);
-          };
+        const image =
+          document.createElement("img");
 
-        card.appendChild(tools);
+        image.src =
+          url;
+
+        image.loading =
+          "lazy";
+
+        image.decoding =
+          "async";
+
+        image.alt =
+          memory.caption ||
+          "Memory photo";
+
+
+        image.addEventListener(
+          "click",
+          () =>
+            openLightbox(
+              memory,
+              false
+            )
+        );
+
+
+        media.appendChild(image);
+
       }
 
 
-      /* ---------- drag start ---------- */
+      card.appendChild(media);
 
-      card.addEventListener(
-        "dragstart",
-        function () {
 
-          card.classList.add("memory-dragging");
+      /* Info */
 
-        },
-        { once: true }
+      const info =
+        document.createElement("div");
+
+      info.className =
+        "info";
+
+
+      if(memory.date){
+
+        const date =
+          document.createElement("div");
+
+        date.className =
+          "date";
+
+        date.textContent =
+          formatDate(
+            memory.date
+          );
+
+        info.appendChild(date);
+
+      }
+
+
+      if(memory.location){
+
+        const location =
+          document.createElement("div");
+
+        location.className =
+          "location";
+
+        location.textContent =
+          "📍 " +
+          memory.location;
+
+        info.appendChild(location);
+
+      }
+
+
+      if(memory.caption){
+
+        const caption =
+          document.createElement("div");
+
+        caption.className =
+          "caption";
+
+        caption.textContent =
+          memory.caption;
+
+        info.appendChild(caption);
+
+      }
+
+
+      if(info.children.length){
+
+        card.appendChild(info);
+
+      }
+
+
+      /* Basic delete */
+
+      if(admin()){
+
+        const actions =
+          document.createElement("div");
+
+        actions.className =
+          "card-actions";
+
+
+        const del =
+          document.createElement("button");
+
+        del.className =
+          "delete-memory";
+
+        del.textContent =
+          "delete";
+
+
+        del.addEventListener(
+          "click",
+          () =>
+            deleteMemory(memory)
+        );
+
+
+        actions.appendChild(del);
+
+        card.appendChild(actions);
+
+      }
+
+
+      gallery.appendChild(card);
+
+    }
+  );
+
+
+  if(admin()){
+
+    setTimeout(
+      addMemoryTools,
+      20
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   DELETE MEMORY
+========================================================= */
+
+async function deleteMemory(memory){
+
+  if(!admin()) return;
+
+
+  if(
+    !confirm(
+      "Delete this memory and its stored file?"
+    )
+  ){
+
+    return;
+
+  }
+
+
+  const result =
+    await db
+      .from(MEMORIES_TABLE)
+      .delete()
+      .eq(
+        "id",
+        memory.id
       );
 
 
-      /* ---------- drag end ---------- */
+  if(result.error){
+
+    alert(
+      "Couldn't delete the memory ♡\n\n" +
+      result.error.message
+    );
+
+    return;
+
+  }
+
+
+  if(memory.file_path){
+
+    const storage =
+      await db
+        .storage
+        .from(STORAGE_BUCKET)
+        .remove([
+          memory.file_path
+        ]);
+
+
+    if(storage.error){
+
+      console.error(
+        storage.error
+      );
+
+    }
+
+  }
+
+
+  await loadGallery();
+
+}
+
+
+/* =========================================================
+   REMOVE SECTION
+========================================================= */
+
+async function removeSection(section){
+
+  if(!admin()) return;
+
+
+  if(
+    !confirm(
+      `Remove "${section.title}"?\n\n` +
+      "Its memories will be kept and moved to All Memories."
+    )
+  ){
+
+    return;
+
+  }
+
+
+  const moved =
+    await db
+      .from(MEMORIES_TABLE)
+      .update({
+        section_id:null
+      })
+      .eq(
+        "section_id",
+        section.id
+      );
+
+
+  if(moved.error){
+
+    alert(
+      "Couldn't move the memories.\n\n" +
+      moved.error.message
+    );
+
+    return;
+
+  }
+
+
+  const removed =
+    await db
+      .from(SECTIONS_TABLE)
+      .delete()
+      .eq(
+        "id",
+        section.id
+      );
+
+
+  if(removed.error){
+
+    alert(
+      "Couldn't remove the section.\n\n" +
+      removed.error.message
+    );
+
+    return;
+
+  }
+
+
+  if(
+    activeSectionId === section.id
+  ){
+
+    activeSectionId = null;
+
+  }
+
+
+  await loadSections();
+
+  await loadGallery();
+
+}
+
+
+/* =========================================================
+   SORT
+========================================================= */
+
+$("sortSelect")
+  .addEventListener(
+    "change",
+    event => {
+
+      sortMode =
+        event.target.value;
+
+      loadGallery();
+
+    }
+  );
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+$("adminBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      if(!admin()){
+
+        openModal(
+          "loginModal"
+        );
+
+      }
+
+    }
+  );
+
+
+$("loginSubmit")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const email =
+        $("email").value.trim();
+
+      const password =
+        $("password").value;
+
+      const status =
+        $("loginStatus");
+
+      const button =
+        $("loginSubmit");
+
+
+      status.style.display =
+        "none";
+
+
+      if(!email || !password){
+
+        status.textContent =
+          "Please enter your email and password ♡";
+
+        status.style.display =
+          "block";
+
+        return;
+
+      }
+
+
+      button.disabled =
+        true;
+
+      button.textContent =
+        "logging in...";
+
+
+      const result =
+        await db.auth.signInWithPassword({
+          email,
+          password
+        });
+
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "log in ♡";
+
+
+      if(result.error){
+
+        status.textContent =
+          result.error.message;
+
+        status.style.display =
+          "block";
+
+        return;
+
+      }
+
+
+      if(
+        !result.data.user ||
+        result.data.user.id !== ADMIN_UID
+      ){
+
+        await db.auth.signOut();
+
+        status.textContent =
+          "This account isn't the gallery admin ♡";
+
+        status.style.display =
+          "block";
+
+        return;
+
+      }
+
+
+      currentUser =
+        result.data.user;
+
+
+      closeModal(
+        "loginModal"
+      );
+
+      updateAdminUI();
+
+      renderSections();
+
+      await loadGallery();
+
+      heartbeat();
+
+    }
+  );
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+$("logoutBtn")
+  .addEventListener(
+    "click",
+    async () => {
+
+      await db.auth.signOut();
+
+      currentUser = null;
+
+      updateAdminUI();
+
+      renderSections();
+
+      await loadGallery();
+
+    }
+  );
+
+
+/* =========================================================
+   ADD MEMORY
+========================================================= */
+
+$("addBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      populateSectionSelect();
+
+      openModal(
+        "memoryModal"
+      );
+
+    }
+  );
+
+
+$("saveMemory")
+  .addEventListener(
+    "click",
+    async () => {
+
+      if(!admin()) return;
+
+
+      const file =
+        $("memoryFile")
+          .files[0];
+
+
+      if(!file){
+
+        alert(
+          "Please choose a photo or video ♡"
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        $("saveMemory");
+
+      button.disabled =
+        true;
+
+      button.textContent =
+        "saving... ♡";
+
+
+      const sectionId =
+        $("memorySection").value ||
+        null;
+
+      const date =
+        $("memoryDate").value ||
+        null;
+
+      const location =
+        $("memoryLocation")
+          .value
+          .trim();
+
+      const caption =
+        $("memoryCaption")
+          .value
+          .trim();
+
+
+      const type =
+        file.type.startsWith(
+          "video/"
+        )
+          ? "video"
+          : "image";
+
+
+      const safe =
+        file.name
+          .normalize("NFKD")
+          .replace(
+            /[^\w.\- ]/g,
+            ""
+          )
+          .replace(
+            /\s+/g,
+            "-"
+          );
+
+
+      const path =
+        `uploads/${crypto.randomUUID()}-${safe}`;
+
+
+      const upload =
+        await db
+          .storage
+          .from(STORAGE_BUCKET)
+          .upload(
+            path,
+            file,
+            {
+              contentType:file.type,
+              cacheControl:"3600",
+              upsert:false
+            }
+          );
+
+
+      if(upload.error){
+
+        alert(
+          "Upload failed ♡\n\n" +
+          upload.error.message
+        );
+
+        button.disabled =
+          false;
+
+        button.textContent =
+          "add memory ♡";
+
+        return;
+
+      }
+
+
+      const insert =
+        await db
+          .from(MEMORIES_TABLE)
+          .insert({
+            file_path:path,
+            type,
+            section_id:sectionId,
+            date,
+            location,
+            caption
+          });
+
+
+      if(insert.error){
+
+        await db
+          .storage
+          .from(STORAGE_BUCKET)
+          .remove([path]);
+
+
+        alert(
+          "Couldn't save the memory ♡\n\n" +
+          insert.error.message
+        );
+
+        button.disabled =
+          false;
+
+        button.textContent =
+          "add memory ♡";
+
+        return;
+
+      }
+
+
+      $("memoryFile").value = "";
+
+      $("memorySection").value = "";
+
+      $("memoryDate").value = "";
+
+      $("memoryLocation").value = "";
+
+      $("memoryCaption").value = "";
+
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "add memory ♡";
+
+
+      closeModal(
+        "memoryModal"
+      );
+
+
+      await loadGallery();
+
+    }
+  );
+
+
+/* =========================================================
+   NEW SECTION
+========================================================= */
+
+$("newSectionBtn")
+  .addEventListener(
+    "click",
+    () =>
+      openModal(
+        "sectionModal"
+      )
+  );
+
+
+$("saveSection")
+  .addEventListener(
+    "click",
+    async () => {
+
+      if(!admin()) return;
+
+
+      const title =
+        $("sectionName")
+          .value
+          .trim();
+
+      const subtitle =
+        $("sectionSubtitle")
+          .value
+          .trim();
+
+
+      if(!title){
+
+        alert(
+          "Please give the section a name ♡"
+        );
+
+        return;
+
+      }
+
+
+      if(
+        title
+          .toLowerCase() ===
+        "all memories ♡"
+      ){
+
+        alert(
+          "All Memories is built in and cannot be created as a section."
+        );
+
+        return;
+
+      }
+
+
+      if(
+        sections.some(
+          section =>
+            section.title
+              .trim()
+              .toLowerCase() ===
+            title.toLowerCase()
+        )
+      ){
+
+        alert(
+          "That section already exists ♡"
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        $("saveSection");
+
+      button.disabled =
+        true;
+
+      button.textContent =
+        "creating... ♡";
+
+
+      const result =
+        await db
+          .from(SECTIONS_TABLE)
+          .insert({
+            title,
+            subtitle
+          });
+
+
+      button.disabled =
+        false;
+
+      button.textContent =
+        "create section ♡";
+
+
+      if(result.error){
+
+        alert(
+          "Couldn't create the section ♡\n\n" +
+          result.error.message
+        );
+
+        return;
+
+      }
+
+
+      $("sectionName").value =
+        "";
+
+      $("sectionSubtitle").value =
+        "";
+
+
+      closeModal(
+        "sectionModal"
+      );
+
+
+      await loadSections();
+
+    }
+  );
+
+
+/* =========================================================
+   LIGHTBOX
+========================================================= */
+
+function openLightbox(
+  memory,
+  isVideo
+){
+
+  const wrap =
+    $("lbMedia");
+
+  const caption =
+    $("lbCaption");
+
+
+  wrap.innerHTML =
+    "";
+
+  caption.textContent =
+    memory.caption ||
+    "";
+
+
+  const url =
+    publicUrl(
+      memory.file_path
+    );
+
+
+  if(isVideo){
+
+    const video =
+      document.createElement("video");
+
+    video.src =
+      url;
+
+    video.controls =
+      true;
+
+    video.playsInline =
+      true;
+
+    wrap.appendChild(
+      video
+    );
+
+  }else{
+
+    const image =
+      document.createElement("img");
+
+    image.src =
+      url;
+
+    image.alt =
+      memory.caption ||
+      "Memory photo";
+
+    wrap.appendChild(
+      image
+    );
+
+  }
+
+
+  openModal(
+    "lightbox"
+  );
+
+}
+
+
+$("lbClose")
+  .addEventListener(
+    "click",
+    () =>
+      closeModal(
+        "lightbox"
+      )
+  );
+
+
+$("lightbox")
+  .addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target.id ===
+        "lightbox"
+      ){
+
+        closeModal(
+          "lightbox"
+        );
+
+      }
+
+    }
+  );
+
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(event.key === "Escape"){
+
+      document
+        .querySelectorAll(
+          ".modal.open,.lightbox.open"
+        )
+        .forEach(
+          element =>
+            element.classList.remove(
+              "open"
+            )
+        );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   SAVED DRAG ORDER
+========================================================= */
+
+function storageKey(
+  type,
+  sectionId
+){
+
+  return (
+    "lyss_" +
+    type +
+    "_" +
+    (
+      sectionId ||
+      "all"
+    )
+  );
+
+}
+
+
+function getSavedOrder(
+  type,
+  sectionId
+){
+
+  try{
+
+    return JSON.parse(
+      localStorage.getItem(
+        storageKey(
+          type,
+          sectionId
+        )
+      ) ||
+      "[]"
+    );
+
+  }catch{
+
+    return [];
+
+  }
+
+}
+
+
+function saveOrder(
+  type,
+  sectionId,
+  ids
+){
+
+  localStorage.setItem(
+    storageKey(
+      type,
+      sectionId
+    ),
+    JSON.stringify(ids)
+  );
+
+}
+
+
+function applySavedOrder(
+  items,
+  type,
+  sectionId
+){
+
+  const saved =
+    getSavedOrder(
+      type,
+      sectionId
+    );
+
+
+  if(!saved.length)
+    return items;
+
+
+  const positions =
+    new Map(
+      saved.map(
+        (id,index) =>
+          [
+            String(id),
+            index
+          ]
+      )
+    );
+
+
+  return [...items].sort(
+    (a,b) => {
+
+      const pa =
+        positions.has(
+          String(a.id)
+        )
+          ? positions.get(
+              String(a.id)
+            )
+          : 999999;
+
+
+      const pb =
+        positions.has(
+          String(b.id)
+        )
+          ? positions.get(
+              String(b.id)
+            )
+          : 999999;
+
+
+      return pa - pb;
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   EDIT POPUP
+========================================================= */
+
+function escapeHtml(value){
+
+  return String(
+    value ?? ""
+  ).replace(
+    /[&<>"']/g,
+    character => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[character])
+  );
+
+}
+
+
+function showEditBox(
+  title,
+  fields,
+  saveFunction
+){
+
+  document
+    .getElementById(
+      "extraEditBox"
+    )
+    ?.remove();
+
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+  overlay.id =
+    "extraEditBox";
+
+  overlay.className =
+    "open";
+
+
+  let html =
+    "";
+
+
+  fields.forEach(
+    field => {
+
+      html +=
+        `
+        <label>
+          ${escapeHtml(field.label)}
+        </label>
+        `;
+
+
+      if(field.type === "textarea"){
+
+        html +=
+          `
+          <textarea id="extraField_${field.key}">${escapeHtml(field.value || "")}</textarea>
+          `;
+
+      }else{
+
+        html +=
+          `
+          <input
+            id="extraField_${field.key}"
+            type="${escapeHtml(field.type || "text")}"
+            value="${escapeHtml(field.value || "")}"
+          >
+          `;
+
+      }
+
+    }
+  );
+
+
+  overlay.innerHTML =
+    `
+    <div class="extra-edit-card">
+
+      <h2>
+        ${escapeHtml(title)}
+      </h2>
+
+      <p>
+        edit this little detail ♡
+      </p>
+
+      ${html}
+
+      <div class="extra-edit-buttons">
+
+        <button id="extraCancel">
+          cancel
+        </button>
+
+        <button
+          class="save-extra"
+          id="extraSave"
+        >
+          save ♡
+        </button>
+
+      </div>
+
+    </div>
+    `;
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+
+  function close(){
+    overlay.remove();
+  }
+
+
+  overlay
+    .querySelector(
+      "#extraCancel"
+    )
+    .onclick =
+    close;
+
+
+  overlay.addEventListener(
+    "click",
+    event => {
+
+      if(
+        event.target ===
+        overlay
+      ){
+
+        close();
+
+      }
+
+    }
+  );
+
+
+  overlay
+    .querySelector(
+      "#extraSave"
+    )
+    .onclick =
+    async () => {
+
+      const values = {};
+
+
+      fields.forEach(
+        field => {
+
+          values[field.key] =
+            document
+              .getElementById(
+                "extraField_" +
+                field.key
+              )
+              .value;
+
+        }
+      );
+
+
+      const button =
+        overlay.querySelector(
+          "#extraSave"
+        );
+
+
+      button.disabled =
+        true;
+
+      button.textContent =
+        "saving...";
+
+
+      try{
+
+        await saveFunction(
+          values
+        );
+
+        close();
+
+        await loadSections();
+
+        await loadGallery();
+
+      }catch(error){
+
+        console.error(
+          error
+        );
+
+        alert(
+          "Couldn't save the changes ♡\n\n" +
+          (
+            error.message ||
+            error
+          )
+        );
+
+        button.disabled =
+          false;
+
+        button.textContent =
+          "save ♡";
+
+      }
+
+    };
+
+}
+
+
+/* =========================================================
+   EDIT MEMORY
+========================================================= */
+
+async function editMemory(
+  memory
+){
+
+  if(!admin()) return;
+
+
+  showEditBox(
+    "edit memory ♡",
+    [
+      {
+        key:"date",
+        label:"Date",
+        type:"date",
+        value:memory.date || ""
+      },
+      {
+        key:"location",
+        label:"Location",
+        type:"text",
+        value:memory.location || ""
+      },
+      {
+        key:"caption",
+        label:"Caption",
+        type:"textarea",
+        value:memory.caption || ""
+      }
+    ],
+    async values => {
+
+      const result =
+        await db
+          .from(MEMORIES_TABLE)
+          .update({
+            date:
+              values.date ||
+              null,
+
+            location:
+              values.location.trim() ||
+              null,
+
+            caption:
+              values.caption.trim() ||
+              null
+          })
+          .eq(
+            "id",
+            memory.id
+          );
+
+
+      if(result.error)
+        throw result.error;
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   EDIT SECTION
+========================================================= */
+
+async function editSection(
+  section
+){
+
+  if(!admin()) return;
+
+
+  showEditBox(
+    "edit section ♡",
+    [
+      {
+        key:"title",
+        label:"Section name",
+        type:"text",
+        value:section.title || ""
+      },
+      {
+        key:"subtitle",
+        label:"Subtitle",
+        type:"textarea",
+        value:section.subtitle || ""
+      }
+    ],
+    async values => {
+
+      const result =
+        await db
+          .from(SECTIONS_TABLE)
+          .update({
+            title:
+              values.title.trim(),
+
+            subtitle:
+              values.subtitle.trim() ||
+              null
+          })
+          .eq(
+            "id",
+            section.id
+          );
+
+
+      if(result.error)
+        throw result.error;
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   MEMORY DRAGGING
+========================================================= */
+
+function addMemoryTools(){
+
+  if(!admin()) return;
+
+
+  const gallery =
+    $("gallery");
+
+
+  if(!gallery) return;
+
+
+  const cards =
+    [
+      ...gallery.querySelectorAll(
+        ".card"
+      )
+    ];
+
+
+  cards.forEach(
+    card => {
+
+      card.draggable =
+        true;
+
+
+      if(
+        card.querySelector(
+          ".extra-memory-tools"
+        )
+      ){
+
+        return;
+
+      }
+
+
+      const memoryId =
+        card.dataset.memoryId;
+
+
+      const memory =
+        getMemoryById(
+          memoryId
+        );
+
+
+      if(!memory)
+        return;
+
+
+      const tools =
+        document.createElement(
+          "div"
+        );
+
+      tools.className =
+        "extra-memory-tools";
+
+
+      const edit =
+        document.createElement(
+          "button"
+        );
+
+      edit.type =
+        "button";
+
+      edit.textContent =
+        "✏️ edit";
+
+
+      edit.onclick =
+        event => {
+
+          event.stopPropagation();
+
+          editMemory(
+            memory
+          );
+
+        };
+
+
+      const deleteButton =
+        document.createElement(
+          "button"
+        );
+
+      deleteButton.type =
+        "button";
+
+      deleteButton.textContent =
+        "🗑️ delete";
+
+
+      deleteButton.onclick =
+        async event => {
+
+          event.stopPropagation();
+
+          await deleteMemory(
+            memory
+          );
+
+        };
+
+
+      tools.appendChild(
+        edit
+      );
+
+      tools.appendChild(
+        deleteButton
+      );
+
+
+      card.appendChild(
+        tools
+      );
+
+
+      card.addEventListener(
+        "dragstart",
+        () => {
+
+          card.classList.add(
+            "memory-dragging"
+          );
+
+        }
+      );
+
 
       card.addEventListener(
         "dragend",
-        async function () {
+        () => {
 
-          card.classList.remove("memory-dragging");
+          card.classList.remove(
+            "memory-dragging"
+          );
 
-          const orderedIds = [
-            ...gallery.querySelectorAll(".card[data-memory-id]")
-          ].map(function (item) {
-            return item.dataset.memoryId;
-          });
+
+          const ids =
+            [
+              ...gallery.querySelectorAll(
+                ".card[data-memory-id]"
+              )
+            ].map(
+              item =>
+                item.dataset.memoryId
+            );
+
 
           saveOrder(
             "memories",
             activeSectionId,
-            orderedIds
+            ids
           );
 
-        },
-        { once: true }
+        }
       );
 
 
-      /* ---------- drag over ---------- */
-
       card.addEventListener(
         "dragover",
-        function (event) {
+        event => {
 
           event.preventDefault();
 
+
           const dragging =
-            gallery.querySelector(".memory-dragging");
+            gallery.querySelector(
+              ".memory-dragging"
+            );
 
-          if (!dragging || dragging === card) return;
 
-          const rect = card.getBoundingClientRect();
+          if(
+            !dragging ||
+            dragging === card
+          ){
 
-          const before =
-            event.clientY < rect.top + rect.height / 2;
+            return;
 
-          if (before) {
-            gallery.insertBefore(dragging, card);
-          } else {
+          }
+
+
+          const rect =
+            card.getBoundingClientRect();
+
+
+          if(
+            event.clientY <
+            rect.top +
+            rect.height / 2
+          ){
+
+            gallery.insertBefore(
+              dragging,
+              card
+            );
+
+          }else{
+
             gallery.insertBefore(
               dragging,
               card.nextSibling
             );
+
           }
 
         }
       );
 
-    });
+    }
+  );
 
-  }
-
-
-  /* =========================================================
-     SECTION EDIT
-     ========================================================= */
-
-  async function editSection(section) {
-
-    if (!isAdmin()) return;
-
-    showEditBox(
-      "edit section ♡",
-      [
-        {
-          key: "title",
-          label: "Section name",
-          type: "text",
-          value: section.title || ""
-        },
-        {
-          key: "subtitle",
-          label: "Subtitle",
-          type: "textarea",
-          value: section.subtitle || ""
-        }
-      ],
-      async function (values) {
-
-        const { error } = await db
-          .from(SECTIONS_TABLE)
-          .update({
-            title: values.title.trim(),
-            subtitle: values.subtitle.trim() || null
-          })
-          .eq("id", section.id);
-
-        if (error) throw error;
-      }
-    );
-  }
+}
 
 
-  /* =========================================================
-     SECTION REORDER
-     ========================================================= */
+/* =========================================================
+   MEMORY LOOKUP
+========================================================= */
 
-  function applySectionOrder() {
-
-    if (!Array.isArray(sections)) return;
-
-    sections = applySavedOrder(
-      sections,
-      "sections",
-      "main"
-    );
-  }
+let currentMemoryRows = [];
 
 
-  function addSectionTools() {
+function getMemoryById(id){
 
-    if (!isAdmin()) return;
+  return currentMemoryRows.find(
+    memory =>
+      String(memory.id) ===
+      String(id)
+  );
 
-    const nav = document.getElementById("sectionsNav");
+}
 
-    if (!nav) return;
 
-    const tabs = [
-      ...nav.querySelectorAll(".tab")
+/* =========================================================
+   SECTION DRAGGING
+========================================================= */
+
+function addSectionTools(){
+
+  if(!admin()) return;
+
+
+  const nav =
+    $("sectionsNav");
+
+
+  if(!nav) return;
+
+
+  const tabs =
+    [
+      ...nav.querySelectorAll(
+        ".tab"
+      )
     ];
 
-    /* First tab = All Memories */
-    const realTabs = tabs.slice(1);
 
-    realTabs.forEach(function (tab, index) {
+  const realTabs =
+    tabs.slice(1);
 
-      const section = sections[index];
 
-      if (!section) return;
+  realTabs.forEach(
+    (tab,index) => {
 
-      tab.dataset.sectionId = section.id;
-      tab.draggable = true;
+      const section =
+        sections[index];
 
-      if (tab.querySelector(".extra-section-tools")) return;
 
-      const tools = document.createElement("span");
+      if(!section)
+        return;
 
-      tools.className = "extra-section-tools";
 
-      tools.innerHTML = `
-        <button type="button" title="move left">←</button>
-        <button type="button" title="move right">→</button>
-        <button type="button" title="edit">✏️</button>
-      `;
+      tab.dataset.sectionId =
+        section.id;
 
-      const buttons = tools.querySelectorAll("button");
 
-      /* Move left */
+      tab.draggable =
+        true;
 
-      buttons[0].onclick = function (event) {
 
-        event.stopPropagation();
+      if(
+        tab.querySelector(
+          ".extra-section-tools"
+        )
+      ){
 
-        const currentIndex =
-          [...nav.children].indexOf(tab);
+        return;
 
-        if (currentIndex <= 1) return;
+      }
 
-        nav.insertBefore(
-          tab,
-          nav.children[currentIndex - 1]
+
+      const tools =
+        document.createElement(
+          "span"
         );
 
-        saveCurrentSectionOrder(nav);
-      };
+      tools.className =
+        "extra-section-tools";
 
 
-      /* Move right */
-
-      buttons[1].onclick = function (event) {
-
-        event.stopPropagation();
-
-        const currentIndex =
-          [...nav.children].indexOf(tab);
-
-        if (
-          currentIndex < 1 ||
-          currentIndex >= nav.children.length - 1
-        ) return;
-
-        nav.insertBefore(
-          nav.children[currentIndex + 1],
-          tab
+      const left =
+        document.createElement(
+          "button"
         );
 
-        saveCurrentSectionOrder(nav);
-      };
+      left.textContent =
+        "←";
+
+      left.title =
+        "move left";
 
 
-      /* Edit */
+      const right =
+        document.createElement(
+          "button"
+        );
 
-      buttons[2].onclick = function (event) {
+      right.textContent =
+        "→";
 
-        event.stopPropagation();
-
-        editSection(section);
-      };
-
-
-      tab.appendChild(tools);
+      right.title =
+        "move right";
 
 
-      /* ---------- section dragging ---------- */
+      const edit =
+        document.createElement(
+          "button"
+        );
+
+      edit.textContent =
+        "✏️";
+
+      edit.title =
+        "edit";
+
+
+      tools.appendChild(
+        left
+      );
+
+      tools.appendChild(
+        right
+      );
+
+      tools.appendChild(
+        edit
+      );
+
+
+      left.onclick =
+        event => {
+
+          event.stopPropagation();
+
+          const index =
+            [...nav.children]
+              .indexOf(tab);
+
+
+          if(index <= 1)
+            return;
+
+
+          nav.insertBefore(
+            tab,
+            nav.children[index - 1]
+          );
+
+
+          saveCurrentSectionOrder();
+
+        };
+
+
+      right.onclick =
+        event => {
+
+          event.stopPropagation();
+
+          const index =
+            [...nav.children]
+              .indexOf(tab);
+
+
+          if(
+            index < 1 ||
+            index >=
+            nav.children.length - 1
+          ){
+
+            return;
+
+          }
+
+
+          nav.insertBefore(
+            nav.children[index + 1],
+            tab
+          );
+
+
+          saveCurrentSectionOrder();
+
+        };
+
+
+      edit.onclick =
+        event => {
+
+          event.stopPropagation();
+
+          editSection(
+            section
+          );
+
+        };
+
+
+      tab.appendChild(
+        tools
+      );
+
 
       tab.addEventListener(
         "dragstart",
-        function () {
+        () => {
 
-          tab.classList.add("section-dragging");
+          tab.classList.add(
+            "section-dragging"
+          );
 
-        },
-        { once: true }
+        }
       );
 
 
       tab.addEventListener(
         "dragend",
-        function () {
+        () => {
 
-          tab.classList.remove("section-dragging");
+          tab.classList.remove(
+            "section-dragging"
+          );
 
-          saveCurrentSectionOrder(nav);
+          saveCurrentSectionOrder();
 
-        },
-        { once: true }
+        }
       );
 
 
       tab.addEventListener(
         "dragover",
-        function (event) {
+        event => {
 
           event.preventDefault();
 
-          const dragging =
-            nav.querySelector(".section-dragging");
 
-          if (!dragging || dragging === tab) return;
+          const dragging =
+            nav.querySelector(
+              ".section-dragging"
+            );
+
+
+          if(
+            !dragging ||
+            dragging === tab
+          ){
+
+            return;
+
+          }
+
 
           const rect =
             tab.getBoundingClientRect();
 
-          const before =
-            event.clientX <
-            rect.left + rect.width / 2;
 
-          if (before) {
+          if(
+            event.clientX <
+            rect.left +
+            rect.width / 2
+          ){
 
             nav.insertBefore(
               dragging,
               tab
             );
 
-          } else {
+          }else{
 
             nav.insertBefore(
               dragging,
@@ -1206,461 +3565,722 @@ db.auth.onAuthStateChange((_event,session)=>{
         }
       );
 
-    });
-
-  }
-
-
-  function saveCurrentSectionOrder(nav) {
-
-    const ids = [
-      ...nav.querySelectorAll(
-        ".tab[data-section-id]"
-      )
-    ].map(function (tab) {
-
-      return tab.dataset.sectionId;
-
-    });
-
-    saveOrder(
-      "sections",
-      "main",
-      ids
-    );
-  }
-
-
-  /* =========================================================
-     WRAP ORIGINAL FUNCTIONS
-     ========================================================= */
-
-  const originalLoadSections =
-    window.loadSections;
-
-  if (typeof originalLoadSections === "function") {
-
-    window.loadSections = async function () {
-
-      await originalLoadSections();
-
-      if (isAdmin()) {
-
-        applySectionOrder();
-
-        if (typeof renderSections === "function") {
-          renderSections();
-        }
-
-        setTimeout(addSectionTools, 50);
-
-      }
-
-    };
-
-  }
-
-
-  const originalLoadGallery =
-    window.loadGallery;
-
-  if (typeof originalLoadGallery === "function") {
-
-    window.loadGallery = async function () {
-
-      await originalLoadGallery();
-
-      if (isAdmin()) {
-
-        setTimeout(addMemoryTools, 50);
-
-      }
-
-    };
-
-  }
-
-
-  /* =========================================================
-     REFRESH ADMIN TOOLS WHEN LOGIN STATE CHANGES
-     ========================================================= */
-
-  function refreshExtraTools() {
-
-    if (!isAdmin()) return;
-
-    setTimeout(function () {
-
-      applySectionOrder();
-
-      if (typeof renderSections === "function") {
-        renderSections();
-      }
-
-      addSectionTools();
-      addMemoryTools();
-
-    }, 100);
-
-  }
-
-
-  /* Watch for the existing page changing into admin mode */
-
-  const adminObserver =
-    new MutationObserver(function () {
-
-      if (isAdmin()) {
-        refreshExtraTools();
-      }
-
-    });
-
-  adminObserver.observe(
-    document.body,
-    {
-      attributes: true,
-      attributeFilter: ["class"]
     }
   );
 
+}
 
-  /* Initial load */
 
-  window.addEventListener(
-    "load",
-    function () {
+function saveCurrentSectionOrder(){
+
+  const ids =
+    [
+      ...$("sectionsNav")
+        .querySelectorAll(
+          ".tab[data-section-id]"
+        )
+    ].map(
+      tab =>
+        tab.dataset.sectionId
+    );
+
+
+  saveOrder(
+    "sections",
+    "main",
+    ids
+  );
+
+}
+
+
+/* =========================================================
+   AUTH STATE
+========================================================= */
+
+db.auth.onAuthStateChange(
+  (_event,session) => {
+
+    currentUser =
+      session?.user ||
+      null;
+
+
+    if(
+      currentUser &&
+      currentUser.id !== ADMIN_UID
+    ){
+
+      db.auth.signOut();
+
+      currentUser =
+        null;
+
+    }
+
+
+    updateAdminUI();
+
+    renderSections();
+
+    if(admin()){
 
       setTimeout(
-        refreshExtraTools,
-        500
+        addMemoryTools,
+        100
+      );
+
+      setTimeout(
+        addSectionTools,
+        100
       );
 
     }
-  );
 
-
-  /* Also retry because the original Supabase login is asynchronous */
-
-  setInterval(
-    function () {
-
-      if (isAdmin()) {
-
-        addSectionTools();
-        addMemoryTools();
-
-      }
-
-    },
-    2000
-  );
-
-})();
-  
-</script>
-  <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const header = document.querySelector(".header");
-
-  if (header) {
-    header.style.display = "block";
-    header.style.visibility = "visible";
-    header.style.opacity = "1";
   }
-});
-</script>
-  <script>
+);
+
+
 /* =========================================================
-   LYSS ONLINE STATUS
-   Visitor-visible top-right presence indicator
-   ========================================================= */
+   LYSS PRESENCE
+========================================================= */
 
-(function () {
+const PRESENCE_ID =
+  "lyss";
 
-  const PRESENCE_ID = "lyss";
-  const ONLINE_TIME = 90000; // 90 seconds
-
-  /* ---------- styles ---------- */
-
-  const style = document.createElement("style");
-
-  style.textContent = `
-    #lyss-presence {
-      position: fixed;
-      top: 22px;
-      right: 24px;
-      z-index: 9998;
-
-      display: flex;
-      align-items: center;
-      gap: 9px;
-
-      padding: 10px 15px;
-
-      background: rgba(255,255,255,.94);
-      border: 1px solid #efd2de;
-      border-radius: 999px;
-
-      box-shadow: 0 8px 25px rgba(99,79,89,.08);
-
-      color: #765766;
-      font-size: 12px;
-
-      backdrop-filter: blur(8px);
-    }
-
-    #lyss-heart {
-      font-size: 22px;
-      line-height: 1;
-      display: inline-block;
-      transform-origin: center;
-    }
-
-    #lyss-presence.online #lyss-heart {
-      animation: lyssHeartPulse 1.2s ease-in-out infinite;
-    }
-
-    #lyss-presence.offline #lyss-heart {
-      opacity: .55;
-    }
-
-    @keyframes lyssHeartPulse {
-      0%, 100% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.25);
-      }
-    }
-
-    #lyss-presence-text {
-      white-space: nowrap;
-    }
-
-    @media(max-width:560px) {
-      #lyss-presence {
-        top: 12px;
-        right: 12px;
-        padding: 8px 11px;
-        font-size: 11px;
-      }
-
-      #lyss-heart {
-        font-size: 19px;
-      }
-    }
-  `;
-
-  document.head.appendChild(style);
+const ONLINE_TIME =
+  90000;
 
 
-  /* ---------- create status ---------- */
+function setLyssOnline(){
 
-  const presence = document.createElement("div");
+  const presence =
+    $("lyss-presence");
 
-  presence.id = "lyss-presence";
-  presence.className = "offline";
+  const heart =
+    $("lyss-heart");
 
-  presence.innerHTML = `
-    <span id="lyss-heart">♡</span>
-    <span id="lyss-presence-text">lyss was last active…</span>
-  `;
-
-  document.body.appendChild(presence);
+  const text =
+    $("lyss-presence-text");
 
 
-  /* ---------- helpers ---------- */
+  presence.className =
+    "online";
 
-  function setOnline() {
+  heart.textContent =
+    "♥";
 
-    presence.className = "online";
+  text.textContent =
+    "lyss is online";
 
-    document.getElementById("lyss-heart").textContent = "♥";
+}
 
-    document.getElementById("lyss-presence-text").textContent =
-      "lyss is online";
+
+function setLyssOffline(
+  lastSeen
+){
+
+  const presence =
+    $("lyss-presence");
+
+  const heart =
+    $("lyss-heart");
+
+  const text =
+    $("lyss-presence-text");
+
+
+  presence.className =
+    "offline";
+
+  heart.textContent =
+    "♡";
+
+
+  if(!lastSeen){
+
+    text.textContent =
+      "lyss was last active…";
+
+    return;
 
   }
 
 
-  function setOffline(lastSeen) {
-
-    presence.className = "offline";
-
-    document.getElementById("lyss-heart").textContent = "♡";
-
-    if (!lastSeen) {
-
-      document.getElementById("lyss-presence-text").textContent =
-        "lyss was last active…";
-
-      return;
-    }
-
-    const seconds = Math.max(
+  const seconds =
+    Math.max(
       0,
       Math.floor(
-        (Date.now() - new Date(lastSeen).getTime()) / 1000
+        (
+          Date.now() -
+          new Date(
+            lastSeen
+          ).getTime()
+        ) / 1000
       )
     );
 
-    if (seconds < 60) {
 
-      document.getElementById("lyss-presence-text").textContent =
-        "lyss was last active just now";
+  if(seconds < 60){
 
-      return;
-    }
+    text.textContent =
+      "lyss was last active just now";
 
-    const minutes = Math.floor(seconds / 60);
+    return;
 
-    if (minutes === 1) {
-
-      document.getElementById("lyss-presence-text").textContent =
-        "lyss was last active 1 minute ago";
-
-      return;
-    }
-
-    if (minutes < 60) {
-
-      document.getElementById("lyss-presence-text").textContent =
-        "lyss was last active " + minutes + " minutes ago";
-
-      return;
-    }
-
-    const hours = Math.floor(minutes / 60);
-
-    if (hours === 1) {
-
-      document.getElementById("lyss-presence-text").textContent =
-        "lyss was last active 1 hour ago";
-
-      return;
-    }
-
-    if (hours < 24) {
-
-      document.getElementById("lyss-presence-text").textContent =
-        "lyss was last active " + hours + " hours ago";
-
-      return;
-    }
-
-    const days = Math.floor(hours / 24);
-
-    document.getElementById("lyss-presence-text").textContent =
-      "lyss was last active " + days + " days ago";
   }
 
 
-  /* ---------- update presence ---------- */
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
 
-  async function updatePresence() {
 
-    if (typeof db === "undefined") return;
+  if(minutes === 1){
 
-    try {
+    text.textContent =
+      "lyss was last active 1 minute ago";
 
-      const { data, error } = await db
-        .from("admin_presence")
-        .select("last_seen")
-        .eq("id", PRESENCE_ID)
-        .maybeSingle();
+    return;
 
-      if (error) {
-        console.error("Lyss presence:", error);
-        return;
-      }
-
-      if (!data || !data.last_seen) {
-
-        setOffline(null);
-        return;
-      }
-
-      const lastSeen =
-        new Date(data.last_seen).getTime();
-
-      const isOnline =
-        Date.now() - lastSeen <= ONLINE_TIME;
-
-      if (isOnline) {
-        setOnline();
-      } else {
-        setOffline(data.last_seen);
-      }
-
-    } catch (error) {
-
-      console.error("Lyss presence:", error);
-
-    }
   }
 
 
-  /* ---------- keep YOUR status alive ---------- */
+  if(minutes < 60){
 
-  async function heartbeat() {
+    text.textContent =
+      "lyss was last active " +
+      minutes +
+      " minutes ago";
 
-    if (typeof db === "undefined") return;
-    if (typeof ADMIN_UID === "undefined") return;
+    return;
 
-    try {
+  }
 
-      const { data } =
-        await db.auth.getSession();
 
-      const user = data?.session?.user;
+  const hours =
+    Math.floor(
+      minutes / 60
+    );
 
-      if (!user || user.id !== ADMIN_UID) return;
 
+  if(hours === 1){
+
+    text.textContent =
+      "lyss was last active 1 hour ago";
+
+    return;
+
+  }
+
+
+  if(hours < 24){
+
+    text.textContent =
+      "lyss was last active " +
+      hours +
+      " hours ago";
+
+    return;
+
+  }
+
+
+  const days =
+    Math.floor(
+      hours / 24
+    );
+
+
+  text.textContent =
+    "lyss was last active " +
+    days +
+    (
+      days === 1
+        ? " day ago"
+        : " days ago"
+    );
+
+}
+
+
+/* =========================
+   CHECK LYSS
+========================= */
+
+async function updatePresence(){
+
+  try{
+
+    const result =
       await db
         .from("admin_presence")
-        .upsert(
-          {
-            id: PRESENCE_ID,
-            last_seen: new Date().toISOString()
-          },
-          {
-            onConflict: "id"
-          }
-        );
+        .select("last_seen")
+        .eq(
+          "id",
+          PRESENCE_ID
+        )
+        .maybeSingle();
 
-      updatePresence();
 
-    } catch (error) {
+    if(
+      result.error ||
+      !result.data?.last_seen
+    ){
 
-      console.error("Lyss heartbeat:", error);
+      setLyssOffline(
+        null
+      );
+
+      return;
 
     }
+
+
+    const lastSeen =
+      new Date(
+        result.data.last_seen
+      ).getTime();
+
+
+    const online =
+      Date.now() -
+      lastSeen <=
+      ONLINE_TIME;
+
+
+    if(online){
+
+      setLyssOnline();
+
+    }else{
+
+      setLyssOffline(
+        result.data.last_seen
+      );
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "Lyss presence:",
+      error
+    );
+
   }
 
+}
 
-  /* ---------- start ---------- */
 
-  setTimeout(function () {
+/* =========================
+   LYSS HEARTBEAT
+========================= */
+
+async function heartbeat(){
+
+  try{
+
+    const result =
+      await db.auth.getSession();
+
+
+    const user =
+      result.data
+        ?.session
+        ?.user;
+
+
+    if(
+      !user ||
+      user.id !== ADMIN_UID
+    ){
+
+      return;
+
+    }
+
+
+    await db
+      .from("admin_presence")
+      .upsert(
+        {
+          id:PRESENCE_ID,
+          last_seen:
+            new Date().toISOString()
+        },
+        {
+          onConflict:"id"
+        }
+      );
+
 
     updatePresence();
-    heartbeat();
 
-  }, 1000);
+  }catch(error){
+
+    console.error(
+      "Lyss heartbeat:",
+      error
+    );
+
+  }
+
+}
 
 
-  /* Check status frequently */
+/* =========================================================
+   VISITOR TRACKING
+========================================================= */
 
-  setInterval(updatePresence, 10000);
+const VISITOR_KEY =
+  "lyss_gallery_visitor_id";
+
+const SESSION_KEY =
+  "lyss_gallery_session_id";
 
 
-  /* Update your online timestamp */
+const visitorId =
+  localStorage.getItem(
+    VISITOR_KEY
+  ) ||
+  crypto.randomUUID();
 
-  setInterval(heartbeat, 30000);
 
+localStorage.setItem(
+  VISITOR_KEY,
+  visitorId
+);
+
+
+let sessionId =
+  sessionStorage.getItem(
+    SESSION_KEY
+  );
+
+
+if(!sessionId){
+
+  sessionId =
+    crypto.randomUUID();
+
+  sessionStorage.setItem(
+    SESSION_KEY,
+    sessionId
+  );
+
+}
+
+
+async function recordVisitor(){
+
+  try{
+
+    const now =
+      new Date().toISOString();
+
+
+    const section =
+      activeSectionId;
+
+
+    await db
+      .from("gallery_visitors")
+      .upsert(
+        {
+          visitor_id:
+            visitorId,
+
+          last_seen:
+            now
+        },
+        {
+          onConflict:
+            "visitor_id"
+        }
+      );
+
+
+    const existing =
+      await db
+        .from("gallery_sessions")
+        .select(
+          "id,started_at,sections_visited"
+        )
+        .eq(
+          "id",
+          sessionId
+        )
+        .maybeSingle();
+
+
+    if(existing.data){
+
+      const visited =
+        Array.isArray(
+          existing.data
+            .sections_visited
+        )
+          ? [
+              ...existing.data
+                .sections_visited
+            ]
+          : [];
+
+
+      if(
+        section &&
+        !visited.includes(section)
+      ){
+
+        visited.push(
+          section
+        );
+
+      }
+
+
+      await db
+        .from("gallery_sessions")
+        .update({
+          last_seen:now,
+          current_section_id:
+            section,
+          sections_visited:
+            visited,
+          ended_at:null
+        })
+        .eq(
+          "id",
+          sessionId
+        );
+
+    }else{
+
+      await db
+        .from("gallery_sessions")
+        .insert({
+          id:sessionId,
+          visitor_id:
+            visitorId,
+          started_at:now,
+          last_seen:now,
+          current_section_id:
+            section,
+          sections_visited:
+            section
+              ? [section]
+              : [],
+          ended_at:null
+        });
+
+    }
+
+  }catch(error){
+
+    /*
+      Visitor tracking should NEVER
+      stop the gallery from loading.
+    */
+
+    console.error(
+      "Visitor tracking:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   BEFORE LEAVING
+========================================================= */
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+
+    try{
+
+      db
+        .from("gallery_sessions")
+        .update({
+          ended_at:
+            new Date().toISOString()
+        })
+        .eq(
+          "id",
+          sessionId
+        );
+
+    }catch(error){
+
+      console.error(
+        error
+      );
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   START
+========================================================= */
+
+(async function start(){
+
+  try{
+
+    const auth =
+      await db.auth.getSession();
+
+
+    currentUser =
+      auth.data
+        ?.session
+        ?.user ||
+      null;
+
+
+    if(
+      currentUser &&
+      currentUser.id !== ADMIN_UID
+    ){
+
+      await db.auth.signOut();
+
+      currentUser =
+        null;
+
+    }
+
+
+    updateAdminUI();
+
+
+    /*
+      Load the actual gallery first.
+      Visitor tracking happens after this,
+      so tracking can never make the gallery
+      get stuck on "loading memories".
+    */
+
+    await loadSections();
+
+    await loadGallery();
+
+
+    /* Presence */
+
+    await updatePresence();
+
+    await heartbeat();
+
+
+    /* Visitor */
+
+    await recordVisitor();
+
+
+    /* Admin tools */
+
+    if(admin()){
+
+      setTimeout(
+        addMemoryTools,
+        100
+      );
+
+      setTimeout(
+        addSectionTools,
+        100
+      );
+
+    }
+
+  }catch(error){
+
+    console.error(
+      "Gallery startup:",
+      error
+    );
+
+
+    $("gallery").innerHTML =
+      `
+      <div class="empty">
+        couldn't load memories ♡
+        <br>
+        <small>
+          please refresh the page
+        </small>
+      </div>
+      `;
+
+  }
 
 })();
+
+
+/* =========================================================
+   CONTINUOUS UPDATES
+========================================================= */
+
+/*
+   Visitors check Lyss's status every 10 seconds.
+*/
+
+setInterval(
+  updatePresence,
+  10000
+);
+
+
+/*
+   Lyss updates her online timestamp
+   every 30 seconds while logged in.
+*/
+
+setInterval(
+  heartbeat,
+  30000
+);
+
+
+/*
+   Visitor session heartbeat.
+*/
+
+setInterval(
+  recordVisitor,
+  30000
+);
+
+
+/*
+   Keep admin drag/edit tools alive
+   after gallery updates.
+*/
+
+setInterval(
+  () => {
+
+    if(!admin())
+      return;
+
+    addMemoryTools();
+
+    addSectionTools();
+
+  },
+  2000
+);
+
 </script>
+
 </body>
 </html>
