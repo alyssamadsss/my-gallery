@@ -659,6 +659,941 @@ db.auth.onAuthStateChange((_event,session)=>{
   setInterval(updateLyssLabel, 10000);
 })();
 </script>
+<script>
+/* =========================================================
+   EXTRA ADMIN TOOLS
+   Add this at the VERY BOTTOM of index.html, before </body>
+   ========================================================= */
 
+(function () {
+  "use strict";
+
+  /* ---------- styles ---------- */
+
+  const style = document.createElement("style");
+
+  style.textContent = `
+    /* Keep the gallery starting from the left */
+    .gallery {
+      justify-content: start !important;
+      justify-items: start !important;
+      align-content: start !important;
+    }
+
+    /* Admin controls on memories */
+    body.admin .extra-memory-tools {
+      display: flex !important;
+    }
+
+    .extra-memory-tools {
+      display: none;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 0 10px 10px;
+      justify-content: flex-start;
+    }
+
+    .extra-memory-tools button,
+    .extra-section-tools button {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .extra-memory-tools button:hover,
+    .extra-section-tools button:hover {
+      background: var(--pink2);
+    }
+
+    .memory-dragging {
+      opacity: .45;
+    }
+
+    body.admin .card {
+      cursor: grab;
+    }
+
+    body.admin .card:active {
+      cursor: grabbing;
+    }
+
+    /* Section tools */
+    body.admin .extra-section-tools {
+      display: flex !important;
+    }
+
+    .extra-section-tools {
+      display: none;
+      align-items: center;
+      gap: 2px;
+      margin-left: 2px;
+    }
+
+    .extra-section-tools button {
+      padding: 3px 7px;
+      font-size: 10px;
+    }
+
+    .section-dragging {
+      opacity: .45;
+    }
+
+    body.admin .tab {
+      cursor: grab;
+    }
+
+    /* Edit box */
+    #extraEditBox {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(45,30,37,.55);
+      backdrop-filter: blur(5px);
+    }
+
+    #extraEditBox.open {
+      display: flex;
+    }
+
+    #extraEditBox .extra-edit-card {
+      width: min(500px, 100%);
+      background: #fff;
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.2);
+    }
+
+    #extraEditBox h2 {
+      margin: 0 0 5px;
+      font: 500 24px Georgia, serif;
+      color: var(--text);
+    }
+
+    #extraEditBox p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    #extraEditBox label {
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    #extraEditBox input,
+    #extraEditBox textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--text);
+      background: #fff;
+      font: inherit;
+    }
+
+    #extraEditBox textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    #extraEditBox .extra-edit-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    #extraEditBox button {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 9px 15px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    #extraEditBox .save-extra {
+      background: var(--pink);
+    }
+  `;
+
+  document.head.appendChild(style);
+
+
+  /* ---------- helpers ---------- */
+
+  function isAdmin() {
+    return typeof admin === "function" && admin();
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function (c) {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[c];
+    });
+  }
+
+  function storageKey(type, sectionId) {
+    return "lyss_" + type + "_" + (sectionId || "all");
+  }
+
+  function getSavedOrder(type, sectionId) {
+    try {
+      return JSON.parse(
+        localStorage.getItem(storageKey(type, sectionId)) || "[]"
+      );
+    } catch {
+      return [];
+    }
+  }
+
+  function saveOrder(type, sectionId, ids) {
+    localStorage.setItem(
+      storageKey(type, sectionId),
+      JSON.stringify(ids)
+    );
+  }
+
+  function applySavedOrder(items, type, sectionId) {
+    const saved = getSavedOrder(type, sectionId);
+
+    if (!saved.length) return items;
+
+    const position = new Map(
+      saved.map((id, index) => [String(id), index])
+    );
+
+    return [...items].sort(function (a, b) {
+      const pa = position.has(String(a.id))
+        ? position.get(String(a.id))
+        : 999999;
+
+      const pb = position.has(String(b.id))
+        ? position.get(String(b.id))
+        : 999999;
+
+      return pa - pb;
+    });
+  }
+
+
+  /* =========================================================
+     EDIT POPUP
+     ========================================================= */
+
+  function showEditBox(title, fields, saveFunction) {
+
+    document.getElementById("extraEditBox")?.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "extraEditBox";
+    overlay.className = "open";
+
+    let fieldsHtml = "";
+
+    fields.forEach(function (field) {
+
+      if (field.type === "textarea") {
+
+        fieldsHtml += `
+          <label>${escapeHtml(field.label)}</label>
+          <textarea id="extraField_${escapeHtml(field.key)}">${escapeHtml(field.value || "")}</textarea>
+        `;
+
+      } else {
+
+        fieldsHtml += `
+          <label>${escapeHtml(field.label)}</label>
+          <input
+            id="extraField_${escapeHtml(field.key)}"
+            type="${escapeHtml(field.type || "text")}"
+            value="${escapeHtml(field.value || "")}"
+          >
+        `;
+
+      }
+    });
+
+    overlay.innerHTML = `
+      <div class="extra-edit-card">
+
+        <h2>${escapeHtml(title)}</h2>
+
+        <p>edit this little detail ♡</p>
+
+        ${fieldsHtml}
+
+        <div class="extra-edit-buttons">
+          <button id="extraCancel">cancel</button>
+          <button class="save-extra" id="extraSave">save ♡</button>
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    function close() {
+      overlay.remove();
+    }
+
+    overlay.querySelector("#extraCancel").onclick = close;
+
+    overlay.addEventListener("click", function (event) {
+      if (event.target === overlay) close();
+    });
+
+    overlay.querySelector("#extraSave").onclick = async function () {
+
+      const values = {};
+
+      fields.forEach(function (field) {
+        values[field.key] =
+          document.getElementById("extraField_" + field.key).value;
+      });
+
+      const button = overlay.querySelector("#extraSave");
+
+      button.disabled = true;
+      button.textContent = "saving...";
+
+      try {
+
+        await saveFunction(values);
+
+        close();
+
+        if (typeof loadSections === "function") {
+          await loadSections();
+        }
+
+        if (typeof loadGallery === "function") {
+          await loadGallery();
+        }
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Couldn't save the changes ♡\n\n" +
+          (error.message || error)
+        );
+
+        button.disabled = false;
+        button.textContent = "save ♡";
+      }
+    };
+  }
+
+
+  /* =========================================================
+     EDIT MEMORY
+     ========================================================= */
+
+  async function editMemory(memory) {
+
+    if (!isAdmin()) return;
+
+    showEditBox(
+      "edit memory ♡",
+      [
+        {
+          key: "date",
+          label: "Date",
+          type: "date",
+          value: memory.date || ""
+        },
+        {
+          key: "location",
+          label: "Location",
+          type: "text",
+          value: memory.location || ""
+        },
+        {
+          key: "caption",
+          label: "Caption",
+          type: "textarea",
+          value: memory.caption || ""
+        }
+      ],
+      async function (values) {
+
+        const { error } = await db
+          .from(MEMORIES_TABLE)
+          .update({
+            date: values.date || null,
+            location: values.location.trim() || null,
+            caption: values.caption.trim() || null
+          })
+          .eq("id", memory.id);
+
+        if (error) throw error;
+      }
+    );
+  }
+
+
+  /* =========================================================
+     LOAD CURRENT MEMORIES
+     ========================================================= */
+
+  async function getCurrentMemories() {
+
+    let query = db
+      .from(MEMORIES_TABLE)
+      .select("*");
+
+    if (activeSectionId !== null) {
+      query = query.eq("section_id", activeSectionId);
+    }
+
+    const result = await query;
+
+    if (result.error) throw result.error;
+
+    let rows = result.data || [];
+
+    if (typeof sortMemories === "function") {
+      rows = sortMemories(rows);
+    }
+
+    rows = applySavedOrder(
+      rows,
+      "memories",
+      activeSectionId
+    );
+
+    return rows;
+  }
+
+
+  /* =========================================================
+     ADD MEMORY EDIT BUTTONS + DRAGGING
+     ========================================================= */
+
+  async function addMemoryTools() {
+
+    if (!isAdmin()) return;
+
+    const gallery = document.getElementById("gallery");
+
+    if (!gallery) return;
+
+    let memories;
+
+    try {
+      memories = await getCurrentMemories();
+    } catch (error) {
+      console.error("memory tools:", error);
+      return;
+    }
+
+    const cards = [...gallery.querySelectorAll(".card")];
+
+    cards.forEach(function (card, index) {
+
+      const memory = memories[index];
+
+      if (!memory) return;
+
+      card.dataset.memoryId = memory.id;
+      card.draggable = true;
+
+      /* Don't add twice */
+      if (!card.querySelector(".extra-memory-tools")) {
+
+        const tools = document.createElement("div");
+
+        tools.className = "extra-memory-tools";
+
+        tools.innerHTML = `
+          <button type="button" class="extra-edit-memory">
+            ✏️ edit
+          </button>
+
+          <button type="button" class="extra-delete-memory">
+            🗑️ delete
+          </button>
+        `;
+
+        tools
+          .querySelector(".extra-edit-memory")
+          .onclick = function (event) {
+            event.stopPropagation();
+            editMemory(memory);
+          };
+
+        tools
+          .querySelector(".extra-delete-memory")
+          .onclick = async function (event) {
+
+            event.stopPropagation();
+
+            if (!confirm(
+              "Delete this memory and its stored file?"
+            )) return;
+
+            await deleteMemory(memory);
+          };
+
+        card.appendChild(tools);
+      }
+
+
+      /* ---------- drag start ---------- */
+
+      card.addEventListener(
+        "dragstart",
+        function () {
+
+          card.classList.add("memory-dragging");
+
+        },
+        { once: true }
+      );
+
+
+      /* ---------- drag end ---------- */
+
+      card.addEventListener(
+        "dragend",
+        async function () {
+
+          card.classList.remove("memory-dragging");
+
+          const orderedIds = [
+            ...gallery.querySelectorAll(".card[data-memory-id]")
+          ].map(function (item) {
+            return item.dataset.memoryId;
+          });
+
+          saveOrder(
+            "memories",
+            activeSectionId,
+            orderedIds
+          );
+
+        },
+        { once: true }
+      );
+
+
+      /* ---------- drag over ---------- */
+
+      card.addEventListener(
+        "dragover",
+        function (event) {
+
+          event.preventDefault();
+
+          const dragging =
+            gallery.querySelector(".memory-dragging");
+
+          if (!dragging || dragging === card) return;
+
+          const rect = card.getBoundingClientRect();
+
+          const before =
+            event.clientY < rect.top + rect.height / 2;
+
+          if (before) {
+            gallery.insertBefore(dragging, card);
+          } else {
+            gallery.insertBefore(
+              dragging,
+              card.nextSibling
+            );
+          }
+
+        }
+      );
+
+    });
+
+  }
+
+
+  /* =========================================================
+     SECTION EDIT
+     ========================================================= */
+
+  async function editSection(section) {
+
+    if (!isAdmin()) return;
+
+    showEditBox(
+      "edit section ♡",
+      [
+        {
+          key: "title",
+          label: "Section name",
+          type: "text",
+          value: section.title || ""
+        },
+        {
+          key: "subtitle",
+          label: "Subtitle",
+          type: "textarea",
+          value: section.subtitle || ""
+        }
+      ],
+      async function (values) {
+
+        const { error } = await db
+          .from(SECTIONS_TABLE)
+          .update({
+            title: values.title.trim(),
+            subtitle: values.subtitle.trim() || null
+          })
+          .eq("id", section.id);
+
+        if (error) throw error;
+      }
+    );
+  }
+
+
+  /* =========================================================
+     SECTION REORDER
+     ========================================================= */
+
+  function applySectionOrder() {
+
+    if (!Array.isArray(sections)) return;
+
+    sections = applySavedOrder(
+      sections,
+      "sections",
+      "main"
+    );
+  }
+
+
+  function addSectionTools() {
+
+    if (!isAdmin()) return;
+
+    const nav = document.getElementById("sectionsNav");
+
+    if (!nav) return;
+
+    const tabs = [
+      ...nav.querySelectorAll(".tab")
+    ];
+
+    /* First tab = All Memories */
+    const realTabs = tabs.slice(1);
+
+    realTabs.forEach(function (tab, index) {
+
+      const section = sections[index];
+
+      if (!section) return;
+
+      tab.dataset.sectionId = section.id;
+      tab.draggable = true;
+
+      if (tab.querySelector(".extra-section-tools")) return;
+
+      const tools = document.createElement("span");
+
+      tools.className = "extra-section-tools";
+
+      tools.innerHTML = `
+        <button type="button" title="move left">←</button>
+        <button type="button" title="move right">→</button>
+        <button type="button" title="edit">✏️</button>
+      `;
+
+      const buttons = tools.querySelectorAll("button");
+
+      /* Move left */
+
+      buttons[0].onclick = function (event) {
+
+        event.stopPropagation();
+
+        const currentIndex =
+          [...nav.children].indexOf(tab);
+
+        if (currentIndex <= 1) return;
+
+        nav.insertBefore(
+          tab,
+          nav.children[currentIndex - 1]
+        );
+
+        saveCurrentSectionOrder(nav);
+      };
+
+
+      /* Move right */
+
+      buttons[1].onclick = function (event) {
+
+        event.stopPropagation();
+
+        const currentIndex =
+          [...nav.children].indexOf(tab);
+
+        if (
+          currentIndex < 1 ||
+          currentIndex >= nav.children.length - 1
+        ) return;
+
+        nav.insertBefore(
+          nav.children[currentIndex + 1],
+          tab
+        );
+
+        saveCurrentSectionOrder(nav);
+      };
+
+
+      /* Edit */
+
+      buttons[2].onclick = function (event) {
+
+        event.stopPropagation();
+
+        editSection(section);
+      };
+
+
+      tab.appendChild(tools);
+
+
+      /* ---------- section dragging ---------- */
+
+      tab.addEventListener(
+        "dragstart",
+        function () {
+
+          tab.classList.add("section-dragging");
+
+        },
+        { once: true }
+      );
+
+
+      tab.addEventListener(
+        "dragend",
+        function () {
+
+          tab.classList.remove("section-dragging");
+
+          saveCurrentSectionOrder(nav);
+
+        },
+        { once: true }
+      );
+
+
+      tab.addEventListener(
+        "dragover",
+        function (event) {
+
+          event.preventDefault();
+
+          const dragging =
+            nav.querySelector(".section-dragging");
+
+          if (!dragging || dragging === tab) return;
+
+          const rect =
+            tab.getBoundingClientRect();
+
+          const before =
+            event.clientX <
+            rect.left + rect.width / 2;
+
+          if (before) {
+
+            nav.insertBefore(
+              dragging,
+              tab
+            );
+
+          } else {
+
+            nav.insertBefore(
+              dragging,
+              tab.nextSibling
+            );
+
+          }
+
+        }
+      );
+
+    });
+
+  }
+
+
+  function saveCurrentSectionOrder(nav) {
+
+    const ids = [
+      ...nav.querySelectorAll(
+        ".tab[data-section-id]"
+      )
+    ].map(function (tab) {
+
+      return tab.dataset.sectionId;
+
+    });
+
+    saveOrder(
+      "sections",
+      "main",
+      ids
+    );
+  }
+
+
+  /* =========================================================
+     WRAP ORIGINAL FUNCTIONS
+     ========================================================= */
+
+  const originalLoadSections =
+    window.loadSections;
+
+  if (typeof originalLoadSections === "function") {
+
+    window.loadSections = async function () {
+
+      await originalLoadSections();
+
+      if (isAdmin()) {
+
+        applySectionOrder();
+
+        if (typeof renderSections === "function") {
+          renderSections();
+        }
+
+        setTimeout(addSectionTools, 50);
+
+      }
+
+    };
+
+  }
+
+
+  const originalLoadGallery =
+    window.loadGallery;
+
+  if (typeof originalLoadGallery === "function") {
+
+    window.loadGallery = async function () {
+
+      await originalLoadGallery();
+
+      if (isAdmin()) {
+
+        setTimeout(addMemoryTools, 50);
+
+      }
+
+    };
+
+  }
+
+
+  /* =========================================================
+     REFRESH ADMIN TOOLS WHEN LOGIN STATE CHANGES
+     ========================================================= */
+
+  function refreshExtraTools() {
+
+    if (!isAdmin()) return;
+
+    setTimeout(function () {
+
+      applySectionOrder();
+
+      if (typeof renderSections === "function") {
+        renderSections();
+      }
+
+      addSectionTools();
+      addMemoryTools();
+
+    }, 100);
+
+  }
+
+
+  /* Watch for the existing page changing into admin mode */
+
+  const adminObserver =
+    new MutationObserver(function () {
+
+      if (isAdmin()) {
+        refreshExtraTools();
+      }
+
+    });
+
+  adminObserver.observe(
+    document.body,
+    {
+      attributes: true,
+      attributeFilter: ["class"]
+    }
+  );
+
+
+  /* Initial load */
+
+  window.addEventListener(
+    "load",
+    function () {
+
+      setTimeout(
+        refreshExtraTools,
+        500
+      );
+
+    }
+  );
+
+
+  /* Also retry because the original Supabase login is asynchronous */
+
+  setInterval(
+    function () {
+
+      if (isAdmin()) {
+
+        addSectionTools();
+        addMemoryTools();
+
+      }
+
+    },
+    2000
+  );
+
+})();
+</script>
 </body>
 </html>
