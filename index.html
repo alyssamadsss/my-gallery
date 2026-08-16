@@ -421,264 +421,476 @@ db.auth.onAuthStateChange((_event,session)=>{
   await loadSections();
   await loadGallery();
 })();
-</script>
-
 <script>
-/* Enhanced visitor tracking + Lyss presence, wired to the original interface. */
+/* =========================================================
+   LYSS ONLINE STATUS + VISITOR TRACKING
+   ========================================================= */
+
 (() => {
   if (window.__lyssEnhanced) return;
   window.__lyssEnhanced = true;
 
   const VISITOR_KEY = "lyss_gallery_visitor_id";
   const SESSION_KEY = "lyss_gallery_session_id";
+
   const HEARTBEAT = 30000;
   const ONLINE_WINDOW = 90000;
 
-  const visitorId = localStorage.getItem(VISITOR_KEY) || crypto.randomUUID();
+  /* ---------- database ---------- */
+
+  function getDb() {
+    return typeof db !== "undefined" ? db : null;
+  }
+
+  /* ---------- visitor IDs ---------- */
+
+  const visitorId =
+    localStorage.getItem(VISITOR_KEY) || crypto.randomUUID();
+
   localStorage.setItem(VISITOR_KEY, visitorId);
 
-  let sessionId = sessionStorage.getItem(SESSION_KEY);
+  let sessionId =
+    sessionStorage.getItem(SESSION_KEY);
+
   if (!sessionId) {
     sessionId = crypto.randomUUID();
     sessionStorage.setItem(SESSION_KEY, sessionId);
   }
 
-  const getDb = () => window.db || null;
 
-  async function currentAuthUser() {
-    const client = getDb();
-    if (!client) return null;
-    const { data } = await client.auth.getSession();
-    return data?.session?.user || null;
-  }
+  /* =========================================================
+     LYSS STATUS DISPLAY
+     ========================================================= */
 
-  async function recordVisitor() {
-    const client = getDb();
-    if (!client) return;
+  function createStatus() {
 
-    const now = new Date().toISOString();
-    const section = typeof activeSection !== "undefined" ? activeSection : null;
-
-    await client.from("gallery_visitors").upsert(
-      { visitor_id: visitorId, last_seen: now },
-      { onConflict: "visitor_id" }
-    );
-
-    const payload = {
-      id: sessionId,
-      visitor_id: visitorId,
-      last_seen: now,
-      current_section_id: section,
-      ended_at: null
-    };
-
-    const { data: existing } = await client
-      .from("gallery_sessions")
-      .select("id,started_at,sections_visited")
-      .eq("id", sessionId)
-      .maybeSingle();
-
-    if (existing) {
-      const visited = Array.isArray(existing.sections_visited)
-        ? existing.sections_visited.slice()
-        : [];
-      if (section && !visited.includes(section)) visited.push(section);
-
-      await client.from("gallery_sessions").update({
-        last_seen: now,
-        current_section_id: section,
-        sections_visited: visited
-      }).eq("id", sessionId);
-    } else {
-      await client.from("gallery_sessions").insert({
-        ...payload,
-        started_at: now,
-        sections_visited: section ? [section] : []
-      });
-    }
-  }
-
-  async function lyssHeartbeat() {
-    const client = getDb();
-    if (!client) return;
-
-    const user = await currentAuthUser();
-    if (!user || user.id !== ADMIN_UID) return;
-
-    await client.from("admin_presence").upsert(
-      { id: "lyss", last_seen: new Date().toISOString() },
-      { onConflict: "id" }
-    );
-  }
-
-  async function updateLyssLabel() {
-    const client = getDb();
-    const header = document.querySelector(".header");
-    if (!client || !header) return;
-
-    let label = document.getElementById("lyss-status");
-    if (!label) {
-      label = document.createElement("div");
-      label.id = "lyss-status";
-      label.style.cssText =
-        "font-size:12px;color:#9e8992;margin-top:5px;min-height:18px;";
-      header.appendChild(label);
+    if (document.getElementById("lyss-status-widget")) {
+      return;
     }
 
-    const { data } = await client
+    const widget = document.createElement("div");
+
+    widget.id = "lyss-status-widget";
+
+    widget.innerHTML = `
+      <span id="lyss-heart">♡</span>
+      <span id="lyss-status-text">checking...</span>
+    `;
+
+    document.body.appendChild(widget);
+
+    const style = document.createElement("style");
+
+    style.textContent = `
+      #lyss-status-widget {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 9999;
+
+        display: flex;
+        align-items: center;
+        gap: 9px;
+
+        padding: 10px 16px;
+
+        background: rgba(255,255,255,.94);
+        border: 1px solid #efd2de;
+        border-radius: 999px;
+
+        color: #765766;
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+
+        font-size: 13px;
+
+        box-shadow:
+          0 8px 25px rgba(99,79,89,.08);
+
+        backdrop-filter: blur(8px);
+      }
+
+      #lyss-heart {
+        font-family: Georgia, serif;
+        font-size: 25px;
+        line-height: 1;
+        color: #a85d74;
+        display: inline-block;
+      }
+
+      #lyss-status-widget.online #lyss-heart {
+        animation: lyssHeartPulse 1.2s ease-in-out infinite;
+      }
+
+      #lyss-status-widget.online #lyss-status-text {
+        color: #765766;
+      }
+
+      #lyss-status-widget.offline #lyss-heart {
+        opacity: .65;
+      }
+
+      #lyss-status-widget.offline #lyss-status-text {
+        color: #9e8992;
+      }
+
+      @keyframes lyssHeartPulse {
+        0%, 100% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.25);
+        }
+      }
+
+      @media (max-width: 600px) {
+        #lyss-status-widget {
+          top: 12px;
+          right: 12px;
+          padding: 8px 13px;
+          font-size: 12px;
+        }
+
+        #lyss-heart {
+          font-size: 22px;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+
+  /* =========================================================
+     CHECK LYSS'S LAST ACTIVITY
+     ========================================================= */
+
+  async function updateLyssStatus() {
+
+    const client = getDb();
+
+    if (!client) return;
+
+    createStatus();
+
+    const widget =
+      document.getElementById("lyss-status-widget");
+
+    const heart =
+      document.getElementById("lyss-heart");
+
+    const text =
+      document.getElementById("lyss-status-text");
+
+    if (!widget || !heart || !text) return;
+
+
+    const { data, error } = await client
       .from("admin_presence")
       .select("last_seen")
       .eq("id", "lyss")
       .maybeSingle();
 
-    if (!data?.last_seen) {
-      label.textContent = "lyss was last active…";
+
+    if (error || !data?.last_seen) {
+
+      widget.classList.remove("online");
+      widget.classList.add("offline");
+
+      heart.textContent = "♡";
+      text.textContent = "lyss was last active...";
+
       return;
     }
 
-    const seconds = Math.max(
-      0,
-      Math.floor((Date.now() - new Date(data.last_seen).getTime()) / 1000)
-    );
+
+    const lastSeen =
+      new Date(data.last_seen).getTime();
+
+    const seconds =
+      Math.max(
+        0,
+        Math.floor(
+          (Date.now() - lastSeen) / 1000
+        )
+      );
+
+
+    /* ---------- ONLINE ---------- */
 
     if (seconds <= ONLINE_WINDOW / 1000) {
-      label.textContent = "♡ lyss is online";
+
+      widget.classList.remove("offline");
+      widget.classList.add("online");
+
+      heart.textContent = "♥";
+      text.textContent = "lyss is online";
+
       return;
     }
 
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 1) label.textContent = "lyss was last active just now";
-    else if (minutes === 1) label.textContent = "lyss was last active 1 minute ago";
-    else if (minutes < 60) label.textContent = `lyss was last active ${minutes} minutes ago`;
+
+    /* ---------- OFFLINE ---------- */
+
+    widget.classList.remove("online");
+    widget.classList.add("offline");
+
+    heart.textContent = "♡";
+
+
+    const minutes =
+      Math.floor(seconds / 60);
+
+
+    if (minutes < 1) {
+
+      text.textContent =
+        "lyss was last active just now";
+
+    }
+
+    else if (minutes === 1) {
+
+      text.textContent =
+        "lyss was last active 1 minute ago";
+
+    }
+
+    else if (minutes < 60) {
+
+      text.textContent =
+        `lyss was last active ${minutes} minutes ago`;
+
+    }
+
     else {
-      const hours = Math.floor(minutes / 60);
-      label.textContent =
-        hours === 1
-          ? "lyss was last active 1 hour ago"
-          : `lyss was last active ${hours} hours ago`;
+
+      const hours =
+        Math.floor(minutes / 60);
+
+      if (hours === 1) {
+
+        text.textContent =
+          "lyss was last active 1 hour ago";
+
+      }
+
+      else if (hours < 24) {
+
+        text.textContent =
+          `lyss was last active ${hours} hours ago`;
+
+      }
+
+      else {
+
+        const days =
+          Math.floor(hours / 24);
+
+        text.textContent =
+          days === 1
+            ? "lyss was last active 1 day ago"
+            : `lyss was last active ${days} days ago`;
+      }
     }
   }
 
-  function formatDate(value) {
-    return value ? new Date(value).toLocaleString() : "—";
-  }
 
-  async function showVisitorHistory() {
+  /* =========================================================
+     RECORD VISITOR
+     ========================================================= */
+
+  async function recordVisitor() {
+
     const client = getDb();
+
     if (!client) return;
 
-    const user = await currentAuthUser();
-    if (!user || user.id !== ADMIN_UID) return;
+    const now =
+      new Date().toISOString();
 
-    const { data, error } = await client
-      .from("gallery_sessions")
-      .select("*")
-      .order("started_at", { ascending: false });
+    const section =
+      typeof activeSectionId !== "undefined"
+        ? activeSectionId
+        : null;
 
-    if (error) {
-      alert("Could not load visitor history: " + error.message);
-      return;
+
+    await client
+      .from("gallery_visitors")
+      .upsert(
+        {
+          visitor_id: visitorId,
+          last_seen: now
+        },
+        {
+          onConflict: "visitor_id"
+        }
+      );
+
+
+    const { data: existing } =
+      await client
+        .from("gallery_sessions")
+        .select(
+          "id,started_at,sections_visited"
+        )
+        .eq("id", sessionId)
+        .maybeSingle();
+
+
+    if (existing) {
+
+      const visited =
+        Array.isArray(existing.sections_visited)
+          ? existing.sections_visited.slice()
+          : [];
+
+
+      if (
+        section &&
+        !visited.includes(section)
+      ) {
+        visited.push(section);
+      }
+
+
+      await client
+        .from("gallery_sessions")
+        .update({
+          last_seen: now,
+          current_section_id: section,
+          sections_visited: visited,
+          ended_at: null
+        })
+        .eq("id", sessionId);
+
     }
 
-    const groups = {};
-    (data || []).forEach(row => {
-      const id = row.visitor_id || "unknown";
-      if (!groups[id]) groups[id] = [];
-      groups[id].push(row);
-    });
-
-    const wrap = document.createElement("div");
-    wrap.id = "visitor-history-overlay";
-    wrap.style.cssText =
-      "position:fixed;inset:0;background:rgba(70,50,60,.28);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;";
-
-    let body = "";
-    for (const [id, visits] of Object.entries(groups)) {
-      body += `<div style="border:1px solid #efd2de;border-radius:14px;padding:13px;margin:8px 0;background:#fff;">
-        <b>👤 visitor</b>
-        <div style="font-size:10px;opacity:.5;word-break:break-all;margin:4px 0 8px;">${escapeHtml(id)}</div>`;
-      visits.forEach(v => {
-        const start = v.started_at ? new Date(v.started_at).getTime() : 0;
-        const end = v.last_seen ? new Date(v.last_seen).getTime() : Date.now();
-        const mins = Math.max(0, Math.round((end - start) / 60000));
-        body += `<div style="border-top:1px solid #f3e3e9;padding:8px 0;font-size:12px;">
-          <div>${escapeHtml(formatDate(v.started_at))}</div>
-          <div style="opacity:.65;">last seen: ${escapeHtml(formatDate(v.last_seen))}</div>
-          <div style="opacity:.65;">section: ${escapeHtml(v.current_section_id || "all memories")}</div>
-          <div style="opacity:.65;">visit length: ${mins} min</div>
-        </div>`;
-      });
-      body += "</div>";
-    }
-
-    if (!body) body = '<p style="text-align:center;opacity:.6;">No visitor history yet ♡</p>';
-
-    wrap.innerHTML = `
-      <div style="background:#fff9fb;border:1px solid #efd2de;border-radius:20px;width:min(760px,100%);max-height:85vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(60,40,50,.18);">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div>
-            <h2 style="margin:0;font:500 25px Georgia,serif;">visitor history ♡</h2>
-            <div style="font-size:12px;color:#9e8992;margin-top:4px;">grouped by visitor ID</div>
-          </div>
-          <button id="visitor-history-close" class="btn">close</button>
-        </div>
-        <div style="margin-top:15px;">${body}</div>
-      </div>`;
-    document.body.appendChild(wrap);
-    wrap.querySelector("#visitor-history-close").onclick = () => wrap.remove();
-    wrap.onclick = e => { if (e.target === wrap) wrap.remove(); };
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[c]));
-  }
-
-  async function addAdminHistoryButton() {
-    const user = await currentAuthUser();
-    if (!user || user.id !== ADMIN_UID) {
-      document.getElementById("visitor-history-btn")?.remove();
-      return;
-    }
-
-    if (document.getElementById("visitor-history-btn")) return;
-
-    const adminPanel = document.getElementById("admin-panel");
-    const btn = document.createElement("button");
-    btn.id = "visitor-history-btn";
-    btn.className = "btn";
-    btn.textContent = "👀 visitor history";
-    btn.onclick = showVisitorHistory;
-
-    if (adminPanel) adminPanel.appendChild(btn);
     else {
-      btn.style.cssText = "position:fixed;right:18px;top:18px;z-index:10000;";
-      document.body.appendChild(btn);
+
+      await client
+        .from("gallery_sessions")
+        .insert({
+          id: sessionId,
+          visitor_id: visitorId,
+          started_at: now,
+          last_seen: now,
+          current_section_id: section,
+          sections_visited:
+            section ? [section] : [],
+          ended_at: null
+        });
     }
   }
+
+
+  /* =========================================================
+     LYSS HEARTBEAT
+     ========================================================= */
+
+  async function lyssHeartbeat() {
+
+    const client = getDb();
+
+    if (!client) return;
+
+
+    const {
+      data: sessionData
+    } = await client.auth.getSession();
+
+
+    const user =
+      sessionData?.session?.user;
+
+
+    if (
+      !user ||
+      user.id !== ADMIN_UID
+    ) {
+      return;
+    }
+
+
+    await client
+      .from("admin_presence")
+      .upsert(
+        {
+          id: "lyss",
+          last_seen:
+            new Date().toISOString()
+        },
+        {
+          onConflict: "id"
+        }
+      );
+  }
+
+
+  /* =========================================================
+     MAIN UPDATE
+     ========================================================= */
 
   async function tick() {
+
+    createStatus();
+
     await recordVisitor();
+
     await lyssHeartbeat();
-    await updateLyssLabel();
-    await addAdminHistoryButton();
+
+    await updateLyssStatus();
   }
 
-  window.addEventListener("beforeunload", () => {
-    const client = getDb();
-    if (client && sessionId) {
-      client.from("gallery_sessions")
-        .update({ ended_at: new Date().toISOString() })
-        .eq("id", sessionId);
-    }
-  });
+
+  /* =========================================================
+     START
+     ========================================================= */
 
   setTimeout(tick, 500);
-  setInterval(tick, 30000);
-  setInterval(updateLyssLabel, 10000);
+
+  setInterval(
+    tick,
+    HEARTBEAT
+  );
+
+  setInterval(
+    updateLyssStatus,
+    10000
+  );
+
+
+  /* =========================================================
+     MARK SESSION ENDED
+     ========================================================= */
+
+  window.addEventListener(
+    "beforeunload",
+    () => {
+
+      const client = getDb();
+
+      if (!client || !sessionId) {
+        return;
+      }
+
+      client
+        .from("gallery_sessions")
+        .update({
+          ended_at:
+            new Date().toISOString()
+        })
+        .eq("id", sessionId);
+    }
+  );
+
 })();
 </script>
+
 <script>
 /* =========================================================
    EXTRA ADMIN TOOLS
