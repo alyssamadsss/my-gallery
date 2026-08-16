@@ -1617,5 +1617,29 @@ db.auth.onAuthStateChange((_event,session)=>{
 
 })();
 </script>
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.querySelectorAll("*").forEach(function (el) {
+
+    const text = el.textContent.trim();
+    const style = window.getComputedStyle(el);
+
+    // Hide ONLY the large "all memories ♡" title
+    if (
+      text === "all memories ♡" &&
+      parseFloat(style.fontSize) >= 20
+    ) {
+      el.style.display = "none";
+    }
+
+    // Hide the large subtitle
+    if (
+      text === "photos, videos & little memories"
+    ) {
+      el.style.display = "none";
+    }
+  });
+});
+</script>
 </body>
 </html>
