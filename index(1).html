@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>my gallery ♡</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#fff9fb;--pink:#f5dce5;--pink2:#fff2f6;--border:#efd2de;
+  --text:#634f59;--muted:#9e8992;--danger:#a85d74;--shadow:0 10px 28px rgba(99,79,89,.08)
+}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(#fffafd,#fff);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.page{max-width:1500px;margin:auto;padding:28px 24px 70px}
+.header{text-align:center;padding:8px 10px 22px}.header h1{margin:0;font:500 clamp(32px,4vw,50px) Georgia,serif;color:#6b5460}.header p{margin:8px 0 0;color:var(--muted);font-size:13px}
+.actions,.sections,.sort{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap}
+.actions{margin-bottom:16px}.sections{margin-bottom:14px}
+button,select,input,textarea{font:inherit}.btn{border:1px solid var(--border);border-radius:999px;padding:9px 15px;background:#fff;color:#765766;cursor:pointer}.btn.primary{background:var(--pink)}.btn:hover{transform:translateY(-1px)}
+.admin-only{display:none}
+.tab{display:inline-flex;align-items:center;gap:3px;padding:4px 6px 4px 12px;border:1px solid var(--border);border-radius:999px;background:#fff}.tab.active{background:var(--pink2)}
+.tab button{border:0;background:transparent;color:var(--text);cursor:pointer;font-size:12px;padding:5px 3px}.remove-section{display:none;border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:50%}.remove-section:hover{background:var(--pink2);color:var(--danger)}body.admin .remove-section{display:block}
+.sort{margin-bottom:24px;color:var(--muted);font-size:12px}.sort select{border:1px solid var(--border);border-radius:12px;padding:7px 10px;background:#fff;color:var(--text)}
+.heading{text-align:center;margin-bottom:18px}.heading h2{margin:0;font:500 24px Georgia,serif}.heading p{margin:5px 0 0;color:var(--muted);font-size:12px;white-space:pre-wrap}
+.gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,18px);align-items:start}
+.card{background:#fff;border:1px solid rgba(239,210,222,.65);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.media{width:100%;overflow:hidden;background:#fff}.media img,.media video{display:block;max-width:100%;height:auto}.media img{width:auto;margin:0 auto;cursor:zoom-in}.media video{width:100%;background:#000}
+.info{padding:11px 13px 13px}.date{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}.location{font-size:11px;color:#987682;margin-bottom:6px}.caption{font:14px/1.5 Georgia,serif;white-space:pre-wrap;overflow-wrap:anywhere}
+.card-actions{display:none;justify-content:flex-end;padding:0 10px 10px}body.admin .card-actions{display:flex}.delete-memory{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:11px}.empty{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted);font:14px Georgia,serif}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(45,30,37,.55);backdrop-filter:blur(5px);z-index:1000}.modal.open{display:flex}
+.modal-card{position:relative;width:min(520px,100%);max-height:90vh;overflow:auto;padding:24px;background:#fff;border-radius:22px;box-shadow:0 24px 80px rgba(0,0,0,.2)}.modal-card h2{margin:0 0 5px;font:500 24px Georgia,serif}.sub{margin:0 0 18px;color:var(--muted);font-size:12px}.close{position:absolute;right:14px;top:12px;border:0;border-radius:50%;width:34px;height:34px;background:var(--pink2);color:var(--text);font-size:20px;cursor:pointer}.field{margin-bottom:14px}.field label{display:block;margin-bottom:6px;font-size:12px;font-weight:600} .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--text)}.field textarea{min-height:95px;resize:vertical}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.status{display:none;padding:9px 11px;margin-bottom:14px;border-radius:10px;background:var(--pink2);color:var(--muted);font-size:12px}
+.lightbox{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(25,18,22,.82);z-index:1200}.lightbox.open{display:flex}.lb-inner{position:relative;max-width:96vw;max-height:95vh;background:#111;border-radius:18px;overflow:hidden}.lb-inner img,.lb-inner video{display:block;max-width:94vw;max-height:82vh;width:auto;height:auto;background:#111}.lb-caption{padding:10px 14px;background:#fff;color:var(--text);font-size:12px;white-space:pre-wrap}
+@media(max-width:950px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.page{padding-left:9px;padding-right:9px}.gallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card{border-radius:14px}.info{padding:9px 10px 11px}}
+</style>
+</head>
+<body>
+<main class="page">
+<header class="header"><h1>my gallery ♡</h1><p>photos, videos &amp; little memories</p></header>
+
+<div class="actions">
+  <button class="btn" id="adminBtn">🔒 admin</button>
+  <button class="btn admin-only" id="logoutBtn">log out</button>
+  <button class="btn admin-only" id="addBtn">＋ add a little memory</button>
+  <button class="btn admin-only" id="newSectionBtn">＋ new section</button>
+</div>
+
+<nav class="sections" id="sectionsNav"></nav>
+<div class="heading" id="heading"></div>
+
+<div class="sort">
+  <span>sort by</span>
+  <select id="sortSelect">
+    <option value="newest">newest first</option>
+    <option value="oldest">oldest first</option>
+    <option value="recently_added">recently added</option>
+  </select>
+</div>
+
+<section class="gallery" id="gallery"><div class="empty">loading memories ♡</div></section>
+</main>
+
+<div class="modal" id="loginModal"><div class="modal-card">
+  <button class="close" data-close="loginModal">×</button>
+  <h2>admin ♡</h2><p class="sub">log in to manage your gallery</p>
+  <div class="status" id="loginStatus"></div>
+  <div class="field"><label>Email</label><input id="email" type="email" autocomplete="email"></div>
+  <div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password"></div>
+  <div class="modal-actions"><button class="btn" data-close="loginModal">cancel</button><button class="btn primary" id="loginSubmit">log in ♡</button></div>
+</div></div>
+
+<div class="modal" id="memoryModal"><div class="modal-card">
+  <button class="close" data-close="memoryModal">×</button>
+  <h2>add a little memory ♡</h2><p class="sub">photos, videos, dates, places &amp; captions</p>
+  <div class="field"><label>Photo or video</label><input id="memoryFile" type="file" accept="image/*,video/*"></div>
+  <div class="field"><label>Section</label><select id="memorySection"></select></div>
+  <div class="field"><label>Date — optional</label><input id="memoryDate" type="date"></div>
+  <div class="field"><label>Location — optional</label><input id="memoryLocation" type="text" placeholder="Toronto, Canada"></div>
+  <div class="field"><label>Caption — optional</label><textarea id="memoryCaption" placeholder="a little memory ♡"></textarea></div>
+  <div class="modal-actions"><button class="btn" data-close="memoryModal">cancel</button><button class="btn primary" id="saveMemory">add memory ♡</button></div>
+</div></div>
+
+<div class="modal" id="sectionModal"><div class="modal-card">
+  <button class="close" data-close="sectionModal">×</button>
+  <h2>new section ♡</h2><p class="sub">create another album for your memories</p>
+  <div class="field"><label>Section name</label><input id="sectionName" placeholder="summer ♡"></div>
+  <div class="field"><label>Subtitle — optional</label><textarea id="sectionSubtitle" placeholder="sunny days & tiny adventures"></textarea></div>
+  <div class="modal-actions"><button class="btn" data-close="sectionModal">cancel</button><button class="btn primary" id="saveSection">create section ♡</button></div>
+</div></div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lb-inner">
+    <button class="close" id="lbClose">×</button>
+    <div id="lbMedia"></div>
+    <div class="lb-caption" id="lbCaption"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://jhdjzuneqtmtglindcia.supabase.co";
+const SUPABASE_ANON_KEY = "PASTE-YOUR-WORKING-ANON-OR-PUBLISHABLE-KEY-HERE";
+const ADMIN_UID = "d512046e-1639-4c5a-8143-8b5602bd03f0";
+
+const MEMORIES_TABLE = "memories";
+const SECTIONS_TABLE = "sections";
+const STORAGE_BUCKET = "gallery";
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let sections = [];
+let activeSectionId = null; // null = All Memories
+let sortMode = "newest";
+
+const $ = id => document.getElementById(id);
+
+function admin(){return !!currentUser && currentUser.id === ADMIN_UID;}
+function openModal(id){$(id).classList.add("open")}
+function closeModal(id){$(id).classList.remove("open")}
+
+document.querySelectorAll("[data-close]").forEach(b=>{
+  b.addEventListener("click",()=>closeModal(b.dataset.close));
+});
+
+function updateAdminUI(){
+  document.body.classList.toggle("admin",admin());
+  document.querySelectorAll(".admin-only").forEach(e=>{
+    e.style.display = admin() ? "inline-flex" : "none";
+  });
+}
+
+function formatDate(value){
+  if(!value) return "";
+  const s=String(value).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    const [y,m,d]=s.split("-").map(Number);
+    return new Date(y,m-1,d).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  }
+  const parsed=Date.parse(s);
+  return Number.isNaN(parsed)?s:new Date(parsed).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+}
+
+function sortValue(value){
+  if(!value) return null;
+  const s=String(value).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return Number(s.replaceAll("-",""));
+  const t=Date.parse(s);
+  return Number.isNaN(t)?null:t;
+}
+
+function sortMemories(rows){
+  return [...rows].sort((a,b)=>{
+    if(sortMode==="recently_added"){
+      return new Date(b.created_at||0)-new Date(a.created_at||0);
+    }
+    const da=sortValue(a.date), db=sortValue(b.date);
+    if(da===null&&db===null) return new Date(b.created_at||0)-new Date(a.created_at||0);
+    if(da===null) return 1;
+    if(db===null) return -1;
+    return sortMode==="oldest" ? da-db : db-da;
+  });
+}
+
+function publicUrl(path){
+  if(!path) return "";
+  if(/^https?:\/\//i.test(path)) return path;
+  return db.storage.from(STORAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+function renderHeading(){
+  if(activeSectionId===null){
+    $("heading").innerHTML="<h2>all memories ♡</h2><p>photos, videos & little memories</p>";
+    return;
+  }
+  const s=sections.find(x=>x.id===activeSectionId);
+  if(!s){activeSectionId=null;return renderHeading();}
+  $("heading").innerHTML="";
+  const h=document.createElement("h2"); h.textContent=s.title; $("heading").appendChild(h);
+  if(s.subtitle){const p=document.createElement("p");p.textContent=s.subtitle;$("heading").appendChild(p);}
+}
+
+function renderSections(){
+  const nav=$("sectionsNav");
+  nav.innerHTML="";
+
+  const all=document.createElement("div");
+  all.className="tab"+(activeSectionId===null?" active":"");
+  const allBtn=document.createElement("button");
+  allBtn.textContent="all memories ♡";
+  allBtn.addEventListener("click",async()=>{activeSectionId=null;renderSections();await loadGallery();});
+  all.appendChild(allBtn);nav.appendChild(all);
+
+  sections.forEach(s=>{
+    const wrap=document.createElement("div");
+    wrap.className="tab"+(activeSectionId===s.id?" active":"");
+
+    const pick=document.createElement("button");
+    pick.textContent=s.title;
+    pick.addEventListener("click",async()=>{activeSectionId=s.id;renderSections();await loadGallery();});
+    wrap.appendChild(pick);
+
+    const rem=document.createElement("button");
+    rem.className="remove-section";
+    rem.type="button";
+    rem.title="Remove section";
+    rem.textContent="×";
+    rem.addEventListener("click",e=>{e.stopPropagation();removeSection(s);});
+    wrap.appendChild(rem);
+
+    nav.appendChild(wrap);
+  });
+
+  updateAdminUI();
+}
+
+function populateSectionSelect(){
+  const sel=$("memorySection");
+  sel.innerHTML="";
+  const all=document.createElement("option");
+  all.value="";all.textContent="All memories ♡";sel.appendChild(all);
+  sections.forEach(s=>{
+    const o=document.createElement("option");
+    o.value=s.id;o.textContent=s.title;sel.appendChild(o);
+  });
+}
+
+async function loadSections(){
+  const {data,error}=await db.from(SECTIONS_TABLE).select("id,title,subtitle,created_at").order("created_at",{ascending:true});
+  if(error){console.error(error);sections=[];} else sections=data||[];
+  renderSections();populateSectionSelect();renderHeading();
+}
+
+async function loadGallery(){
+  renderHeading();
+  const g=$("gallery");
+  g.innerHTML='<div class="empty">loading memories ♡</div>';
+
+  let q=db.from(MEMORIES_TABLE).select("*");
+  if(activeSectionId!==null) q=q.eq("section_id",activeSectionId);
+
+  const {data,error}=await q;
+  if(error){
+    console.error(error);
+    g.innerHTML='<div class="empty">couldn\\'t load memories ♡</div>';
+    return;
+  }
+
+  const rows=sortMemories(data||[]);
+  g.innerHTML="";
+  if(!rows.length){g.innerHTML='<div class="empty">no memories here yet ♡</div>';return;}
+
+  rows.forEach(memory=>{
+    const card=document.createElement("article");card.className="card";
+    const media=document.createElement("div");media.className="media";
+    const url=publicUrl(memory.file_path);
+    const video=memory.type==="video" || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(memory.file_path||"");
+
+    if(video){
+      const v=document.createElement("video");v.src=url;v.controls=true;v.preload="metadata";v.playsInline=true;media.appendChild(v);
+    }else{
+      const img=document.createElement("img");img.src=url;img.loading="lazy";img.decoding="async";img.alt=memory.caption||"Memory photo";
+      img.addEventListener("click",()=>openLightbox(memory,false));
+      media.appendChild(img);
+    }
+    card.appendChild(media);
+
+    const info=document.createElement("div");info.className="info";
+    if(memory.date){const d=document.createElement("div");d.className="date";d.textContent=formatDate(memory.date);info.appendChild(d);}
+    if(memory.location){const l=document.createElement("div");l.className="location";l.textContent="📍 "+memory.location;info.appendChild(l);}
+    if(memory.caption){const c=document.createElement("div");c.className="caption";c.textContent=memory.caption;info.appendChild(c);}
+    if(info.children.length)card.appendChild(info);
+
+    if(admin()){
+      const actions=document.createElement("div");actions.className="card-actions";
+      const del=document.createElement("button");del.className="delete-memory";del.textContent="delete";
+      del.addEventListener("click",()=>deleteMemory(memory));
+      actions.appendChild(del);card.appendChild(actions);
+    }
+
+    g.appendChild(card);
+  });
+}
+
+async function deleteMemory(memory){
+  if(!admin())return;
+  if(!confirm("Delete this memory and its stored file?"))return;
+
+  const {error}=await db.from(MEMORIES_TABLE).delete().eq("id",memory.id);
+  if(error){alert("Couldn't delete the memory ♡\\n\\n"+error.message);return;}
+
+  if(memory.file_path){
+    const r=await db.storage.from(STORAGE_BUCKET).remove([memory.file_path]);
+    if(r.error)console.error(r.error);
+  }
+  await loadGallery();
+}
+
+async function removeSection(section){
+  if(!admin())return;
+  if(!confirm(`Remove "${section.title}"?\\n\\nIts memories will be kept and moved to All Memories.`))return;
+
+  const moved=await db.from(MEMORIES_TABLE).update({section_id:null}).eq("section_id",section.id);
+  if(moved.error){alert("Couldn't move the memories.\\n\\n"+moved.error.message);return;}
+
+  const removed=await db.from(SECTIONS_TABLE).delete().eq("id",section.id);
+  if(removed.error){alert("Couldn't remove the section.\\n\\n"+removed.error.message);return;}
+
+  if(activeSectionId===section.id)activeSectionId=null;
+  await loadSections();await loadGallery();
+}
+
+$("sortSelect").addEventListener("change",e=>{sortMode=e.target.value;loadGallery();});
+
+$("adminBtn").addEventListener("click",()=>{if(!admin())openModal("loginModal");});
+
+$("loginSubmit").addEventListener("click",async()=>{
+  const email=$("email").value.trim(), password=$("password").value, status=$("loginStatus"), btn=$("loginSubmit");
+  status.style.display="none";
+  if(!email||!password){status.textContent="Please enter your email and password ♡";status.style.display="block";return;}
+  btn.disabled=true;btn.textContent="logging in...";
+  const {data,error}=await db.auth.signInWithPassword({email,password});
+  btn.disabled=false;btn.textContent="log in ♡";
+  if(error){status.textContent=error.message;status.style.display="block";return;}
+  if(!data.user||data.user.id!==ADMIN_UID){
+    await db.auth.signOut();status.textContent="This account isn't the gallery admin ♡";status.style.display="block";return;
+  }
+  currentUser=data.user;closeModal("loginModal");updateAdminUI();renderSections();
+});
+
+$("logoutBtn").addEventListener("click",async()=>{
+  await db.auth.signOut();currentUser=null;updateAdminUI();renderSections();
+});
+
+$("addBtn").addEventListener("click",()=>{populateSectionSelect();openModal("memoryModal");});
+
+$("saveMemory").addEventListener("click",async()=>{
+  if(!admin())return;
+  const file=$("memoryFile").files[0];
+  if(!file){alert("Please choose a photo or video ♡");return;}
+  const btn=$("saveMemory");btn.disabled=true;btn.textContent="saving... ♡";
+
+  const sectionId=$("memorySection").value||null;
+  const date=$("memoryDate").value||null;
+  const location=$("memoryLocation").value.trim();
+  const caption=$("memoryCaption").value.trim();
+  const type=file.type.startsWith("video/")?"video":"image";
+  const safe=file.name.normalize("NFKD").replace(/[^\w.\- ]/g,"").replace(/\s+/g,"-");
+  const path=`uploads/${crypto.randomUUID()}-${safe}`;
+
+  const up=await db.storage.from(STORAGE_BUCKET).upload(path,file,{contentType:file.type,cacheControl:"3600",upsert:false});
+  if(up.error){alert("Upload failed ♡\\n\\n"+up.error.message);btn.disabled=false;btn.textContent="add memory ♡";return;}
+
+  const ins=await db.from(MEMORIES_TABLE).insert({file_path:path,type,section_id:sectionId,date,location,caption});
+  if(ins.error){
+    await db.storage.from(STORAGE_BUCKET).remove([path]);
+    alert("Couldn't save the memory ♡\\n\\n"+ins.error.message);
+    btn.disabled=false;btn.textContent="add memory ♡";return;
+  }
+
+  $("memoryFile").value="";$("memorySection").value="";$("memoryDate").value="";$("memoryLocation").value="";$("memoryCaption").value="";
+  btn.disabled=false;btn.textContent="add memory ♡";closeModal("memoryModal");await loadGallery();
+});
+
+$("newSectionBtn").addEventListener("click",()=>openModal("sectionModal"));
+
+$("saveSection").addEventListener("click",async()=>{
+  if(!admin())return;
+  const title=$("sectionName").value.trim(), subtitle=$("sectionSubtitle").value.trim();
+  if(!title){alert("Please give the section a name ♡");return;}
+  if(title.toLowerCase()==="all memories ♡"){alert("All Memories is built in and cannot be created as a section.");return;}
+  if(sections.some(s=>s.title.trim().toLowerCase()===title.toLowerCase())){alert("That section already exists ♡");return;}
+
+  const btn=$("saveSection");btn.disabled=true;btn.textContent="creating... ♡";
+  const ins=await db.from(SECTIONS_TABLE).insert({title,subtitle});
+  btn.disabled=false;btn.textContent="create section ♡";
+  if(ins.error){alert("Couldn't create the section ♡\\n\\n"+ins.error.message);return;}
+  $("sectionName").value="";$("sectionSubtitle").value="";closeModal("sectionModal");await loadSections();
+});
+
+function openLightbox(memory,isVideo){
+  const wrap=$("lbMedia"), caption=$("lbCaption");wrap.innerHTML="";caption.textContent=memory.caption||"";
+  const url=publicUrl(memory.file_path);
+  if(isVideo){const v=document.createElement("video");v.src=url;v.controls=true;v.playsInline=true;wrap.appendChild(v);}
+  else{const img=document.createElement("img");img.src=url;img.alt=memory.caption||"Memory photo";wrap.appendChild(img);}
+  openModal("lightbox");
+}
+
+$("lbClose").addEventListener("click",()=>closeModal("lightbox"));
+$("lightbox").addEventListener("click",e=>{if(e.target.id==="lightbox")closeModal("lightbox")});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal.open,.lightbox.open").forEach(x=>x.classList.remove("open"));});
+
+db.auth.onAuthStateChange((_event,session)=>{
+  currentUser=session?.user||null;
+  if(currentUser&&currentUser.id!==ADMIN_UID){db.auth.signOut();currentUser=null;}
+  updateAdminUI();renderSections();
+});
+
+(async function start(){
+  const {data}=await db.auth.getSession();
+  currentUser=data.session?.user||null;
+  if(currentUser&&currentUser.id!==ADMIN_UID){await db.auth.signOut();currentUser=null;}
+  updateAdminUI();
+  await loadSections();
+  await loadGallery();
+})();
+</script>
+
+<script>
+/* ============================================================
+   LYSS ENHANCED FEATURES — ORIGINAL INTERFACE COMPATIBILITY LAYER
+   ============================================================ */
+(function () {
+  if (window.__lyssEnhancedLoaded) return;
+  window.__lyssEnhancedLoaded = true;
+
+  const ADMIN_UID = "d512046e-1639-4c5a-8143-8b5602bd03f0";
+  const PRESENCE_ID = "lyss";
+  const VISITOR_KEY = "lyss_gallery_visitor_id";
+  const SESSION_KEY = "lyss_gallery_session_id";
+  const HEARTBEAT_MS = 30000;
+  const ONLINE_MS = 90000;
+
+  let visitorId = localStorage.getItem(VISITOR_KEY);
+  if (!visitorId) {
+    visitorId = crypto.randomUUID();
+    localStorage.setItem(VISITOR_KEY, visitorId);
+  }
+
+  let sessionId = sessionStorage.getItem(SESSION_KEY);
+  let heartbeatTimer = null;
+
+  function client() {
+    return window.db || window.supabaseClient;
+  }
+
+  function adminLoggedIn() {
+    try {
+      return !!window.currentUser && window.currentUser.id === ADMIN_UID;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function ensureVisitorSession() {
+    const db = client();
+    if (!db) return;
+
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      sessionStorage.setItem(SESSION_KEY, sessionId);
+    }
+
+    const section = window.activeSectionId ?? null;
+    const now = new Date().toISOString();
+
+    const { error } = await db.from("gallery_sessions").upsert({
+      id: sessionId,
+      visitor_id: visitorId,
+      current_section_id: section,
+      last_seen: now,
+      started_at: now,
+      ended_at: null
+    }, { onConflict: "id" });
+
+    if (error) {
+      console.debug("visitor session:", error.message);
+      return;
+    }
+
+    await db.from("gallery_visitors").upsert({
+      visitor_id: visitorId,
+      last_seen: now
+    }, { onConflict: "visitor_id" });
+  }
+
+  async function heartbeatVisitor() {
+    const db = client();
+    if (!db || !sessionId) return;
+
+    const now = new Date().toISOString();
+    const section = window.activeSectionId ?? null;
+
+    await db.from("gallery_sessions")
+      .update({
+        last_seen: now,
+        current_section_id: section
+      })
+      .eq("id", sessionId);
+
+    await db.from("gallery_visitors")
+      .upsert({ visitor_id: visitorId, last_seen: now },
+        { onConflict: "visitor_id" });
+  }
+
+  async function updateSectionVisit() {
+    const db = client();
+    if (!db || !sessionId) return;
+
+    const section = window.activeSectionId ?? null;
+    const { data } = await db.from("gallery_sessions")
+      .select("sections_visited")
+      .eq("id", sessionId)
+      .maybeSingle();
+
+    const visited = Array.isArray(data?.sections_visited)
+      ? data.sections_visited.slice()
+      : [];
+
+    if (section && !visited.includes(section)) visited.push(section);
+
+    await db.from("gallery_sessions")
+      .update({
+        current_section_id: section,
+        sections_visited: visited,
+        last_seen: new Date().toISOString()
+      })
+      .eq("id", sessionId);
+  }
+
+  async function lyssHeartbeat() {
+    const db = client();
+    if (!db || !adminLoggedIn()) return;
+
+    await db.from("admin_presence").upsert({
+      id: PRESENCE_ID,
+      last_seen: new Date().toISOString()
+    }, { onConflict: "id" });
+  }
+
+  async function getLyssStatus() {
+    const db = client();
+    if (!db) return null;
+
+    const { data } = await db.from("admin_presence")
+      .select("last_seen")
+      .eq("id", PRESENCE_ID)
+      .maybeSingle();
+
+    if (!data?.last_seen) return null;
+
+    const seconds = Math.max(
+      0,
+      Math.floor((Date.now() - new Date(data.last_seen).getTime()) / 1000)
+    );
+
+    if (seconds <= ONLINE_MS / 1000) return "♡ lyss is online";
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 1) return "lyss was last active just now";
+    if (minutes === 1) return "lyss was last active 1 minute ago";
+    if (minutes < 60) return `lyss was last active ${minutes} minutes ago`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours === 1) return "lyss was last active 1 hour ago";
+    if (hours < 24) return `lyss was last active ${hours} hours ago`;
+
+    const days = Math.floor(hours / 24);
+    return days === 1
+      ? "lyss was last active 1 day ago"
+      : `lyss was last active ${days} days ago`;
+  }
+
+  function addPresenceToOriginalHeader() {
+    if (document.getElementById("lyssPresence")) return;
+
+    const header = document.querySelector(".header");
+    if (!header) return;
+
+    const el = document.createElement("div");
+    el.id = "lyssPresence";
+    el.style.cssText =
+      "margin-top:6px;font-size:13px;opacity:.75;min-height:19px;";
+    header.appendChild(el);
+  }
+
+  async function renderLyssStatus() {
+    addPresenceToOriginalHeader();
+    const el = document.getElementById("lyssPresence");
+    if (!el) return;
+
+    const status = await getLyssStatus();
+    if (status) el.textContent = status;
+  }
+
+  function addVisitorHistoryButton() {
+    if (!adminLoggedIn()) return;
+    if (document.getElementById("visitorHistoryButton")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "visitorHistoryButton";
+    btn.className = "btn admin-only";
+    btn.textContent = "👀 visitor history";
+    btn.style.cssText =
+      "position:fixed;top:18px;right:20px;z-index:10000;";
+
+    btn.addEventListener("click", openVisitorHistory);
+    document.body.appendChild(btn);
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function formatDuration(seconds) {
+    seconds = Math.max(0, Number(seconds) || 0);
+    if (seconds < 60) return `${seconds}s`;
+    const m = Math.floor(seconds / 60);
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    const mins = m % 60;
+    return mins ? `${h}h ${mins}m` : `${h}h`;
+  }
+
+  async function openVisitorHistory() {
+    if (!adminLoggedIn()) return;
+
+    const db = client();
+    if (!db) return;
+
+    const { data, error } = await db.from("gallery_sessions")
+      .select("*")
+      .order("started_at", { ascending: false });
+
+    if (error) {
+      alert("Couldn't load visitor history ♡\n\n" + error.message);
+      return;
+    }
+
+    const groups = {};
+    (data || []).forEach(v => {
+      const id = v.visitor_id || "unknown";
+      (groups[id] ||= []).push(v);
+    });
+
+    let html = `
+      <div class="modal open" id="enhancedVisitorModal">
+        <div class="modal-card" style="max-width:760px;max-height:85vh;overflow:auto;">
+          <button class="close" id="closeEnhancedVisitor">×</button>
+          <h2>visitor history ♡</h2>
+          <p class="sub">visitors grouped by visitor ID</p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+    `;
+
+    Object.entries(groups).forEach(([id, visits]) => {
+      html += `
+        <div style="border:1px solid rgba(0,0,0,.07);border-radius:14px;overflow:hidden;">
+          <div style="padding:13px 15px;background:rgba(255,255,255,.75);">
+            <strong>👤 visitor</strong>
+            <div style="font-size:9px;opacity:.45;word-break:break-all;margin-top:4px;">
+              ${escapeHtml(id)}
+            </div>
+            <div style="font-size:11px;opacity:.5;margin-top:3px;">
+              ${visits.length} visit${visits.length === 1 ? "" : "s"}
+            </div>
+          </div>
+          <div>
+      `;
+
+      visits.forEach(v => {
+        const start = v.started_at
+          ? new Date(v.started_at).toLocaleString()
+          : "unknown";
+        const last = v.last_seen
+          ? new Date(v.last_seen).toLocaleString()
+          : "unknown";
+        const seconds = v.started_at
+          ? Math.floor(
+              (new Date(v.last_seen || Date.now()).getTime() -
+               new Date(v.started_at).getTime()) / 1000
+            )
+          : 0;
+
+        html += `
+          <div style="padding:12px 15px;border-top:1px solid rgba(0,0,0,.05);">
+            <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <span>${escapeHtml(start)}</span>
+              <span style="opacity:.55;">${escapeHtml(last)}</span>
+            </div>
+            <div style="margin-top:5px;font-size:12px;">
+              ⏱️ ${formatDuration(seconds)}
+            </div>
+            <div style="margin-top:4px;font-size:11px;opacity:.6;">
+              section: ${escapeHtml(v.current_section_id || "all memories ♡")}
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+    });
+
+    if (!Object.keys(groups).length) {
+      html += `<div class="empty">no visitor history yet ♡</div>`;
+    }
+
+    html += `
+          </div>
+          <div class="modal-actions">
+            <button class="btn" id="closeEnhancedVisitor2">close</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const wrap = document.createElement("div");
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap);
+
+    const close = () => wrap.remove();
+    wrap.querySelector("#closeEnhancedVisitor").onclick = close;
+    wrap.querySelector("#closeEnhancedVisitor2").onclick = close;
+    wrap.firstElementChild.addEventListener("click", e => {
+      if (e.target === wrap.firstElementChild) close();
+    });
+  }
+
+  async function start() {
+    await ensureVisitorSession();
+    await updateSectionVisit();
+
+    setInterval(heartbeatVisitor, HEARTBEAT_MS);
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        heartbeatVisitor();
+        updateSectionVisit();
+      }
+    });
+
+    setInterval(renderLyssStatus, 10000);
+    renderLyssStatus();
+
+    setInterval(() => {
+      if (adminLoggedIn()) {
+        lyssHeartbeat();
+        addVisitorHistoryButton();
+      }
+    }, HEARTBEAT_MS);
+
+    lyssHeartbeat();
+    addVisitorHistoryButton();
+
+    // Catch navigation changes made by the original interface.
+    setInterval(updateSectionVisit, 5000);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+})();
+</script>
+
+</body>
+</html>
