@@ -36,8 +36,6 @@ body{
   padding:28px 24px 70px
 }
 
-/* HEADER */
-
 .header{
   text-align:center;
   padding:8px 10px 22px
@@ -55,8 +53,6 @@ body{
   font-size:13px
 }
 
-/* BUTTONS */
-
 .actions,
 .sections,
 .sort{
@@ -73,8 +69,8 @@ body{
 
 .sections{
   justify-content:flex-start;
-  margin-bottom:14px;
-  width:100%
+  width:100%;
+  margin-bottom:14px
 }
 
 button,
@@ -90,8 +86,7 @@ textarea{
   padding:9px 15px;
   background:#fff;
   color:#765766;
-  cursor:pointer;
-  transition:.15s ease
+  cursor:pointer
 }
 
 .btn.primary{
@@ -103,7 +98,7 @@ textarea{
 }
 
 .btn:disabled{
-  opacity:.55;
+  opacity:.6;
   cursor:not-allowed;
   transform:none
 }
@@ -112,8 +107,6 @@ textarea{
   display:none
 }
 
-/* SECTIONS */
-
 .tab{
   display:inline-flex;
   align-items:center;
@@ -121,8 +114,7 @@ textarea{
   padding:4px 6px 4px 12px;
   border:1px solid var(--border);
   border-radius:999px;
-  background:#fff;
-  transition:.15s ease
+  background:#fff
 }
 
 .tab.active{
@@ -158,8 +150,6 @@ body.admin .remove-section{
   display:block
 }
 
-/* SORT */
-
 .sort{
   justify-content:center;
   margin-bottom:24px;
@@ -174,8 +164,6 @@ body.admin .remove-section{
   background:#fff;
   color:var(--text)
 }
-
-/* HEADING */
 
 .heading{
   text-align:center;
@@ -193,8 +181,6 @@ body.admin .remove-section{
   font-size:12px;
   white-space:pre-wrap
 }
-
-/* GALLERY */
 
 .gallery{
   display:grid;
@@ -226,10 +212,6 @@ body.admin .remove-section{
   height:auto
 }
 
-/*
-  Images are NOT cropped or stretched.
-  They keep their natural aspect ratio.
-*/
 .media img{
   width:auto;
   margin:0 auto;
@@ -238,7 +220,8 @@ body.admin .remove-section{
 
 .media video{
   width:100%;
-  background:#000
+  background:#000;
+  cursor:pointer
 }
 
 .info{
@@ -291,7 +274,7 @@ body.admin .card-actions{
   font:14px Georgia,serif
 }
 
-/* MODALS */
+/* ---------- MODALS ---------- */
 
 .modal{
   position:fixed;
@@ -389,7 +372,7 @@ body.admin .card-actions{
   font-size:12px
 }
 
-/* LIGHTBOX */
+/* ---------- LIGHTBOX ---------- */
 
 .lightbox{
   position:fixed;
@@ -433,67 +416,7 @@ body.admin .card-actions{
   white-space:pre-wrap
 }
 
-/* LYSS PRESENCE */
-
-#lyss-presence{
-  position:fixed;
-  top:18px;
-  right:24px;
-  z-index:9998;
-
-  display:flex;
-  align-items:center;
-  gap:9px;
-
-  padding:10px 16px;
-
-  background:rgba(255,255,255,.96);
-  border:1px solid var(--border);
-  border-radius:999px;
-
-  color:#765766;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  font-size:12px;
-
-  box-shadow:0 8px 25px rgba(99,79,89,.08);
-  backdrop-filter:blur(8px);
-
-  transition:all .25s ease
-}
-
-#lyss-heart{
-  font-family:Georgia,serif;
-  font-size:24px;
-  line-height:1;
-  display:inline-block;
-  color:#c98da5;
-  transform-origin:center
-}
-
-#lyss-presence.online #lyss-heart{
-  color:#a85d74;
-  animation:lyssHeartPulse 1.15s ease-in-out infinite
-}
-
-#lyss-presence.offline #lyss-heart{
-  opacity:.65
-}
-
-#lyss-presence-text{
-  white-space:nowrap
-}
-
-@keyframes lyssHeartPulse{
-  0%,100%{
-    transform:scale(1)
-  }
-
-  50%{
-    transform:scale(1.28)
-  }
-}
-
-/* EXTRA ADMIN TOOLS */
+/* ---------- ADMIN EXTRA TOOLS ---------- */
 
 .extra-memory-tools{
   display:none;
@@ -559,7 +482,7 @@ body.admin .tab{
   opacity:.45
 }
 
-/* EDIT BOX */
+/* ---------- EDIT BOX ---------- */
 
 #extraEditBox{
   position:fixed;
@@ -621,14 +544,14 @@ body.admin .tab{
   resize:vertical
 }
 
-#extraEditBox .extra-edit-buttons{
+.extra-edit-buttons{
   display:flex;
   justify-content:flex-end;
   gap:8px;
   margin-top:18px
 }
 
-#extraEditBox button{
+.extra-edit-buttons button{
   border:1px solid var(--border);
   border-radius:999px;
   padding:9px 15px;
@@ -637,22 +560,82 @@ body.admin .tab{
   cursor:pointer
 }
 
-#extraEditBox .save-extra{
+.extra-edit-buttons .save-extra{
   background:var(--pink)
 }
 
-/* RESPONSIVE */
+/* =========================================================
+   LYSS PRESENCE
+   ========================================================= */
+
+#lyss-presence{
+  position:fixed;
+  top:18px;
+  right:24px;
+  z-index:9998;
+
+  display:flex;
+  align-items:center;
+  gap:9px;
+
+  padding:10px 16px;
+
+  background:rgba(255,255,255,.95);
+  border:1px solid var(--border);
+  border-radius:999px;
+
+  color:#765766;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:13px;
+
+  box-shadow:0 8px 25px rgba(99,79,89,.08);
+  backdrop-filter:blur(8px);
+
+  transition:opacity .2s ease
+}
+
+#lyss-heart{
+  font-family:Georgia,serif;
+  font-size:24px;
+  line-height:1;
+  color:#a85d74;
+  display:inline-block;
+  transform-origin:center
+}
+
+#lyss-presence.online #lyss-heart{
+  animation:lyssHeartPulse 1.2s ease-in-out infinite
+}
+
+#lyss-presence.offline #lyss-heart{
+  opacity:.6
+}
+
+#lyss-presence.online #lyss-presence-text{
+  color:#765766
+}
+
+#lyss-presence.offline #lyss-presence-text{
+  color:#9e8992
+}
+
+@keyframes lyssHeartPulse{
+  0%,100%{
+    transform:scale(1)
+  }
+
+  50%{
+    transform:scale(1.25)
+  }
+}
 
 @media(max-width:950px){
-
   .gallery{
     grid-template-columns:repeat(2,minmax(0,1fr))
   }
-
 }
 
 @media(max-width:560px){
-
   .page{
     padding-left:9px;
     padding-right:9px
@@ -674,7 +657,7 @@ body.admin .tab{
   #lyss-presence{
     top:12px;
     right:12px;
-    padding:8px 12px;
+    padding:8px 13px;
     font-size:11px
   }
 
@@ -733,17 +716,21 @@ body.admin .tab{
 </main>
 
 
-<!-- LYSS PRESENCE -->
+<!-- =========================================================
+     LYSS PRESENCE
+     ========================================================= -->
 
 <div id="lyss-presence" class="offline">
   <span id="lyss-heart">♡</span>
   <span id="lyss-presence-text">
-    lyss was last active…
+    lyss was last active...
   </span>
 </div>
 
 
-<!-- LOGIN MODAL -->
+<!-- =========================================================
+     LOGIN MODAL
+     ========================================================= -->
 
 <div class="modal" id="loginModal">
 
@@ -780,21 +767,13 @@ body.admin .tab{
     </div>
 
     <div class="modal-actions">
-
-      <button
-        class="btn"
-        data-close="loginModal"
-      >
+      <button class="btn" data-close="loginModal">
         cancel
       </button>
 
-      <button
-        class="btn primary"
-        id="loginSubmit"
-      >
+      <button class="btn primary" id="loginSubmit">
         log in ♡
       </button>
-
     </div>
 
   </div>
@@ -802,7 +781,9 @@ body.admin .tab{
 </div>
 
 
-<!-- ADD MEMORY MODAL -->
+<!-- =========================================================
+     ADD MEMORY MODAL
+     ========================================================= -->
 
 <div class="modal" id="memoryModal">
 
@@ -864,17 +845,11 @@ body.admin .tab{
 
     <div class="modal-actions">
 
-      <button
-        class="btn"
-        data-close="memoryModal"
-      >
+      <button class="btn" data-close="memoryModal">
         cancel
       </button>
 
-      <button
-        class="btn primary"
-        id="saveMemory"
-      >
+      <button class="btn primary" id="saveMemory">
         add memory ♡
       </button>
 
@@ -885,7 +860,9 @@ body.admin .tab{
 </div>
 
 
-<!-- NEW SECTION MODAL -->
+<!-- =========================================================
+     SECTION MODAL
+     ========================================================= -->
 
 <div class="modal" id="sectionModal">
 
@@ -902,36 +879,34 @@ body.admin .tab{
     </p>
 
     <div class="field">
+
       <label>Section name</label>
 
       <input
         id="sectionName"
         placeholder="summer ♡"
       >
+
     </div>
 
     <div class="field">
+
       <label>Subtitle — optional</label>
 
       <textarea
         id="sectionSubtitle"
         placeholder="sunny days & tiny adventures"
       ></textarea>
+
     </div>
 
     <div class="modal-actions">
 
-      <button
-        class="btn"
-        data-close="sectionModal"
-      >
+      <button class="btn" data-close="sectionModal">
         cancel
       </button>
 
-      <button
-        class="btn primary"
-        id="saveSection"
-      >
+      <button class="btn primary" id="saveSection">
         create section ♡
       </button>
 
@@ -942,25 +917,21 @@ body.admin .tab{
 </div>
 
 
-<!-- LIGHTBOX -->
+<!-- =========================================================
+     LIGHTBOX
+     ========================================================= -->
 
 <div class="lightbox" id="lightbox">
 
   <div class="lb-inner">
 
-    <button
-      class="close"
-      id="lbClose"
-    >
+    <button class="close" id="lbClose">
       ×
     </button>
 
     <div id="lbMedia"></div>
 
-    <div
-      class="lb-caption"
-      id="lbCaption"
-    ></div>
+    <div class="lb-caption" id="lbCaption"></div>
 
   </div>
 
@@ -968,9 +939,8 @@ body.admin .tab{
 
 
 <script>
-
 /* =========================================================
-   SUPABASE
+   SUPABASE CONFIGURATION
    ========================================================= */
 
 const SUPABASE_URL =
@@ -994,15 +964,12 @@ const db =
 
 
 /* =========================================================
-   STATE
+   GLOBAL STATE
    ========================================================= */
 
 let currentUser = null;
-
 let sections = [];
-
 let activeSectionId = null;
-
 let sortMode = "newest";
 
 
@@ -1015,30 +982,20 @@ const $ = id =>
 
 
 function admin(){
-
   return !!currentUser &&
          currentUser.id === ADMIN_UID;
-
 }
 
 
 function openModal(id){
-
   $(id).classList.add("open");
-
 }
 
 
 function closeModal(id){
-
   $(id).classList.remove("open");
-
 }
 
-
-/* =========================================================
-   MODAL CLOSE BUTTONS
-   ========================================================= */
 
 document
   .querySelectorAll("[data-close]")
@@ -1092,11 +1049,7 @@ function formatDate(value){
     /^\d{4}-\d{2}-\d{2}$/.test(s)
   ){
 
-    const [
-      y,
-      m,
-      d
-    ] =
+    const [y,m,d] =
       s.split("-").map(Number);
 
     return new Date(
@@ -1119,15 +1072,15 @@ function formatDate(value){
 
   return Number.isNaN(parsed)
     ? s
-    : new Date(parsed).toLocaleDateString(
-        undefined,
-        {
-          year:"numeric",
-          month:"long",
-          day:"numeric"
-        }
-      );
-
+    : new Date(parsed)
+        .toLocaleDateString(
+          undefined,
+          {
+            year:"numeric",
+            month:"long",
+            day:"numeric"
+          }
+        );
 }
 
 
@@ -1154,7 +1107,6 @@ function sortValue(value){
   return Number.isNaN(t)
     ? null
     : t;
-
 }
 
 
@@ -1167,10 +1119,9 @@ function sortMemories(rows){
         sortMode === "recently_added"
       ){
 
-        return new Date(
-          b.created_at || 0
-        ) - new Date(
-          a.created_at || 0
+        return (
+          new Date(b.created_at || 0) -
+          new Date(a.created_at || 0)
         );
 
       }
@@ -1186,10 +1137,9 @@ function sortMemories(rows){
         dbValue === null
       ){
 
-        return new Date(
-          b.created_at || 0
-        ) - new Date(
-          a.created_at || 0
+        return (
+          new Date(b.created_at || 0) -
+          new Date(a.created_at || 0)
         );
 
       }
@@ -1219,9 +1169,7 @@ function publicUrl(path){
   if(
     /^https?:\/\//i.test(path)
   ){
-
     return path;
-
   }
 
   return db
@@ -1230,12 +1178,64 @@ function publicUrl(path){
     .getPublicUrl(path)
     .data
     .publicUrl;
+}
+
+
+/* =========================================================
+   SECTION HEADING
+   ========================================================= */
+
+function renderHeading(){
+
+  if(activeSectionId === null){
+
+    $("heading").innerHTML = "";
+
+    return;
+  }
+
+  const section =
+    sections.find(
+      x => x.id === activeSectionId
+    );
+
+  if(!section){
+
+    activeSectionId = null;
+
+    return renderHeading();
+
+  }
+
+  $("heading").innerHTML = "";
+
+  const h =
+    document.createElement("h2");
+
+  h.textContent =
+    section.title;
+
+  $("heading")
+    .appendChild(h);
+
+  if(section.subtitle){
+
+    const p =
+      document.createElement("p");
+
+    p.textContent =
+      section.subtitle;
+
+    $("heading")
+      .appendChild(p);
+
+  }
 
 }
 
 
 /* =========================================================
-   SECTION ORDER
+   LOCAL ORDER STORAGE
    ========================================================= */
 
 function storageKey(
@@ -1302,19 +1302,14 @@ function applySavedOrder(
     );
 
   if(!saved.length){
-
     return items;
-
   }
 
   const position =
     new Map(
       saved.map(
         (id,index) =>
-          [
-            String(id),
-            index
-          ]
+          [String(id),index]
       )
     );
 
@@ -1340,65 +1335,7 @@ function applySavedOrder(
 
 
 /* =========================================================
-   HEADING
-   ========================================================= */
-
-function renderHeading(){
-
-  if(
-    activeSectionId === null
-  ){
-
-    $("heading").innerHTML = "";
-
-    return;
-
-  }
-
-  const section =
-    sections.find(
-      x => x.id === activeSectionId
-    );
-
-  if(!section){
-
-    activeSectionId = null;
-
-    renderHeading();
-
-    return;
-
-  }
-
-  $("heading").innerHTML = "";
-
-  const h =
-    document.createElement("h2");
-
-  h.textContent =
-    section.title;
-
-  $("heading")
-    .appendChild(h);
-
-  if(section.subtitle){
-
-    const p =
-      document.createElement("p");
-
-    p.textContent =
-      section.subtitle;
-
-    $("heading")
-      .appendChild(p);
-
-  }
-
-}
-
-
-/* =========================================================
-   RENDER SECTIONS
+   SECTIONS
    ========================================================= */
 
 function renderSections(){
@@ -1407,9 +1344,6 @@ function renderSections(){
     $("sectionsNav");
 
   nav.innerHTML = "";
-
-
-  /* ALL MEMORIES */
 
   const all =
     document.createElement("div");
@@ -1422,13 +1356,15 @@ function renderSections(){
         : ""
     );
 
-  const allBtn =
+  const allButton =
     document.createElement("button");
 
-  allBtn.textContent =
+  allButton.type = "button";
+
+  allButton.textContent =
     "all memories ♡";
 
-  allBtn.addEventListener(
+  allButton.addEventListener(
     "click",
     async () => {
 
@@ -1438,17 +1374,13 @@ function renderSections(){
 
       await loadGallery();
 
-      recordVisitor();
-
     }
   );
 
-  all.appendChild(allBtn);
+  all.appendChild(allButton);
 
   nav.appendChild(all);
 
-
-  /* REAL SECTIONS */
 
   sections.forEach(
     section => {
@@ -1464,12 +1396,10 @@ function renderSections(){
             : ""
         );
 
-      wrap.dataset.sectionId =
-        section.id;
-
-
       const pick =
         document.createElement("button");
+
+      pick.type = "button";
 
       pick.textContent =
         section.title;
@@ -1485,29 +1415,27 @@ function renderSections(){
 
           await loadGallery();
 
-          recordVisitor();
-
         }
       );
 
       wrap.appendChild(pick);
 
 
-      const rem =
+      const remove =
         document.createElement("button");
 
-      rem.className =
+      remove.className =
         "remove-section";
 
-      rem.type = "button";
+      remove.type = "button";
 
-      rem.title =
+      remove.title =
         "Remove section";
 
-      rem.textContent =
+      remove.textContent =
         "×";
 
-      rem.addEventListener(
+      remove.addEventListener(
         "click",
         event => {
 
@@ -1518,7 +1446,7 @@ function renderSections(){
         }
       );
 
-      wrap.appendChild(rem);
+      wrap.appendChild(remove);
 
       nav.appendChild(wrap);
 
@@ -1541,7 +1469,6 @@ function populateSectionSelect(){
 
   select.innerHTML = "";
 
-
   const all =
     document.createElement("option");
 
@@ -1551,7 +1478,6 @@ function populateSectionSelect(){
     "All memories ♡";
 
   select.appendChild(all);
-
 
   sections.forEach(
     section => {
@@ -1579,10 +1505,7 @@ function populateSectionSelect(){
 
 async function loadSections(){
 
-  const {
-    data,
-    error
-  } =
+  const result =
     await db
       .from(SECTIONS_TABLE)
       .select(
@@ -1595,12 +1518,11 @@ async function loadSections(){
         }
       );
 
-
-  if(error){
+  if(result.error){
 
     console.error(
       "Sections:",
-      error
+      result.error
     );
 
     sections = [];
@@ -1608,10 +1530,9 @@ async function loadSections(){
   }else{
 
     sections =
-      data || [];
+      result.data || [];
 
   }
-
 
   sections =
     applySavedOrder(
@@ -1619,7 +1540,6 @@ async function loadSections(){
       "sections",
       "main"
     );
-
 
   renderSections();
 
@@ -1638,23 +1558,18 @@ async function loadGallery(){
 
   renderHeading();
 
-
   const gallery =
     $("gallery");
 
   gallery.innerHTML =
     '<div class="empty">loading memories ♡</div>';
 
-
   let query =
     db
       .from(MEMORIES_TABLE)
       .select("*");
 
-
-  if(
-    activeSectionId !== null
-  ){
+  if(activeSectionId !== null){
 
     query =
       query.eq(
@@ -1664,19 +1579,14 @@ async function loadGallery(){
 
   }
 
-
-  const {
-    data,
-    error
-  } =
+  const result =
     await query;
 
-
-  if(error){
+  if(result.error){
 
     console.error(
       "Gallery:",
-      error
+      result.error
     );
 
     gallery.innerHTML =
@@ -1686,12 +1596,11 @@ async function loadGallery(){
 
   }
 
-
   let rows =
-    sortMemories(
-      data || []
-    );
+    result.data || [];
 
+  rows =
+    sortMemories(rows);
 
   rows =
     applySavedOrder(
@@ -1700,9 +1609,7 @@ async function loadGallery(){
       activeSectionId
     );
 
-
   gallery.innerHTML = "";
-
 
   if(!rows.length){
 
@@ -1713,15 +1620,13 @@ async function loadGallery(){
 
   }
 
-
   rows.forEach(
     memory => {
 
       const card =
         document.createElement("article");
 
-      card.className =
-        "card";
+      card.className = "card";
 
       card.dataset.memoryId =
         memory.id;
@@ -1739,12 +1644,12 @@ async function loadGallery(){
           memory.file_path
         );
 
-
       const isVideo =
         memory.type === "video" ||
-        /\.(mp4|webm|ogg|mov)(\?|$)/i.test(
-          memory.file_path || ""
-        );
+        /\.(mp4|webm|ogg|mov)(\?|$)/i
+          .test(
+            memory.file_path || ""
+          );
 
 
       if(isVideo){
@@ -1759,6 +1664,14 @@ async function loadGallery(){
         video.preload = "metadata";
 
         video.playsInline = true;
+
+        video.addEventListener(
+          "dblclick",
+          () => openLightbox(
+            memory,
+            true
+          )
+        );
 
         media.appendChild(video);
 
@@ -1779,17 +1692,15 @@ async function loadGallery(){
 
         img.addEventListener(
           "click",
-          () =>
-            openLightbox(
-              memory,
-              false
-            )
+          () => openLightbox(
+            memory,
+            false
+          )
         );
 
         media.appendChild(img);
 
       }
-
 
       card.appendChild(media);
 
@@ -1859,8 +1770,6 @@ async function loadGallery(){
       }
 
 
-      /* BASIC DELETE */
-
       if(admin()){
 
         const actions =
@@ -1868,7 +1777,6 @@ async function loadGallery(){
 
         actions.className =
           "card-actions";
-
 
         const del =
           document.createElement("button");
@@ -1881,10 +1789,8 @@ async function loadGallery(){
 
         del.addEventListener(
           "click",
-          () =>
-            deleteMemory(memory)
+          () => deleteMemory(memory)
         );
-
 
         actions.appendChild(del);
 
@@ -1898,16 +1804,6 @@ async function loadGallery(){
     }
   );
 
-
-  if(admin()){
-
-    setTimeout(
-      addMemoryTools,
-      20
-    );
-
-  }
-
 }
 
 
@@ -1919,21 +1815,15 @@ async function deleteMemory(memory){
 
   if(!admin()) return;
 
-
   if(
     !confirm(
       "Delete this memory and its stored file?"
     )
   ){
-
     return;
-
   }
 
-
-  const {
-    error
-  } =
+  const result =
     await db
       .from(MEMORIES_TABLE)
       .delete()
@@ -1942,22 +1832,20 @@ async function deleteMemory(memory){
         memory.id
       );
 
-
-  if(error){
+  if(result.error){
 
     alert(
       "Couldn't delete the memory ♡\n\n" +
-      error.message
+      result.error.message
     );
 
     return;
 
   }
 
-
   if(memory.file_path){
 
-    const result =
+    const storageResult =
       await db
         .storage
         .from(STORAGE_BUCKET)
@@ -1965,17 +1853,15 @@ async function deleteMemory(memory){
           memory.file_path
         ]);
 
-    if(result.error){
+    if(storageResult.error){
 
       console.error(
-        "Storage delete:",
-        result.error
+        storageResult.error
       );
 
     }
 
   }
-
 
   await loadGallery();
 
@@ -1983,13 +1869,12 @@ async function deleteMemory(memory){
 
 
 /* =========================================================
-   DELETE SECTION
+   REMOVE SECTION
    ========================================================= */
 
 async function removeSection(section){
 
   if(!admin()) return;
-
 
   if(
     !confirm(
@@ -1997,11 +1882,8 @@ async function removeSection(section){
       "Its memories will be kept and moved to All Memories."
     )
   ){
-
     return;
-
   }
-
 
   const moved =
     await db
@@ -2014,7 +1896,6 @@ async function removeSection(section){
         section.id
       );
 
-
   if(moved.error){
 
     alert(
@@ -2026,7 +1907,6 @@ async function removeSection(section){
 
   }
 
-
   const removed =
     await db
       .from(SECTIONS_TABLE)
@@ -2035,7 +1915,6 @@ async function removeSection(section){
         "id",
         section.id
       );
-
 
   if(removed.error){
 
@@ -2048,7 +1927,6 @@ async function removeSection(section){
 
   }
 
-
   if(
     activeSectionId === section.id
   ){
@@ -2056,7 +1934,6 @@ async function removeSection(section){
     activeSectionId = null;
 
   }
-
 
   await loadSections();
 
@@ -2084,7 +1961,7 @@ $("sortSelect")
 
 
 /* =========================================================
-   ADMIN LOGIN
+   LOGIN
    ========================================================= */
 
 $("adminBtn")
@@ -2094,9 +1971,10 @@ $("adminBtn")
 
       if(!admin()){
 
-        openModal(
-          "loginModal"
-        );
+        $("loginStatus").style.display =
+          "none";
+
+        openModal("loginModal");
 
       }
 
@@ -2110,13 +1988,10 @@ $("loginSubmit")
     async () => {
 
       const email =
-        $("email")
-          .value
-          .trim();
+        $("email").value.trim();
 
       const password =
-        $("password")
-          .value;
+        $("password").value;
 
       const status =
         $("loginStatus");
@@ -2124,15 +1999,10 @@ $("loginSubmit")
       const button =
         $("loginSubmit");
 
-
       status.style.display =
         "none";
 
-
-      if(
-        !email ||
-        !password
-      ){
+      if(!email || !password){
 
         status.textContent =
           "Please enter your email and password ♡";
@@ -2144,35 +2014,29 @@ $("loginSubmit")
 
       }
 
-
-      button.disabled =
-        true;
+      button.disabled = true;
 
       button.textContent =
         "logging in...";
 
 
-      const {
-        data,
-        error
-      } =
+      const result =
         await db.auth.signInWithPassword({
           email,
           password
         });
 
 
-      button.disabled =
-        false;
+      button.disabled = false;
 
       button.textContent =
         "log in ♡";
 
 
-      if(error){
+      if(result.error){
 
         status.textContent =
-          error.message;
+          result.error.message;
 
         status.style.display =
           "block";
@@ -2183,8 +2047,8 @@ $("loginSubmit")
 
 
       if(
-        !data.user ||
-        data.user.id !== ADMIN_UID
+        !result.data.user ||
+        result.data.user.id !== ADMIN_UID
       ){
 
         await db.auth.signOut();
@@ -2201,11 +2065,9 @@ $("loginSubmit")
 
 
       currentUser =
-        data.user;
+        result.data.user;
 
-      closeModal(
-        "loginModal"
-      );
+      closeModal("loginModal");
 
       updateAdminUI();
 
@@ -2213,14 +2075,12 @@ $("loginSubmit")
 
       startPresenceHeartbeat();
 
-      updatePresence();
-
     }
   );
 
 
 /* =========================================================
-   LOG OUT
+   LOGOUT
    ========================================================= */
 
 $("logoutBtn")
@@ -2230,16 +2090,11 @@ $("logoutBtn")
 
       await db.auth.signOut();
 
-      currentUser =
-        null;
+      currentUser = null;
 
       updateAdminUI();
 
       renderSections();
-
-      stopPresenceHeartbeat();
-
-      updatePresence();
 
     }
   );
@@ -2256,9 +2111,7 @@ $("addBtn")
 
       populateSectionSelect();
 
-      openModal(
-        "memoryModal"
-      );
+      openModal("memoryModal");
 
     }
   );
@@ -2271,11 +2124,8 @@ $("saveMemory")
 
       if(!admin()) return;
 
-
       const file =
-        $("memoryFile")
-          .files[0];
-
+        $("memoryFile").files[0];
 
       if(!file){
 
@@ -2287,25 +2137,21 @@ $("saveMemory")
 
       }
 
-
       const button =
         $("saveMemory");
 
-      button.disabled =
-        true;
+      button.disabled = true;
 
       button.textContent =
         "saving... ♡";
 
 
       const sectionId =
-        $("memorySection")
-          .value ||
+        $("memorySection").value ||
         null;
 
       const date =
-        $("memoryDate")
-          .value ||
+        $("memoryDate").value ||
         null;
 
       const location =
@@ -2318,16 +2164,13 @@ $("saveMemory")
           .value
           .trim();
 
-
       const type =
-        file.type.startsWith(
-          "video/"
-        )
+        file.type.startsWith("video/")
           ? "video"
           : "image";
 
 
-      const safeName =
+      const safe =
         file.name
           .normalize("NFKD")
           .replace(
@@ -2339,9 +2182,8 @@ $("saveMemory")
             "-"
           );
 
-
       const path =
-        `uploads/${crypto.randomUUID()}-${safeName}`;
+        `uploads/${crypto.randomUUID()}-${safe}`;
 
 
       const upload =
@@ -2352,10 +2194,8 @@ $("saveMemory")
             path,
             file,
             {
-              contentType:
-                file.type,
-              cacheControl:
-                "3600",
+              contentType:file.type,
+              cacheControl:"3600",
               upsert:false
             }
           );
@@ -2368,8 +2208,7 @@ $("saveMemory")
           upload.error.message
         );
 
-        button.disabled =
-          false;
+        button.disabled = false;
 
         button.textContent =
           "add memory ♡";
@@ -2387,10 +2226,8 @@ $("saveMemory")
             type,
             section_id:sectionId,
             date,
-            location:
-              location || null,
-            caption:
-              caption || null
+            location,
+            caption
           });
 
 
@@ -2399,17 +2236,14 @@ $("saveMemory")
         await db
           .storage
           .from(STORAGE_BUCKET)
-          .remove([
-            path
-          ]);
+          .remove([path]);
 
         alert(
           "Couldn't save the memory ♡\n\n" +
           insert.error.message
         );
 
-        button.disabled =
-          false;
+        button.disabled = false;
 
         button.textContent =
           "add memory ♡";
@@ -2419,33 +2253,23 @@ $("saveMemory")
       }
 
 
-      $("memoryFile")
-        .value = "";
+      $("memoryFile").value = "";
 
-      $("memorySection")
-        .value = "";
+      $("memorySection").value = "";
 
-      $("memoryDate")
-        .value = "";
+      $("memoryDate").value = "";
 
-      $("memoryLocation")
-        .value = "";
+      $("memoryLocation").value = "";
 
-      $("memoryCaption")
-        .value = "";
+      $("memoryCaption").value = "";
 
 
-      button.disabled =
-        false;
+      button.disabled = false;
 
       button.textContent =
         "add memory ♡";
 
-
-      closeModal(
-        "memoryModal"
-      );
-
+      closeModal("memoryModal");
 
       await loadGallery();
 
@@ -2460,10 +2284,15 @@ $("saveMemory")
 $("newSectionBtn")
   .addEventListener(
     "click",
-    () =>
-      openModal(
-        "sectionModal"
-      )
+    () => {
+
+      $("sectionName").value = "";
+
+      $("sectionSubtitle").value = "";
+
+      openModal("sectionModal");
+
+    }
   );
 
 
@@ -2473,7 +2302,6 @@ $("saveSection")
     async () => {
 
       if(!admin()) return;
-
 
       const title =
         $("sectionName")
@@ -2533,14 +2361,13 @@ $("saveSection")
       const button =
         $("saveSection");
 
-      button.disabled =
-        true;
+      button.disabled = true;
 
       button.textContent =
         "creating... ♡";
 
 
-      const insert =
+      const result =
         await db
           .from(SECTIONS_TABLE)
           .insert({
@@ -2550,18 +2377,17 @@ $("saveSection")
           });
 
 
-      button.disabled =
-        false;
+      button.disabled = false;
 
       button.textContent =
         "create section ♡";
 
 
-      if(insert.error){
+      if(result.error){
 
         alert(
           "Couldn't create the section ♡\n\n" +
-          insert.error.message
+          result.error.message
         );
 
         return;
@@ -2569,17 +2395,7 @@ $("saveSection")
       }
 
 
-      $("sectionName")
-        .value = "";
-
-      $("sectionSubtitle")
-        .value = "";
-
-
-      closeModal(
-        "sectionModal"
-      );
-
+      closeModal("sectionModal");
 
       await loadSections();
 
@@ -2602,7 +2418,6 @@ function openLightbox(
   const caption =
     $("lbCaption");
 
-
   wrap.innerHTML = "";
 
   caption.textContent =
@@ -2618,28 +2433,22 @@ function openLightbox(
   if(isVideo){
 
     const video =
-      document.createElement(
-        "video"
-      );
+      document.createElement("video");
 
     video.src = url;
 
-    video.controls =
-      true;
+    video.controls = true;
 
-    video.playsInline =
-      true;
+    video.playsInline = true;
 
-    wrap.appendChild(
-      video
-    );
+    video.autoplay = true;
+
+    wrap.appendChild(video);
 
   }else{
 
     const img =
-      document.createElement(
-        "img"
-      );
+      document.createElement("img");
 
     img.src = url;
 
@@ -2647,15 +2456,11 @@ function openLightbox(
       memory.caption ||
       "Memory photo";
 
-    wrap.appendChild(
-      img
-    );
+    wrap.appendChild(img);
 
   }
 
-
-  $("lightbox")
-    .classList.add("open");
+  openModal("lightbox");
 
 }
 
@@ -2663,10 +2468,7 @@ function openLightbox(
 $("lbClose")
   .addEventListener(
     "click",
-    () =>
-      closeModal(
-        "lightbox"
-      )
+    () => closeModal("lightbox")
   );
 
 
@@ -2680,9 +2482,7 @@ $("lightbox")
         "lightbox"
       ){
 
-        closeModal(
-          "lightbox"
-        );
+        closeModal("lightbox");
 
       }
 
@@ -2690,30 +2490,22 @@ $("lightbox")
   );
 
 
-/* =========================================================
-   ESCAPE
-   ========================================================= */
-
 document.addEventListener(
   "keydown",
   event => {
 
-    if(
-      event.key ===
-      "Escape"
-    ){
-
-      document
-        .querySelectorAll(
-          ".modal.open,.lightbox.open"
-        )
-        .forEach(
-          element =>
-            element.classList
-              .remove("open")
-        );
-
+    if(event.key !== "Escape"){
+      return;
     }
+
+    document
+      .querySelectorAll(
+        ".modal.open,.lightbox.open"
+      )
+      .forEach(
+        element =>
+          element.classList.remove("open")
+      );
 
   }
 );
@@ -2729,14 +2521,13 @@ function escapeHtml(value){
     value ?? ""
   ).replace(
     /[&<>"']/g,
-    character =>
-      ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#39;"
-      }[character])
+    character => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[character])
   );
 
 }
@@ -2749,16 +2540,12 @@ function showEditBox(
 ){
 
   document
-    .getElementById(
-      "extraEditBox"
-    )
+    .getElementById("extraEditBox")
     ?.remove();
 
 
   const overlay =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   overlay.id =
     "extraEditBox";
@@ -2767,27 +2554,31 @@ function showEditBox(
     "open";
 
 
-  let fieldsHtml =
-    "";
+  let fieldsHtml = "";
 
 
   fields.forEach(
     field => {
 
-      if(
-        field.type ===
-        "textarea"
-      ){
+      if(field.type === "textarea"){
 
         fieldsHtml += `
-          <label>${escapeHtml(field.label)}</label>
-          <textarea id="extraField_${escapeHtml(field.key)}">${escapeHtml(field.value || "")}</textarea>
+          <label>
+            ${escapeHtml(field.label)}
+          </label>
+
+          <textarea
+            id="extraField_${escapeHtml(field.key)}"
+          >${escapeHtml(field.value || "")}</textarea>
         `;
 
       }else{
 
         fieldsHtml += `
-          <label>${escapeHtml(field.label)}</label>
+          <label>
+            ${escapeHtml(field.label)}
+          </label>
+
           <input
             id="extraField_${escapeHtml(field.key)}"
             type="${escapeHtml(field.type || "text")}"
@@ -2804,9 +2595,13 @@ function showEditBox(
   overlay.innerHTML = `
     <div class="extra-edit-card">
 
-      <h2>${escapeHtml(title)}</h2>
+      <h2>
+        ${escapeHtml(title)}
+      </h2>
 
-      <p>edit this little detail ♡</p>
+      <p>
+        edit this little detail ♡
+      </p>
 
       ${fieldsHtml}
 
@@ -2835,16 +2630,12 @@ function showEditBox(
 
 
   function close(){
-
     overlay.remove();
-
   }
 
 
   overlay
-    .querySelector(
-      "#extraCancel"
-    )
+    .querySelector("#extraCancel")
     .onclick = close;
 
 
@@ -2853,8 +2644,7 @@ function showEditBox(
     event => {
 
       if(
-        event.target ===
-        overlay
+        event.target === overlay
       ){
 
         close();
@@ -2866,75 +2656,70 @@ function showEditBox(
 
 
   overlay
-    .querySelector(
-      "#extraSave"
-    )
-    .onclick =
-      async () => {
+    .querySelector("#extraSave")
+    .onclick = async () => {
 
-        const values = {};
+      const values = {};
 
 
-        fields.forEach(
-          field => {
+      fields.forEach(
+        field => {
 
-            values[field.key] =
-              document
-                .getElementById(
-                  "extraField_" +
-                  field.key
-                )
-                .value;
-
-          }
-        );
-
-
-        const button =
-          overlay.querySelector(
-            "#extraSave"
-          );
-
-        button.disabled =
-          true;
-
-        button.textContent =
-          "saving...";
-
-
-        try{
-
-          await saveFunction(
-            values
-          );
-
-          close();
-
-          await loadSections();
-
-          await loadGallery();
-
-        }catch(error){
-
-          console.error(error);
-
-          alert(
-            "Couldn't save the changes ♡\n\n" +
-            (
-              error.message ||
-              error
-            )
-          );
-
-          button.disabled =
-            false;
-
-          button.textContent =
-            "save ♡";
+          values[field.key] =
+            document
+              .getElementById(
+                "extraField_" +
+                field.key
+              )
+              .value;
 
         }
+      );
 
-      };
+
+      const button =
+        overlay.querySelector(
+          "#extraSave"
+        );
+
+      button.disabled = true;
+
+      button.textContent =
+        "saving...";
+
+
+      try{
+
+        await saveFunction(
+          values
+        );
+
+        close();
+
+        await loadSections();
+
+        await loadGallery();
+
+      }catch(error){
+
+        console.error(error);
+
+        alert(
+          "Couldn't save the changes ♡\n\n" +
+          (
+            error.message ||
+            error
+          )
+        );
+
+        button.disabled = false;
+
+        button.textContent =
+          "save ♡";
+
+      }
+
+    };
 
 }
 
@@ -2943,12 +2728,9 @@ function showEditBox(
    EDIT MEMORY
    ========================================================= */
 
-async function editMemory(
-  memory
-){
+async function editMemory(memory){
 
   if(!admin()) return;
-
 
   showEditBox(
     "edit memory ♡",
@@ -2957,44 +2739,36 @@ async function editMemory(
         key:"date",
         label:"Date",
         type:"date",
-        value:
-          memory.date || ""
+        value:memory.date || ""
       },
       {
         key:"location",
         label:"Location",
         type:"text",
-        value:
-          memory.location || ""
+        value:memory.location || ""
       },
       {
         key:"caption",
         label:"Caption",
         type:"textarea",
-        value:
-          memory.caption || ""
+        value:memory.caption || ""
       }
     ],
     async values => {
 
-      const {
-        error
-      } =
+      const result =
         await db
           .from(MEMORIES_TABLE)
           .update({
             date:
-              values.date ||
-              null,
+              values.date || null,
 
             location:
-              values.location
-                .trim() ||
+              values.location.trim() ||
               null,
 
             caption:
-              values.caption
-                .trim() ||
+              values.caption.trim() ||
               null
           })
           .eq(
@@ -3002,9 +2776,9 @@ async function editMemory(
             memory.id
           );
 
-
-      if(error)
-        throw error;
+      if(result.error){
+        throw result.error;
+      }
 
     }
   );
@@ -3016,12 +2790,9 @@ async function editMemory(
    EDIT SECTION
    ========================================================= */
 
-async function editSection(
-  section
-){
+async function editSection(section){
 
   if(!admin()) return;
-
 
   showEditBox(
     "edit section ♡",
@@ -3030,31 +2801,56 @@ async function editSection(
         key:"title",
         label:"Section name",
         type:"text",
-        value:
-          section.title || ""
+        value:section.title || ""
       },
       {
         key:"subtitle",
         label:"Subtitle",
         type:"textarea",
-        value:
-          section.subtitle || ""
+        value:section.subtitle || ""
       }
     ],
     async values => {
 
-      const {
-        error
-      } =
+      const title =
+        values.title.trim();
+
+      if(!title){
+
+        throw new Error(
+          "Please give the section a name."
+        );
+
+      }
+
+
+      const duplicate =
+        sections.some(
+          other =>
+            other.id !== section.id &&
+            other.title
+              .trim()
+              .toLowerCase() ===
+            title.toLowerCase()
+        );
+
+
+      if(duplicate){
+
+        throw new Error(
+          "That section already exists."
+        );
+
+      }
+
+
+      const result =
         await db
           .from(SECTIONS_TABLE)
           .update({
-            title:
-              values.title.trim(),
-
+            title,
             subtitle:
-              values.subtitle
-                .trim() ||
+              values.subtitle.trim() ||
               null
           })
           .eq(
@@ -3063,8 +2859,9 @@ async function editSection(
           );
 
 
-      if(error)
-        throw error;
+      if(result.error){
+        throw result.error;
+      }
 
     }
   );
@@ -3076,83 +2873,27 @@ async function editSection(
    MEMORY ADMIN TOOLS
    ========================================================= */
 
-async function getCurrentMemories(){
-
-  let query =
-    db
-      .from(MEMORIES_TABLE)
-      .select("*");
-
-
-  if(
-    activeSectionId !== null
-  ){
-
-    query =
-      query.eq(
-        "section_id",
-        activeSectionId
-      );
-
-  }
-
-
-  const result =
-    await query;
-
-
-  if(result.error)
-    throw result.error;
-
-
-  let rows =
-    result.data || [];
-
-
-  rows =
-    sortMemories(
-      rows
-    );
-
-
-  rows =
-    applySavedOrder(
-      rows,
-      "memories",
-      activeSectionId
-    );
-
-
-  return rows;
-
-}
-
-
 async function addMemoryTools(){
 
   if(!admin()) return;
 
-
   const gallery =
     $("gallery");
-
 
   if(!gallery) return;
 
 
-  let memories;
+  let result =
+    await db
+      .from(MEMORIES_TABLE)
+      .select("*");
 
 
-  try{
-
-    memories =
-      await getCurrentMemories();
-
-  }catch(error){
+  if(result.error){
 
     console.error(
       "Memory tools:",
-      error
+      result.error
     );
 
     return;
@@ -3160,12 +2901,39 @@ async function addMemoryTools(){
   }
 
 
+  let memories =
+    result.data || [];
+
+
+  if(activeSectionId !== null){
+
+    memories =
+      memories.filter(
+        memory =>
+          memory.section_id ===
+          activeSectionId
+      );
+
+  }
+
+
+  memories =
+    sortMemories(memories);
+
+
+  memories =
+    applySavedOrder(
+      memories,
+      "memories",
+      activeSectionId
+    );
+
+
   const cards =
     [
-      ...gallery
-        .querySelectorAll(
-          ".card"
-        )
+      ...gallery.querySelectorAll(
+        ".card"
+      )
     ];
 
 
@@ -3175,16 +2943,13 @@ async function addMemoryTools(){
       const memory =
         memories[index];
 
-
-      if(!memory)
-        return;
+      if(!memory) return;
 
 
       card.dataset.memoryId =
         memory.id;
 
-      card.draggable =
-        true;
+      card.draggable = true;
 
 
       if(
@@ -3194,55 +2959,37 @@ async function addMemoryTools(){
       ){
 
         const tools =
-          document.createElement(
-            "div"
-          );
+          document.createElement("div");
 
         tools.className =
           "extra-memory-tools";
 
 
-        const editButton =
-          document.createElement(
-            "button"
-          );
+        const edit =
+          document.createElement("button");
 
-        editButton.type =
-          "button";
+        edit.type = "button";
 
-        editButton.className =
-          "extra-edit-memory";
-
-        editButton.textContent =
+        edit.textContent =
           "✏️ edit";
 
-
-        const deleteButton =
-          document.createElement(
-            "button"
-          );
-
-        deleteButton.type =
-          "button";
-
-        deleteButton.className =
-          "extra-delete-memory";
-
-        deleteButton.textContent =
-          "🗑️ delete";
-
-
-        editButton.onclick =
+        edit.onclick =
           event => {
 
             event.stopPropagation();
 
-            editMemory(
-              memory
-            );
+            editMemory(memory);
 
           };
 
+
+        const deleteButton =
+          document.createElement("button");
+
+        deleteButton.type = "button";
+
+        deleteButton.textContent =
+          "🗑️ delete";
 
         deleteButton.onclick =
           async event => {
@@ -3256,19 +3003,23 @@ async function addMemoryTools(){
           };
 
 
-        tools.appendChild(
-          editButton
-        );
+        tools.appendChild(edit);
 
         tools.appendChild(
           deleteButton
         );
 
-        card.appendChild(
-          tools
-        );
+        card.appendChild(tools);
 
       }
+
+
+      if(card.dataset.dragReady){
+        return;
+      }
+
+      card.dataset.dragReady =
+        "true";
 
 
       card.addEventListener(
@@ -3294,10 +3045,9 @@ async function addMemoryTools(){
 
           const orderedIds =
             [
-              ...gallery
-                .querySelectorAll(
-                  ".card[data-memory-id]"
-                )
+              ...gallery.querySelectorAll(
+                ".card[data-memory-id]"
+              )
             ].map(
               item =>
                 item.dataset.memoryId
@@ -3331,9 +3081,7 @@ async function addMemoryTools(){
             !dragging ||
             dragging === card
           ){
-
             return;
-
           }
 
 
@@ -3376,40 +3124,12 @@ async function addMemoryTools(){
    SECTION ADMIN TOOLS
    ========================================================= */
 
-function saveCurrentSectionOrder(){
-
-  const nav =
-    $("sectionsNav");
-
-
-  const ids =
-    [
-      ...nav.querySelectorAll(
-        ".tab[data-section-id]"
-      )
-    ].map(
-      tab =>
-        tab.dataset.sectionId
-    );
-
-
-  saveOrder(
-    "sections",
-    "main",
-    ids
-  );
-
-}
-
-
 function addSectionTools(){
 
   if(!admin()) return;
 
-
   const nav =
     $("sectionsNav");
-
 
   if(!nav) return;
 
@@ -3417,30 +3137,28 @@ function addSectionTools(){
   const tabs =
     [
       ...nav.querySelectorAll(
-        ".tab[data-section-id]"
+        ".tab"
       )
     ];
 
 
-  tabs.forEach(
-    tab => {
+  const realTabs =
+    tabs.slice(1);
+
+
+  realTabs.forEach(
+    (tab,index) => {
 
       const section =
-        sections.find(
-          item =>
-            String(item.id) ===
-            String(
-              tab.dataset.sectionId
-            )
-        );
+        sections[index];
+
+      if(!section) return;
 
 
-      if(!section)
-        return;
+      tab.dataset.sectionId =
+        section.id;
 
-
-      tab.draggable =
-        true;
+      tab.draggable = true;
 
 
       if(
@@ -3448,123 +3166,89 @@ function addSectionTools(){
           ".extra-section-tools"
         )
       ){
-
         return;
-
       }
 
 
       const tools =
-        document.createElement(
-          "span"
-        );
+        document.createElement("span");
 
       tools.className =
         "extra-section-tools";
 
 
-      const left =
-        document.createElement(
+      tools.innerHTML = `
+        <button
+          type="button"
+          title="move left"
+        >←</button>
+
+        <button
+          type="button"
+          title="move right"
+        >→</button>
+
+        <button
+          type="button"
+          title="edit"
+        >✏️</button>
+      `;
+
+
+      const buttons =
+        tools.querySelectorAll(
           "button"
         );
 
-      left.type =
-        "button";
 
-      left.title =
-        "move left";
-
-      left.textContent =
-        "←";
-
-
-      const right =
-        document.createElement(
-          "button"
-        );
-
-      right.type =
-        "button";
-
-      right.title =
-        "move right";
-
-      right.textContent =
-        "→";
-
-
-      const edit =
-        document.createElement(
-          "button"
-        );
-
-      edit.type =
-        "button";
-
-      edit.title =
-        "edit";
-
-      edit.textContent =
-        "✏️";
-
-
-      left.onclick =
+      buttons[0].onclick =
         event => {
 
           event.stopPropagation();
 
-          const index =
+
+          const currentIndex =
             [
-              ...nav.querySelectorAll(
-                ".tab[data-section-id]"
-              )
+              ...nav.children
             ].indexOf(tab);
 
 
-          if(index <= 0)
+          if(currentIndex <= 1){
             return;
-
-
-          const tabs =
-            [
-              ...nav.querySelectorAll(
-                ".tab[data-section-id]"
-              )
-            ];
+          }
 
 
           nav.insertBefore(
             tab,
-            tabs[index - 1]
+            nav.children[
+              currentIndex - 1
+            ]
           );
 
 
-          saveCurrentSectionOrder();
+          saveCurrentSectionOrder(
+            nav
+          );
 
         };
 
 
-      right.onclick =
+      buttons[1].onclick =
         event => {
 
           event.stopPropagation();
 
-          const tabs =
+
+          const currentIndex =
             [
-              ...nav.querySelectorAll(
-                ".tab[data-section-id]"
-              )
-            ];
-
-
-          const index =
-            tabs.indexOf(tab);
+              ...nav.children
+            ].indexOf(tab);
 
 
           if(
-            index < 0 ||
-            index >=
-              tabs.length - 1
+            currentIndex < 1 ||
+            currentIndex >=
+              nav.children.length - 1
           ){
 
             return;
@@ -3573,17 +3257,21 @@ function addSectionTools(){
 
 
           nav.insertBefore(
-            tabs[index + 1],
+            nav.children[
+              currentIndex + 1
+            ],
             tab
           );
 
 
-          saveCurrentSectionOrder();
+          saveCurrentSectionOrder(
+            nav
+          );
 
         };
 
 
-      edit.onclick =
+      buttons[2].onclick =
         event => {
 
           event.stopPropagation();
@@ -3595,21 +3283,17 @@ function addSectionTools(){
         };
 
 
-      tools.appendChild(
-        left
-      );
-
-      tools.appendChild(
-        right
-      );
-
-      tools.appendChild(
-        edit
-      );
-
       tab.appendChild(
         tools
       );
+
+
+      if(tab.dataset.dragReady){
+        return;
+      }
+
+      tab.dataset.dragReady =
+        "true";
 
 
       tab.addEventListener(
@@ -3632,7 +3316,9 @@ function addSectionTools(){
             "section-dragging"
           );
 
-          saveCurrentSectionOrder();
+          saveCurrentSectionOrder(
+            nav
+          );
 
         }
       );
@@ -3655,9 +3341,7 @@ function addSectionTools(){
             !dragging ||
             dragging === tab
           ){
-
             return;
-
           }
 
 
@@ -3696,6 +3380,45 @@ function addSectionTools(){
 }
 
 
+function saveCurrentSectionOrder(
+  nav
+){
+
+  const ids =
+    [
+      ...nav.querySelectorAll(
+        ".tab[data-section-id]"
+      )
+    ].map(
+      tab =>
+        tab.dataset.sectionId
+    );
+
+
+  saveOrder(
+    "sections",
+    "main",
+    ids
+  );
+
+}
+
+
+/* =========================================================
+   REFRESH ADMIN TOOLS
+   ========================================================= */
+
+async function refreshAdminTools(){
+
+  if(!admin()) return;
+
+  addSectionTools();
+
+  await addMemoryTools();
+
+}
+
+
 /* =========================================================
    AUTH STATE
    ========================================================= */
@@ -3714,8 +3437,7 @@ db.auth.onAuthStateChange(
 
       await db.auth.signOut();
 
-      currentUser =
-        null;
+      currentUser = null;
 
     }
 
@@ -3724,34 +3446,9 @@ db.auth.onAuthStateChange(
 
     renderSections();
 
-
-    if(admin()){
+    if(currentUser){
 
       startPresenceHeartbeat();
-
-      updatePresence();
-
-    }else{
-
-      stopPresenceHeartbeat();
-
-      updatePresence();
-
-    }
-
-
-    if(admin()){
-
-      setTimeout(
-        () => {
-
-          addMemoryTools();
-
-          addSectionTools();
-
-        },
-        100
-      );
 
     }
 
@@ -3760,25 +3457,31 @@ db.auth.onAuthStateChange(
 
 
 /* =========================================================
-   PRESENCE
+   LYSS PRESENCE SYSTEM
    ========================================================= */
 
 const PRESENCE_ID =
   "lyss";
 
-const ONLINE_TIME =
+const PRESENCE_ONLINE_WINDOW =
   90000;
 
 const PRESENCE_HEARTBEAT =
   30000;
 
-let presenceTimer =
+const PRESENCE_REFRESH =
+  10000;
+
+let presenceHeartbeatStarted =
+  false;
+
+let presenceHeartbeatTimer =
   null;
 
 
-function setOnline(){
+function setLyssOnline(){
 
-  const presence =
+  const widget =
     $("lyss-presence");
 
   const heart =
@@ -3788,8 +3491,18 @@ function setOnline(){
     $("lyss-presence-text");
 
 
-  presence.className =
-    "online";
+  if(!widget || !heart || !text){
+    return;
+  }
+
+
+  widget.classList.remove(
+    "offline"
+  );
+
+  widget.classList.add(
+    "online"
+  );
 
   heart.textContent =
     "♥";
@@ -3800,11 +3513,11 @@ function setOnline(){
 }
 
 
-function setOffline(
+function setLyssOffline(
   lastSeen
 ){
 
-  const presence =
+  const widget =
     $("lyss-presence");
 
   const heart =
@@ -3814,8 +3527,18 @@ function setOffline(
     $("lyss-presence-text");
 
 
-  presence.className =
-    "offline";
+  if(!widget || !heart || !text){
+    return;
+  }
+
+
+  widget.classList.remove(
+    "online"
+  );
+
+  widget.classList.add(
+    "offline"
+  );
 
   heart.textContent =
     "♡";
@@ -3824,7 +3547,7 @@ function setOffline(
   if(!lastSeen){
 
     text.textContent =
-      "lyss was last active…";
+      "lyss was last active...";
 
     return;
 
@@ -3911,27 +3634,31 @@ function setOffline(
     );
 
 
-  text.textContent =
-    days === 1
-      ? "lyss was last active 1 day ago"
-      : `lyss was last active ${days} days ago`;
+  if(days === 1){
+
+    text.textContent =
+      "lyss was last active 1 day ago";
+
+  }else{
+
+    text.textContent =
+      `lyss was last active ${days} days ago`;
+
+  }
 
 }
 
 
-async function updatePresence(){
+/* ---------- Read Lyss status ---------- */
+
+async function updateLyssStatus(){
 
   try{
 
-    const {
-      data,
-      error
-    } =
+    const result =
       await db
         .from("admin_presence")
-        .select(
-          "last_seen"
-        )
+        .select("last_seen")
         .eq(
           "id",
           PRESENCE_ID
@@ -3939,14 +3666,14 @@ async function updatePresence(){
         .maybeSingle();
 
 
-    if(error){
+    if(result.error){
 
       console.error(
-        "Presence read:",
-        error
+        "Lyss presence read:",
+        result.error
       );
 
-      setOffline(null);
+      setLyssOffline(null);
 
       return;
 
@@ -3954,11 +3681,11 @@ async function updatePresence(){
 
 
     if(
-      !data ||
-      !data.last_seen
+      !result.data ||
+      !result.data.last_seen
     ){
 
-      setOffline(null);
+      setLyssOffline(null);
 
       return;
 
@@ -3967,24 +3694,23 @@ async function updatePresence(){
 
     const lastSeen =
       new Date(
-        data.last_seen
+        result.data.last_seen
       ).getTime();
 
 
     const online =
-      Date.now() -
-      lastSeen <=
-      ONLINE_TIME;
+      Date.now() - lastSeen <=
+      PRESENCE_ONLINE_WINDOW;
 
 
     if(online){
 
-      setOnline();
+      setLyssOnline();
 
     }else{
 
-      setOffline(
-        data.last_seen
+      setLyssOffline(
+        result.data.last_seen
       );
 
     }
@@ -3992,29 +3718,32 @@ async function updatePresence(){
   }catch(error){
 
     console.error(
-      "Presence:",
+      "Lyss presence:",
       error
     );
 
-    setOffline(null);
+    setLyssOffline(null);
 
   }
 
 }
 
 
-async function heartbeat(){
+/* ---------- Update Lyss heartbeat ---------- */
+
+async function sendLyssHeartbeat(){
 
   try{
 
-    const {
-      data
-    } =
+    const sessionResult =
       await db.auth.getSession();
 
 
     const user =
-      data?.session?.user;
+      sessionResult
+        ?.data
+        ?.session
+        ?.user;
 
 
     if(
@@ -4045,7 +3774,7 @@ async function heartbeat(){
     if(result.error){
 
       console.error(
-        "Presence heartbeat:",
+        "Lyss heartbeat:",
         result.error
       );
 
@@ -4054,12 +3783,12 @@ async function heartbeat(){
     }
 
 
-    setOnline();
+    setLyssOnline();
 
   }catch(error){
 
     console.error(
-      "Heartbeat:",
+      "Lyss heartbeat:",
       error
     );
 
@@ -4068,40 +3797,43 @@ async function heartbeat(){
 }
 
 
+/* ---------- Start heartbeat ---------- */
+
 function startPresenceHeartbeat(){
 
-  if(presenceTimer)
+  if(presenceHeartbeatStarted){
     return;
+  }
+
+  presenceHeartbeatStarted = true;
 
 
-  heartbeat();
+  sendLyssHeartbeat();
 
 
-  presenceTimer =
+  presenceHeartbeatTimer =
     setInterval(
-      heartbeat,
+      sendLyssHeartbeat,
       PRESENCE_HEARTBEAT
     );
 
 }
 
 
-function stopPresenceHeartbeat(){
+/* ---------- Keep visitor display updated ---------- */
 
-  if(
-    presenceTimer
-  ){
+setInterval(
+  updateLyssStatus,
+  PRESENCE_REFRESH
+);
 
-    clearInterval(
-      presenceTimer
-    );
 
-    presenceTimer =
-      null;
+/* ---------- Initial status check ---------- */
 
-  }
-
-}
+setTimeout(
+  updateLyssStatus,
+  500
+);
 
 
 /* =========================================================
@@ -4115,23 +3847,17 @@ const SESSION_KEY =
   "lyss_gallery_session_id";
 
 
-let visitorId =
+const visitorId =
   localStorage.getItem(
     VISITOR_KEY
-  );
+  ) ||
+  crypto.randomUUID();
 
 
-if(!visitorId){
-
-  visitorId =
-    crypto.randomUUID();
-
-  localStorage.setItem(
-    VISITOR_KEY,
-    visitorId
-  );
-
-}
+localStorage.setItem(
+  VISITOR_KEY,
+  visitorId
+);
 
 
 let sessionId =
@@ -4169,22 +3895,16 @@ async function recordVisitor(){
       .from("gallery_visitors")
       .upsert(
         {
-          visitor_id:
-            visitorId,
-
-          last_seen:
-            now
+          visitor_id:visitorId,
+          last_seen:now
         },
         {
-          onConflict:
-            "visitor_id"
+          onConflict:"visitor_id"
         }
       );
 
 
-    const {
-      data:existing
-    } =
+    const existingResult =
       await db
         .from("gallery_sessions")
         .select(
@@ -4197,46 +3917,55 @@ async function recordVisitor(){
         .maybeSingle();
 
 
-    if(existing){
+    if(existingResult.error){
+
+      console.error(
+        "Visitor session read:",
+        existingResult.error
+      );
+
+      return;
+
+    }
+
+
+    if(existingResult.data){
 
       const visited =
         Array.isArray(
-          existing.sections_visited
+          existingResult
+            .data
+            .sections_visited
         )
-          ? [
-              ...existing.sections_visited
-            ]
+          ? existingResult
+              .data
+              .sections_visited
+              .slice()
           : [];
 
 
       if(
         section &&
-        !visited.includes(
-          section
-        )
+        !visited.includes(section)
       ){
 
-        visited.push(
-          section
-        );
+        visited.push(section);
 
       }
 
 
       await db
         .from("gallery_sessions")
-        .update({
-          last_seen:
-            now,
-
-          current_section_id:
-            section,
-
-          sections_visited:
-            visited,
-
-          ended_at:null
-        })
+        .update(
+          {
+            last_seen:now,
+            current_section_id:
+              section,
+            sections_visited:
+              visited,
+            ended_at:null
+          }
+        )
         .eq(
           "id",
           sessionId
@@ -4246,41 +3975,27 @@ async function recordVisitor(){
 
       await db
         .from("gallery_sessions")
-        .insert({
-          id:
-            sessionId,
-
-          visitor_id:
-            visitorId,
-
-          started_at:
-            now,
-
-          last_seen:
-            now,
-
-          current_section_id:
-            section,
-
-          sections_visited:
-            section
-              ? [section]
-              : [],
-
-          ended_at:null
-        });
+        .insert(
+          {
+            id:sessionId,
+            visitor_id:visitorId,
+            started_at:now,
+            last_seen:now,
+            current_section_id:
+              section,
+            sections_visited:
+              section
+                ? [section]
+                : [],
+            ended_at:null
+          }
+        );
 
     }
 
   }catch(error){
 
-    /*
-      Visitor tracking should NEVER
-      break the gallery if its table
-      or RLS is unavailable.
-    */
-
-    console.warn(
+    console.error(
       "Visitor tracking:",
       error
     );
@@ -4290,67 +4005,33 @@ async function recordVisitor(){
 }
 
 
-/* =========================================================
-   VISITOR HEARTBEAT
-   ========================================================= */
+/* Visitor heartbeat */
+
+recordVisitor();
 
 setInterval(
-  () => {
-
-    recordVisitor();
-
-  },
+  recordVisitor,
   30000
 );
 
 
 /* =========================================================
-   END SESSION
-   ========================================================= */
-
-window.addEventListener(
-  "beforeunload",
-  () => {
-
-    if(!sessionId)
-      return;
-
-
-    /*
-      This is intentionally best-effort.
-    */
-
-    db
-      .from("gallery_sessions")
-      .update({
-        ended_at:
-          new Date().toISOString()
-      })
-      .eq(
-        "id",
-        sessionId
-      );
-
-  }
-);
-
-
-/* =========================================================
-   START
+   INITIALIZE
    ========================================================= */
 
 (async function start(){
 
   try{
 
-    const {
-      data
-    } =
+    const sessionResult =
       await db.auth.getSession();
 
 
     currentUser =
-      data.session?.user ||
+      sessionResult
+        ?.data
+        ?.session
+        ?.user ||
       null;
 
 
@@ -4361,8 +4042,7 @@ window.addEventListener(
 
       await db.auth.signOut();
 
-      currentUser =
-        null;
+      currentUser = null;
 
     }
 
@@ -4375,45 +4055,29 @@ window.addEventListener(
     await loadGallery();
 
 
-    recordVisitor();
-
-
     if(admin()){
 
       startPresenceHeartbeat();
 
+      setTimeout(
+        refreshAdminTools,
+        300
+      );
+
     }
 
 
-    updatePresence();
-
-
-    setTimeout(
-      () => {
-
-        if(admin()){
-
-          addMemoryTools();
-
-          addSectionTools();
-
-        }
-
-      },
-      200
-    );
-
+    updateLyssStatus();
 
   }catch(error){
 
     console.error(
-      "Startup:",
+      "Gallery startup:",
       error
     );
 
-
     $("gallery").innerHTML =
-      '<div class="empty">couldn\'t load memories ♡</div>';
+      '<div class="empty">something went wrong loading the gallery ♡</div>';
 
   }
 
@@ -4421,17 +4085,37 @@ window.addEventListener(
 
 
 /* =========================================================
-   KEEP PRESENCE DISPLAY FRESH
+   KEEP ADMIN TOOLS IN SYNC
    ========================================================= */
 
-setInterval(
-  updatePresence,
-  10000
+const adminObserver =
+  new MutationObserver(
+    () => {
+
+      if(admin()){
+
+        setTimeout(
+          refreshAdminTools,
+          100
+        );
+
+      }
+
+    }
+  );
+
+
+adminObserver.observe(
+  document.body,
+  {
+    attributes:true,
+    attributeFilter:["class"]
+  }
 );
 
 
 /* =========================================================
-   KEEP ADMIN TOOLS FRESH
+   RE-APPLY ADMIN TOOLS AFTER LOGIN
    ========================================================= */
 
 setInterval(
@@ -4439,14 +4123,42 @@ setInterval(
 
     if(admin()){
 
-      addMemoryTools();
-
       addSectionTools();
+
+      addMemoryTools();
 
     }
 
   },
-  3000
+  2500
+);
+
+
+/* =========================================================
+   PAGE VISIBILITY
+   Make sure Lyss heartbeat resumes when tab becomes active.
+   ========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if(
+      document.visibilityState ===
+      "visible"
+    ){
+
+      updateLyssStatus();
+
+      if(admin()){
+
+        sendLyssHeartbeat();
+
+      }
+
+    }
+
+  }
 );
 
 </script>
