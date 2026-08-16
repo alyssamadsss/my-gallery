@@ -1641,33 +1641,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
-  <script>
-/* Remove the large "all memories" heading */
-(function () {
-  function hideBigHeading() {
-    const heading = document.getElementById("heading");
 
-    if (heading) {
-      heading.style.display = "none";
-    }
-  }
-
-  hideBigHeading();
-
-  document.addEventListener("DOMContentLoaded", hideBigHeading);
-
-  const observer = new MutationObserver(hideBigHeading);
-
-  const heading = document.getElementById("heading");
-
-  if (heading) {
-    observer.observe(heading, {
-      childList: true,
-      subtree: true
-    });
-  }
-})();
-</script>
   <script>
 document.addEventListener("DOMContentLoaded", function () {
   const heading = document.getElementById("heading");
@@ -1676,6 +1650,24 @@ document.addEventListener("DOMContentLoaded", function () {
     heading.innerHTML = `
       <h2>my memories ♡</h2>
     `;
+  }
+});
+</script>
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (!document.querySelector(".header h1")) {
+    const header = document.createElement("header");
+    header.className = "header";
+
+    header.innerHTML = `
+      <h1>my gallery ♡</h1>
+      <p>photos, videos & little memories</p>
+    `;
+
+    document.body.insertBefore(
+      header,
+      document.body.firstElementChild
+    );
   }
 });
 </script>
