@@ -4867,6 +4867,55 @@ document.addEventListener(
 );
 
 </script>
+```html
+<script>
+/* =========================================================
+   DEVICE TYPE TRACKING
+   Adds desktop / mobile / tablet to visitor history
+   ========================================================= */
+
+(function () {
+  "use strict";
+
+  function getDeviceType() {
+    const ua = navigator.userAgent.toLowerCase();
+
+    if (/ipad|tablet|playbook|silk/.test(ua)) {
+      return "Tablet";
+    }
+
+    if (
+      /mobile|iphone|ipod|android.*mobile|windows phone/.test(ua)
+    ) {
+      return "Mobile";
+    }
+
+    return "Desktop";
+  }
+
+  async function saveDeviceType() {
+    if (typeof db === "undefined") return;
+    if (typeof visitorId === "undefined") return;
+
+    const deviceType = getDeviceType();
+
+    try {
+      await db
+        .from("gallery_visitors")
+        .update({
+          device_type: deviceType
+        })
+        .eq("visitor_id", visitorId);
+    } catch (error) {
+      console.error("Device type tracking:", error);
+    }
+  }
+
+  setTimeout(saveDeviceType, 1500);
+
+})();
+</script>
+```
 
 </body>
 </html>
