@@ -186,8 +186,8 @@ function publicUrl(path){
 }
 
 function renderHeading(){
-  if(activeSectionId===null){
-    $("heading").innerHTML="<h2>all memories ♡</h2><p>photos, videos & little memories</p>";
+   if(activeSectionId===null){
+    $("heading").innerHTML="";
     return;
   }
   const s=sections.find(x=>x.id===activeSectionId);
