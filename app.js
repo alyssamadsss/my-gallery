@@ -6130,3 +6130,156 @@ setTimeout(
   );
 
 })();
+/* =========================================================
+   ♡ LYSS ONLINE / LAST ACTIVE STATUS
+   Paste this at the VERY BOTTOM of your JS file
+   ========================================================= */
+
+(function () {
+  const LYSS_PRESENCE_ID = "lyss";
+
+  // Change this if your admin page uses a different way
+  // of identifying the admin session.
+  const isAdminPage =
+    window.location.pathname.toLowerCase().includes("admin");
+
+  /* ---------- VISITOR DISPLAY ---------- */
+
+  async function updateLyssStatusDisplay() {
+    try {
+      const { data, error } = await supabase
+        .from("admin_presence")
+        .select("last_seen")
+        .eq("id", LYSS_PRESENCE_ID)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Lyss presence error:", error);
+        return;
+      }
+
+      if (!data || !data.last_seen) return;
+
+      const lastSeen = new Date(data.last_seen);
+      const secondsAgo = Math.floor((Date.now() - lastSeen.getTime()) / 1000);
+
+      // Consider Lyss online if her last heartbeat was
+      // within the last 90 seconds.
+      const isOnline = secondsAgo <= 90;
+
+      let text = "";
+
+      if (isOnline) {
+        text = "♡ lyss is online";
+      } else {
+        const minutesAgo = Math.floor(secondsAgo / 60);
+
+        if (minutesAgo < 1) {
+          text = "lyss was last active just now";
+        } else if (minutesAgo === 1) {
+          text = "lyss was last active 1 minute ago";
+        } else if (minutesAgo < 60) {
+          text = `lyss was last active ${minutesAgo} minutes ago`;
+        } else {
+          const hoursAgo = Math.floor(minutesAgo / 60);
+
+          if (hoursAgo === 1) {
+            text = "lyss was last active 1 hour ago";
+          } else if (hoursAgo < 24) {
+            text = `lyss was last active ${hoursAgo} hours ago`;
+          } else {
+            const daysAgo = Math.floor(hoursAgo / 24);
+
+            if (daysAgo === 1) {
+              text = "lyss was last active 1 day ago";
+            } else {
+              text = `lyss was last active ${daysAgo} days ago`;
+            }
+          }
+        }
+      }
+
+      let statusElement = document.getElementById("lyss-online-status");
+
+      if (!statusElement) {
+        statusElement = document.createElement("div");
+        statusElement.id = "lyss-online-status";
+
+        statusElement.style.cssText = `
+          font-size: 13px;
+          margin-top: 4px;
+          opacity: 0.8;
+        `;
+
+        // Put it at the bottom of the page.
+        document.body.appendChild(statusElement);
+      }
+
+      statusElement.textContent = text;
+
+    } catch (err) {
+      console.error("Could not update Lyss status:", err);
+    }
+  }
+
+
+  /* ---------- ADMIN HEARTBEAT ---------- */
+
+  async function sendLyssHeartbeat() {
+    if (!isAdminPage) return;
+
+    try {
+      const now = new Date().toISOString();
+
+      const { error } = await supabase
+        .from("admin_presence")
+        .upsert(
+          {
+            id: LYSS_PRESENCE_ID,
+            last_seen: now
+          },
+          {
+            onConflict: "id"
+          }
+        );
+
+      if (error) {
+        console.error("Lyss heartbeat error:", error);
+      }
+
+    } catch (err) {
+      console.error("Lyss heartbeat failed:", err);
+    }
+  }
+
+
+  /* ---------- START ---------- */
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      updateLyssStatusDisplay();
+
+      if (isAdminPage) {
+        sendLyssHeartbeat();
+      }
+    });
+  } else {
+    updateLyssStatusDisplay();
+
+    if (isAdminPage) {
+      sendLyssHeartbeat();
+    }
+  }
+
+
+  /* ---------- KEEP ADMIN ONLINE ---------- */
+
+  setInterval(() => {
+    if (isAdminPage) {
+      sendLyssHeartbeat();
+    }
+
+    updateLyssStatusDisplay();
+  }, 30000);
+
+})();
