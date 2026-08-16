@@ -1627,5 +1627,297 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 </script>
+  <script>
+/* =========================================================
+   LYSS ONLINE STATUS
+   Visitor-visible top-right presence indicator
+   ========================================================= */
+
+(function () {
+
+  const PRESENCE_ID = "lyss";
+  const ONLINE_TIME = 90000; // 90 seconds
+
+  /* ---------- styles ---------- */
+
+  const style = document.createElement("style");
+
+  style.textContent = `
+    #lyss-presence {
+      position: fixed;
+      top: 22px;
+      right: 24px;
+      z-index: 9998;
+
+      display: flex;
+      align-items: center;
+      gap: 9px;
+
+      padding: 10px 15px;
+
+      background: rgba(255,255,255,.94);
+      border: 1px solid #efd2de;
+      border-radius: 999px;
+
+      box-shadow: 0 8px 25px rgba(99,79,89,.08);
+
+      color: #765766;
+      font-size: 12px;
+
+      backdrop-filter: blur(8px);
+    }
+
+    #lyss-heart {
+      font-size: 22px;
+      line-height: 1;
+      display: inline-block;
+      transform-origin: center;
+    }
+
+    #lyss-presence.online #lyss-heart {
+      animation: lyssHeartPulse 1.2s ease-in-out infinite;
+    }
+
+    #lyss-presence.offline #lyss-heart {
+      opacity: .55;
+    }
+
+    @keyframes lyssHeartPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.25);
+      }
+    }
+
+    #lyss-presence-text {
+      white-space: nowrap;
+    }
+
+    @media(max-width:560px) {
+      #lyss-presence {
+        top: 12px;
+        right: 12px;
+        padding: 8px 11px;
+        font-size: 11px;
+      }
+
+      #lyss-heart {
+        font-size: 19px;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
+
+
+  /* ---------- create status ---------- */
+
+  const presence = document.createElement("div");
+
+  presence.id = "lyss-presence";
+  presence.className = "offline";
+
+  presence.innerHTML = `
+    <span id="lyss-heart">♡</span>
+    <span id="lyss-presence-text">lyss was last active…</span>
+  `;
+
+  document.body.appendChild(presence);
+
+
+  /* ---------- helpers ---------- */
+
+  function setOnline() {
+
+    presence.className = "online";
+
+    document.getElementById("lyss-heart").textContent = "♥";
+
+    document.getElementById("lyss-presence-text").textContent =
+      "lyss is online";
+
+  }
+
+
+  function setOffline(lastSeen) {
+
+    presence.className = "offline";
+
+    document.getElementById("lyss-heart").textContent = "♡";
+
+    if (!lastSeen) {
+
+      document.getElementById("lyss-presence-text").textContent =
+        "lyss was last active…";
+
+      return;
+    }
+
+    const seconds = Math.max(
+      0,
+      Math.floor(
+        (Date.now() - new Date(lastSeen).getTime()) / 1000
+      )
+    );
+
+    if (seconds < 60) {
+
+      document.getElementById("lyss-presence-text").textContent =
+        "lyss was last active just now";
+
+      return;
+    }
+
+    const minutes = Math.floor(seconds / 60);
+
+    if (minutes === 1) {
+
+      document.getElementById("lyss-presence-text").textContent =
+        "lyss was last active 1 minute ago";
+
+      return;
+    }
+
+    if (minutes < 60) {
+
+      document.getElementById("lyss-presence-text").textContent =
+        "lyss was last active " + minutes + " minutes ago";
+
+      return;
+    }
+
+    const hours = Math.floor(minutes / 60);
+
+    if (hours === 1) {
+
+      document.getElementById("lyss-presence-text").textContent =
+        "lyss was last active 1 hour ago";
+
+      return;
+    }
+
+    if (hours < 24) {
+
+      document.getElementById("lyss-presence-text").textContent =
+        "lyss was last active " + hours + " hours ago";
+
+      return;
+    }
+
+    const days = Math.floor(hours / 24);
+
+    document.getElementById("lyss-presence-text").textContent =
+      "lyss was last active " + days + " days ago";
+  }
+
+
+  /* ---------- update presence ---------- */
+
+  async function updatePresence() {
+
+    if (typeof db === "undefined") return;
+
+    try {
+
+      const { data, error } = await db
+        .from("admin_presence")
+        .select("last_seen")
+        .eq("id", PRESENCE_ID)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Lyss presence:", error);
+        return;
+      }
+
+      if (!data || !data.last_seen) {
+
+        setOffline(null);
+        return;
+      }
+
+      const lastSeen =
+        new Date(data.last_seen).getTime();
+
+      const isOnline =
+        Date.now() - lastSeen <= ONLINE_TIME;
+
+      if (isOnline) {
+        setOnline();
+      } else {
+        setOffline(data.last_seen);
+      }
+
+    } catch (error) {
+
+      console.error("Lyss presence:", error);
+
+    }
+  }
+
+
+  /* ---------- keep YOUR status alive ---------- */
+
+  async function heartbeat() {
+
+    if (typeof db === "undefined") return;
+    if (typeof ADMIN_UID === "undefined") return;
+
+    try {
+
+      const { data } =
+        await db.auth.getSession();
+
+      const user = data?.session?.user;
+
+      if (!user || user.id !== ADMIN_UID) return;
+
+      await db
+        .from("admin_presence")
+        .upsert(
+          {
+            id: PRESENCE_ID,
+            last_seen: new Date().toISOString()
+          },
+          {
+            onConflict: "id"
+          }
+        );
+
+      updatePresence();
+
+    } catch (error) {
+
+      console.error("Lyss heartbeat:", error);
+
+    }
+  }
+
+
+  /* ---------- start ---------- */
+
+  setTimeout(function () {
+
+    updatePresence();
+    heartbeat();
+
+  }, 1000);
+
+
+  /* Check status frequently */
+
+  setInterval(updatePresence, 10000);
+
+
+  /* Update your online timestamp */
+
+  setInterval(heartbeat, 30000);
+
+
+})();
+</script>
 </body>
 </html>
