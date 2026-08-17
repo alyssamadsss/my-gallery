@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>my memories ♡</title>
 
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 <style>
 :root{
@@ -19,7 +21,9 @@
   --shadow:0 10px 28px rgba(99,79,89,.08)
 }
 
+
 *{box-sizing:border-box}
+
 
 body{
   margin:0;
@@ -28,16 +32,19 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
 }
 
+
 .page{
   max-width:1500px;
   margin:auto;
   padding:28px 24px 70px
 }
 
+
 .header{
   text-align:center;
   padding:8px 10px 22px
 }
+
 
 .header h1{
   margin:0;
@@ -45,11 +52,13 @@ body{
   color:#6b5460
 }
 
+
 .header p{
   margin:8px 0 0;
   color:var(--muted);
   font-size:13px
 }
+
 
 .actions,
 .sections,
@@ -61,12 +70,15 @@ body{
   flex-wrap:wrap
 }
 
+
 .actions{margin-bottom:16px}
 .sections{margin-bottom:14px}
+
 
 button,select,input,textarea{
   font:inherit
 }
+
 
 .btn{
   border:1px solid var(--border);
@@ -77,17 +89,21 @@ button,select,input,textarea{
   cursor:pointer
 }
 
+
 .btn.primary{
   background:var(--pink)
 }
+
 
 .btn:hover{
   transform:translateY(-1px)
 }
 
+
 .admin-only{
   display:none
 }
+
 
 .tab{
   display:inline-flex;
@@ -99,9 +115,11 @@ button,select,input,textarea{
   background:#fff
 }
 
+
 .tab.active{
   background:var(--pink2)
 }
+
 
 .tab button{
   border:0;
@@ -111,6 +129,7 @@ button,select,input,textarea{
   font-size:12px;
   padding:5px 3px
 }
+
 
 .remove-section{
   display:none;
@@ -123,20 +142,24 @@ button,select,input,textarea{
   border-radius:50%
 }
 
+
 .remove-section:hover{
   background:var(--pink2);
   color:var(--danger)
 }
 
+
 body.admin .remove-section{
   display:block
 }
+
 
 .sort{
   margin-bottom:24px;
   color:var(--muted);
   font-size:12px
 }
+
 
 .sort select{
   border:1px solid var(--border);
@@ -146,15 +169,18 @@ body.admin .remove-section{
   color:var(--text)
 }
 
+
 .heading{
   text-align:center;
   margin-bottom:18px
 }
 
+
 .heading h2{
   margin:0;
   font:500 24px Georgia,serif
 }
+
 
 .heading p{
   margin:5px 0 0;
@@ -162,6 +188,7 @@ body.admin .remove-section{
   font-size:12px;
   white-space:pre-wrap
 }
+
 
 .gallery{
   display:grid;
@@ -173,6 +200,7 @@ body.admin .remove-section{
   align-content:start
 }
 
+
 .card{
   width:100%;
   background:#fff;
@@ -182,11 +210,13 @@ body.admin .remove-section{
   box-shadow:var(--shadow)
 }
 
+
 .media{
   width:100%;
   overflow:hidden;
   background:#fff
 }
+
 
 .media img,
 .media video{
@@ -195,20 +225,24 @@ body.admin .remove-section{
   height:auto
 }
 
+
 .media img{
   width:auto;
   margin:0 auto;
   cursor:zoom-in
 }
 
+
 .media video{
   width:100%;
   background:#000
 }
 
+
 .info{
   padding:11px 13px 13px
 }
+
 
 .date{
   font-size:10px;
@@ -218,11 +252,13 @@ body.admin .remove-section{
   margin-bottom:5px
 }
 
+
 .location{
   font-size:11px;
   color:#987682;
   margin-bottom:6px
 }
+
 
 .caption{
   font:14px/1.5 Georgia,serif;
@@ -230,15 +266,18 @@ body.admin .remove-section{
   overflow-wrap:anywhere
 }
 
+
 .card-actions{
   display:none;
   justify-content:flex-end;
   padding:0 10px 10px
 }
 
+
 body.admin .card-actions{
   display:flex
 }
+
 
 .delete-memory{
   border:0;
@@ -248,6 +287,7 @@ body.admin .card-actions{
   font-size:11px
 }
 
+
 .empty{
   grid-column:1/-1;
   text-align:center;
@@ -255,6 +295,7 @@ body.admin .card-actions{
   color:var(--muted);
   font:14px Georgia,serif
 }
+
 
 .modal{
   position:fixed;
@@ -268,9 +309,11 @@ body.admin .card-actions{
   z-index:1000
 }
 
+
 .modal.open{
   display:flex
 }
+
 
 .modal-card{
   position:relative;
@@ -283,16 +326,19 @@ body.admin .card-actions{
   box-shadow:0 24px 80px rgba(0,0,0,.2)
 }
 
+
 .modal-card h2{
   margin:0 0 5px;
   font:500 24px Georgia,serif
 }
+
 
 .sub{
   margin:0 0 18px;
   color:var(--muted);
   font-size:12px
 }
+
 
 .close{
   position:absolute;
@@ -308,9 +354,11 @@ body.admin .card-actions{
   cursor:pointer
 }
 
+
 .field{
   margin-bottom:14px
 }
+
 
 .field label{
   display:block;
@@ -318,6 +366,7 @@ body.admin .card-actions{
   font-size:12px;
   font-weight:600
 }
+
 
 .field input,
 .field select,
@@ -330,10 +379,12 @@ body.admin .card-actions{
   color:var(--text)
 }
 
+
 .field textarea{
   min-height:95px;
   resize:vertical
 }
+
 
 .modal-actions{
   display:flex;
@@ -341,6 +392,7 @@ body.admin .card-actions{
   gap:8px;
   margin-top:12px
 }
+
 
 .status{
   display:none;
@@ -351,6 +403,7 @@ body.admin .card-actions{
   color:var(--muted);
   font-size:12px
 }
+
 
 .lightbox{
   position:fixed;
@@ -363,9 +416,11 @@ body.admin .card-actions{
   z-index:1200
 }
 
+
 .lightbox.open{
   display:flex
 }
+
 
 .lb-inner{
   position:relative;
@@ -375,6 +430,7 @@ body.admin .card-actions{
   border-radius:18px;
   overflow:hidden
 }
+
 
 .lb-inner img,
 .lb-inner video{
@@ -386,6 +442,7 @@ body.admin .card-actions{
   background:#111
 }
 
+
 .lb-caption{
   padding:10px 14px;
   background:#fff;
@@ -394,7 +451,9 @@ body.admin .card-actions{
   white-space:pre-wrap
 }
 
+
 /* LEFT SECTION NAVIGATION */
+
 
 #sectionsNav{
   justify-content:flex-start !important;
@@ -403,11 +462,14 @@ body.admin .card-actions{
   text-align:left !important
 }
 
+
 #sectionsNav .tab{
   margin-left:0 !important
 }
 
+
 /* EXTRA ADMIN TOOLS */
+
 
 .extra-memory-tools{
   display:none;
@@ -417,9 +479,11 @@ body.admin .card-actions{
   justify-content:flex-start
 }
 
+
 body.admin .extra-memory-tools{
   display:flex !important
 }
+
 
 .extra-memory-tools button,
 .extra-section-tools button{
@@ -432,23 +496,28 @@ body.admin .extra-memory-tools{
   cursor:pointer
 }
 
+
 .extra-memory-tools button:hover,
 .extra-section-tools button:hover{
   background:var(--pink2)
 }
 
+
 body.admin .card{
   cursor:grab
 }
+
 
 body.admin .card:active{
   cursor:grabbing
 }
 
+
 .memory-dragging,
 .section-dragging{
   opacity:.45
 }
+
 
 .extra-section-tools{
   display:none;
@@ -457,20 +526,25 @@ body.admin .card:active{
   margin-left:2px
 }
 
+
 body.admin .extra-section-tools{
   display:flex !important
 }
+
 
 .extra-section-tools button{
   padding:3px 7px;
   font-size:10px
 }
 
+
 body.admin .tab{
   cursor:grab
 }
 
+
 /* EDIT BOX */
+
 
 #extraEditBox{
   position:fixed;
@@ -484,9 +558,11 @@ body.admin .tab{
   backdrop-filter:blur(5px)
 }
 
+
 #extraEditBox.open{
   display:flex
 }
+
 
 #extraEditBox .extra-edit-card{
   width:min(500px,100%);
@@ -496,11 +572,13 @@ body.admin .tab{
   box-shadow:0 24px 80px rgba(0,0,0,.2)
 }
 
+
 #extraEditBox h2{
   margin:0 0 5px;
   font:500 24px Georgia,serif;
   color:var(--text)
 }
+
 
 #extraEditBox p{
   margin:0 0 18px;
@@ -508,12 +586,14 @@ body.admin .tab{
   font-size:12px
 }
 
+
 #extraEditBox label{
   display:block;
   margin:12px 0 6px;
   font-size:12px;
   font-weight:600
 }
+
 
 #extraEditBox input,
 #extraEditBox textarea{
@@ -527,10 +607,12 @@ body.admin .tab{
   font:inherit
 }
 
+
 #extraEditBox textarea{
   min-height:100px;
   resize:vertical
 }
+
 
 .extra-edit-buttons{
   display:flex;
@@ -538,6 +620,7 @@ body.admin .tab{
   gap:8px;
   margin-top:18px
 }
+
 
 .extra-edit-buttons button{
   border:1px solid var(--border);
@@ -548,13 +631,16 @@ body.admin .tab{
   cursor:pointer
 }
 
+
 .extra-edit-buttons .save-extra{
   background:var(--pink)
 }
 
+
 /* =========================================================
    LYSS ONLINE STATUS
    ========================================================= */
+
 
 #lyss-presence{
   position:fixed;
@@ -574,6 +660,7 @@ body.admin .tab{
   backdrop-filter:blur(8px)
 }
 
+
 #lyss-presence-heart{
   font-family:Georgia,serif;
   font-size:22px;
@@ -582,28 +669,35 @@ body.admin .tab{
   transform-origin:center
 }
 
+
 #lyss-presence.online #lyss-presence-heart{
   animation:lyssHeartPulse 1.2s ease-in-out infinite
 }
 
+
 #lyss-presence.offline #lyss-presence-heart{
   opacity:.55
 }
+
 
 @keyframes lyssHeartPulse{
   0%,100%{transform:scale(1)}
   50%{transform:scale(1.25)}
 }
 
+
 #lyss-presence-text{
   white-space:nowrap
 }
 
+
 /* VISITOR HISTORY */
+
 
 .visitor-modal-card{
   width:min(950px,100%)
 }
+
 
 .visitor-summary{
   display:grid;
@@ -611,6 +705,7 @@ body.admin .tab{
   gap:10px;
   margin-bottom:18px
 }
+
 
 .visitor-stat{
   background:var(--pink2);
@@ -620,16 +715,19 @@ body.admin .tab{
   text-align:center
 }
 
+
 .visitor-stat-number{
   font:500 24px Georgia,serif;
   color:var(--text)
 }
+
 
 .visitor-stat-label{
   margin-top:3px;
   font-size:11px;
   color:var(--muted)
 }
+
 
 .visitor-table-wrap{
   width:100%;
@@ -638,12 +736,14 @@ body.admin .tab{
   border-radius:14px
 }
 
+
 .visitor-table{
   width:100%;
   border-collapse:collapse;
   min-width:700px;
   font-size:12px
 }
+
 
 .visitor-table th{
   background:var(--pink2);
@@ -654,6 +754,7 @@ body.admin .tab{
   border-bottom:1px solid var(--border)
 }
 
+
 .visitor-table td{
   padding:11px 12px;
   border-bottom:1px solid #f4e5eb;
@@ -661,9 +762,11 @@ body.admin .tab{
   vertical-align:top
 }
 
+
 .visitor-table tr:last-child td{
   border-bottom:0
 }
+
 
 .visitor-id{
   font-family:monospace;
@@ -672,12 +775,14 @@ body.admin .tab{
   word-break:break-all
 }
 
+
 .visitor-online{
   display:inline-flex;
   align-items:center;
   gap:5px;
   color:#8b6071
 }
+
 
 .visitor-online-dot{
   width:7px;
@@ -686,6 +791,7 @@ body.admin .tab{
   background:#d58ca4
 }
 
+
 .visitor-empty{
   text-align:center;
   padding:35px;
@@ -693,11 +799,13 @@ body.admin .tab{
   font-family:Georgia,serif
 }
 
+
 .visitor-loading{
   text-align:center;
   padding:35px;
   color:var(--muted)
 }
+
 
 .visitor-refresh{
   margin-bottom:14px;
@@ -705,11 +813,13 @@ body.admin .tab{
   justify-content:flex-end
 }
 
+
 @media(max-width:950px){
   .gallery{
     grid-template-columns:repeat(2,minmax(0,1fr))
   }
 }
+
 
 @media(max-width:560px){
   .page{
@@ -717,18 +827,22 @@ body.admin .tab{
     padding-right:9px
   }
 
+
   .gallery{
     grid-template-columns:repeat(2,minmax(0,1fr));
     gap:9px
   }
 
+
   .card{
     border-radius:14px
   }
 
+
   .info{
     padding:9px 10px 11px
   }
+
 
   #lyss-presence{
     top:12px;
@@ -737,9 +851,11 @@ body.admin .tab{
     font-size:11px
   }
 
+
   #lyss-presence-heart{
     font-size:19px
   }
+
 
   .visitor-summary{
     grid-template-columns:1fr
@@ -748,14 +864,18 @@ body.admin .tab{
 </style>
 </head>
 
+
 <body>
 
+
 <main class="page">
+
 
 <header class="header">
   <h1>my memories ♡</h1>
   <p>photos, videos &amp; little memories</p>
 </header>
+
 
 <div class="actions">
   <button class="btn" id="adminBtn">🔒 admin</button>
@@ -765,9 +885,12 @@ body.admin .tab{
   <button class="btn admin-only" id="visitorHistoryBtn">♡ visitor history</button>
 </div>
 
+
 <nav class="sections" id="sectionsNav"></nav>
 
+
 <div class="heading" id="heading"></div>
+
 
 <div class="sort">
   <span>sort by</span>
@@ -778,153 +901,200 @@ body.admin .tab{
   </select>
 </div>
 
+
 <section class="gallery" id="gallery">
   <div class="empty">loading memories ♡</div>
 </section>
 
+
 </main>
+
+
 
 
 <!-- LOGIN -->
 
+
 <div class="modal" id="loginModal">
   <div class="modal-card">
 
+
     <button class="close" data-close="loginModal">×</button>
+
 
     <h2>admin ♡</h2>
     <p class="sub">log in to manage your gallery</p>
 
+
     <div class="status" id="loginStatus"></div>
+
 
     <div class="field">
       <label>Email</label>
       <input id="email" type="email" autocomplete="email">
     </div>
 
+
     <div class="field">
       <label>Password</label>
       <input id="password" type="password" autocomplete="current-password">
     </div>
+
 
     <div class="modal-actions">
       <button class="btn" data-close="loginModal">cancel</button>
       <button class="btn primary" id="loginSubmit">log in ♡</button>
     </div>
 
+
   </div>
 </div>
 
 
+
+
 <!-- ADD MEMORY -->
+
 
 <div class="modal" id="memoryModal">
   <div class="modal-card">
 
+
     <button class="close" data-close="memoryModal">×</button>
+
 
     <h2>add a little memory ♡</h2>
     <p class="sub">photos, videos, dates, places &amp; captions</p>
+
 
     <div class="field">
       <label>Photo or video</label>
       <input id="memoryFile" type="file" accept="image/*,video/*">
     </div>
 
+
     <div class="field">
       <label>Section</label>
       <select id="memorySection"></select>
     </div>
+
 
     <div class="field">
       <label>Date — optional</label>
       <input id="memoryDate" type="date">
     </div>
 
+
     <div class="field">
       <label>Location — optional</label>
       <input id="memoryLocation" type="text" placeholder="Toronto, Canada">
     </div>
+
 
     <div class="field">
       <label>Caption — optional</label>
       <textarea id="memoryCaption" placeholder="a little memory ♡"></textarea>
     </div>
 
+
     <div class="modal-actions">
       <button class="btn" data-close="memoryModal">cancel</button>
       <button class="btn primary" id="saveMemory">add memory ♡</button>
     </div>
 
+
   </div>
 </div>
 
 
+
+
 <!-- NEW SECTION -->
+
 
 <div class="modal" id="sectionModal">
   <div class="modal-card">
 
+
     <button class="close" data-close="sectionModal">×</button>
+
 
     <h2>new section ♡</h2>
     <p class="sub">create another album for your memories</p>
+
 
     <div class="field">
       <label>Section name</label>
       <input id="sectionName" placeholder="summer ♡">
     </div>
 
+
     <div class="field">
       <label>Subtitle — optional</label>
       <textarea id="sectionSubtitle" placeholder="sunny days & tiny adventures"></textarea>
     </div>
+
 
     <div class="modal-actions">
       <button class="btn" data-close="sectionModal">cancel</button>
       <button class="btn primary" id="saveSection">create section ♡</button>
     </div>
 
+
   </div>
 </div>
 
 
+
+
 <!-- VISITOR HISTORY -->
+
 
 <div class="modal" id="visitorHistoryModal">
 
+
   <div class="modal-card visitor-modal-card">
+
 
     <button class="close" data-close="visitorHistoryModal">×</button>
 
+
     <h2>visitor history ♡</h2>
+
 
     <p class="sub">
       see who has visited your gallery and what sections they looked at
     </p>
 
+
     <div class="visitor-summary">
+
 
       <div class="visitor-stat">
         <div class="visitor-stat-number" id="visitorTotal">—</div>
         <div class="visitor-stat-label">total visitors</div>
       </div>
 
+
       <div class="visitor-stat">
         <div class="visitor-stat-number" id="visitorSessions">—</div>
         <div class="visitor-stat-label">sessions</div>
       </div>
+
 
       <div class="visitor-stat">
         <div class="visitor-stat-number" id="visitorActive">—</div>
         <div class="visitor-stat-label">active now</div>
       </div>
 
+
     </div>
+
 
     <div class="visitor-refresh">
       <button class="btn" id="refreshVisitors">refresh ♡</button>
     </div>
+
 
     <div class="visitor-table-wrap" id="visitorTableWrap">
       <div class="visitor-loading">
@@ -932,26 +1102,39 @@ body.admin .tab{
       </div>
     </div>
 
+
   </div>
 
+
 </div>
+
+
 
 
 <!-- LIGHTBOX -->
 
+
 <div class="lightbox" id="lightbox">
+
 
   <div class="lb-inner">
 
+
     <button class="close" id="lbClose">×</button>
+
 
     <div id="lbMedia"></div>
 
+
     <div class="lb-caption" id="lbCaption"></div>
+
 
   </div>
 
+
 </div>
+
+
 
 
 <script>
@@ -959,25 +1142,23 @@ body.admin .tab{
    SUPABASE
    ========================================================= */
 
+
 const SUPABASE_URL =
   "https://jaubryfyktdfzxqbrzue.supabase.co";
+
 
 const SUPABASE_ANON_KEY =
   "sb_publishable_qNcbkgifCJVk0cX7A7oRXg_AtlSlAld";
 
+
 const ADMIN_UID =
   "dabf4e39-9760-4041-be58-b6a6c42e0351";
+
 
 const MEMORIES_TABLE = "memories";
 const SECTIONS_TABLE = "sections";
 const STORAGE_BUCKET = "gallery";
 
-/* CLOUDINARY MEDIA UPLOADS
-   New photos/videos are uploaded to Cloudinary.
-   Replace the two placeholders below after creating
-   an unsigned upload preset in Cloudinary. */
-const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUD_NAME";
-const CLOUDINARY_UPLOAD_PRESET = "YOUR_UNSIGNED_UPLOAD_PRESET";
 
 const db =
   supabase.createClient(
@@ -986,14 +1167,20 @@ const db =
   );
 
 
+
+
 let currentUser = null;
 let sections = [];
 let activeSectionId = null;
 let sortMode = "newest";
 
 
+
+
 const $ = id =>
   document.getElementById(id);
+
+
 
 
 function admin(){
@@ -1002,9 +1189,13 @@ function admin(){
 }
 
 
+
+
 function openModal(id){
   $(id).classList.add("open");
 }
+
+
 
 
 function closeModal(id){
@@ -1012,60 +1203,80 @@ function closeModal(id){
 }
 
 
+
+
 document
   .querySelectorAll("[data-close]")
   .forEach(button => {
+
 
     button.addEventListener(
       "click",
       () => closeModal(button.dataset.close)
     );
 
+
   });
+
+
 
 
 /* =========================================================
    ADMIN UI
    ========================================================= */
 
+
 function updateAdminUI(){
+
 
   document.body.classList.toggle(
     "admin",
     admin()
   );
 
+
   document
     .querySelectorAll(".admin-only")
     .forEach(element => {
+
 
       element.style.display =
         admin()
           ? "inline-flex"
           : "none";
 
+
     });
 
+
 }
+
+
 
 
 /* =========================================================
    DATE HELPERS
    ========================================================= */
 
+
 function formatDate(value){
+
 
   if(!value) return "";
 
+
   const s =
     String(value).trim();
+
 
   if(
     /^\d{4}-\d{2}-\d{2}$/.test(s)
   ){
 
+
     const [y,m,d] =
       s.split("-").map(Number);
+
 
     return new Date(
       y,
@@ -1080,10 +1291,13 @@ function formatDate(value){
       }
     );
 
+
   }
+
 
   const parsed =
     Date.parse(s);
+
 
   return Number.isNaN(parsed)
     ? s
@@ -1099,25 +1313,34 @@ function formatDate(value){
 }
 
 
+
+
 function sortValue(value){
+
 
   if(!value) return null;
 
+
   const s =
     String(value).trim();
+
 
   if(
     /^\d{4}-\d{2}-\d{2}$/.test(s)
   ){
 
+
     return Number(
       s.replaceAll("-","")
     );
 
+
   }
+
 
   const t =
     Date.parse(s);
+
 
   return Number.isNaN(t)
     ? null
@@ -1125,71 +1348,94 @@ function sortValue(value){
 }
 
 
+
+
 function sortMemories(rows){
+
 
   return [...rows].sort(
     (a,b) => {
+
 
       if(
         sortMode ===
         "recently_added"
       ){
 
+
         return new Date(
           b.created_at || 0
         ) - new Date(
           a.created_at || 0
         );
 
+
       }
+
 
       const da =
         sortValue(a.date);
 
+
       const db =
         sortValue(b.date);
+
 
       if(
         da === null &&
         db === null
       ){
 
+
         return new Date(
           b.created_at || 0
         ) - new Date(
           a.created_at || 0
         );
 
+
       }
+
 
       if(da === null) return 1;
       if(db === null) return -1;
+
 
       return sortMode === "oldest"
         ? da - db
         : db - da;
 
+
     }
   );
 
+
 }
+
+
 
 
 /* =========================================================
    STORAGE
    ========================================================= */
 
+
 function publicUrl(path){
 
+
   if(!path) return "";
+
 
   if(
     /^https?:\/\//i.test(path)
   ){
 
+
     return path;
 
+
   }
+
 
   return db
     .storage
@@ -1198,74 +1444,31 @@ function publicUrl(path){
     .data
     .publicUrl;
 
+
 }
 
 
-function isExternalMediaPath(path){
-  return /^https?:\/\//i.test(String(path || ""));
-}
-
-
-async function uploadToCloudinary(file){
-
-  if(
-    CLOUDINARY_CLOUD_NAME === "YOUR_CLOUD_NAME" ||
-    CLOUDINARY_UPLOAD_PRESET === "YOUR_UNSIGNED_UPLOAD_PRESET"
-  ){
-    throw new Error(
-      "Cloudinary is not configured yet. Add your Cloudinary cloud name and unsigned upload preset in index.html."
-    );
-  }
-
-  const resourceType =
-    file.type.startsWith("video/")
-      ? "video"
-      : "image";
-
-  const endpoint =
-    `https://api.cloudinary.com/v1_1/${encodeURIComponent(CLOUDINARY_CLOUD_NAME)}/${resourceType}/upload`;
-
-  const form = new FormData();
-  form.append("file", file);
-  form.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-
-  const response = await fetch(endpoint,{
-    method:"POST",
-    body:form
-  });
-
-  let data = null;
-
-  try{
-    data = await response.json();
-  }catch{
-    data = null;
-  }
-
-  if(!response.ok || !data?.secure_url){
-    throw new Error(
-      data?.error?.message ||
-      `Cloudinary upload failed (${response.status})`
-    );
-  }
-
-  return data.secure_url;
-}
 
 
 /* =========================================================
    SECTIONS
    ========================================================= */
 
+
 function renderHeading(){
+
 
   if(activeSectionId === null){
 
+
     $("heading").innerHTML = "";
+
 
     return;
 
+
   }
+
 
   const section =
     sections.find(
@@ -1273,50 +1476,70 @@ function renderHeading(){
         item.id === activeSectionId
     );
 
+
   if(!section){
+
 
     activeSectionId = null;
 
+
     return renderHeading();
+
 
   }
 
+
   $("heading").innerHTML = "";
+
 
   const h =
     document.createElement("h2");
 
+
   h.textContent =
     section.title;
+
 
   $("heading")
     .appendChild(h);
 
+
   if(section.subtitle){
+
 
     const p =
       document.createElement("p");
 
+
     p.textContent =
       section.subtitle;
+
 
     $("heading")
       .appendChild(p);
 
+
   }
+
 
 }
 
 
+
+
 function renderSections(){
+
 
   const nav =
     $("sectionsNav");
 
+
   nav.innerHTML = "";
+
 
   const all =
     document.createElement("div");
+
 
   all.className =
     "tab" +
@@ -1326,36 +1549,50 @@ function renderSections(){
         : ""
     );
 
+
   const allButton =
     document.createElement("button");
 
+
   allButton.textContent =
     "all memories ♡";
+
 
   allButton.addEventListener(
     "click",
     async () => {
 
+
       activeSectionId = null;
+
 
       renderSections();
 
+
       await loadGallery();
 
+
       recordVisitor();
+
 
     }
   );
 
+
   all.appendChild(allButton);
+
 
   nav.appendChild(all);
 
 
+
+
   sections.forEach(section => {
+
 
     const wrap =
       document.createElement("div");
+
 
     wrap.className =
       "tab" +
@@ -1365,105 +1602,148 @@ function renderSections(){
           : ""
       );
 
+
     const pick =
       document.createElement("button");
 
+
     pick.textContent =
       section.title;
+
 
     pick.addEventListener(
       "click",
       async () => {
 
+
         activeSectionId =
           section.id;
 
+
         renderSections();
+
 
         await loadGallery();
 
+
         recordVisitor();
+
 
       }
     );
 
+
     wrap.appendChild(pick);
+
+
 
 
     const remove =
       document.createElement("button");
 
+
     remove.className =
       "remove-section";
+
 
     remove.type =
       "button";
 
+
     remove.title =
       "Remove section";
 
+
     remove.textContent =
       "×";
+
 
     remove.addEventListener(
       "click",
       event => {
 
+
         event.stopPropagation();
 
+
         removeSection(section);
+
 
       }
     );
 
+
     wrap.appendChild(remove);
+
 
     nav.appendChild(wrap);
 
+
   });
+
 
   updateAdminUI();
 
+
 }
+
+
 
 
 function populateSectionSelect(){
 
+
   const select =
     $("memorySection");
 
+
   select.innerHTML = "";
+
 
   const all =
     document.createElement("option");
 
+
   all.value = "";
+
 
   all.textContent =
     "All memories ♡";
 
+
   select.appendChild(all);
+
+
 
 
   sections.forEach(section => {
 
+
     const option =
       document.createElement("option");
+
 
     option.value =
       section.id;
 
+
     option.textContent =
       section.title;
 
+
     select.appendChild(option);
 
+
   });
+
 
 }
 
 
+
+
 async function loadSections(){
+
 
   const {
     data,
@@ -1478,38 +1758,54 @@ async function loadSections(){
       {ascending:true}
     );
 
+
   if(error){
+
 
     console.error(error);
 
+
     sections = [];
+
 
   }else{
 
+
     sections = data || [];
 
+
   }
+
 
   renderSections();
   populateSectionSelect();
   renderHeading();
 
+
 }
+
+
 
 
 /* =========================================================
    GALLERY
    ========================================================= */
 
+
 async function loadGallery(){
 
+
   renderHeading();
+
 
   const gallery =
     $("gallery");
 
+
   gallery.innerHTML =
     '<div class="empty">loading memories ♡</div>';
+
+
 
 
   let query =
@@ -1518,7 +1814,10 @@ async function loadGallery(){
       .select("*");
 
 
+
+
   if(activeSectionId !== null){
+
 
     query =
       query.eq(
@@ -1526,7 +1825,10 @@ async function loadGallery(){
         activeSectionId
       );
 
+
   }
+
+
 
 
   const {
@@ -1535,16 +1837,24 @@ async function loadGallery(){
   } = await query;
 
 
+
+
   if(error){
 
+
     console.error(error);
+
 
     gallery.innerHTML =
       '<div class="empty">couldn\'t load memories ♡</div>';
 
+
     return;
 
+
   }
+
+
 
 
   const rows =
@@ -1553,39 +1863,57 @@ async function loadGallery(){
     );
 
 
+
+
   gallery.innerHTML = "";
+
+
 
 
   if(!rows.length){
 
+
     gallery.innerHTML =
       '<div class="empty">no memories here yet ♡</div>';
 
+
     return;
+
 
   }
 
 
+
+
   rows.forEach(memory => {
+
 
     const card =
       document.createElement("article");
+
 
     card.className =
       "card";
 
 
+
+
     const media =
       document.createElement("div");
 
+
     media.className =
       "media";
+
+
 
 
     const url =
       publicUrl(
         memory.file_path
       );
+
+
 
 
     const isVideo =
@@ -1596,42 +1924,57 @@ async function loadGallery(){
         );
 
 
+
+
     if(isVideo){
+
 
       const video =
         document.createElement("video");
 
+
       video.src =
         url;
+
 
       video.controls =
         true;
 
+
       video.preload =
         "metadata";
+
 
       video.playsInline =
         true;
 
+
       media.appendChild(video);
 
+
     }else{
+
 
       const img =
         document.createElement("img");
 
+
       img.src =
         url;
+
 
       img.loading =
         "lazy";
 
+
       img.decoding =
         "async";
+
 
       img.alt =
         memory.caption ||
         "Memory photo";
+
 
       img.addEventListener(
         "click",
@@ -1642,96 +1985,138 @@ async function loadGallery(){
           )
       );
 
+
       media.appendChild(img);
 
+
     }
+
+
 
 
     card.appendChild(media);
 
 
+
+
     const info =
       document.createElement("div");
+
 
     info.className =
       "info";
 
 
+
+
     if(memory.date){
+
 
       const date =
         document.createElement("div");
 
+
       date.className =
         "date";
+
 
       date.textContent =
         formatDate(
           memory.date
         );
 
+
       info.appendChild(date);
+
 
     }
 
 
+
+
     if(memory.location){
+
 
       const location =
         document.createElement("div");
 
+
       location.className =
         "location";
+
 
       location.textContent =
         "📍 " +
         memory.location;
 
+
       info.appendChild(location);
 
+
     }
+
+
 
 
     if(memory.caption){
 
+
       const caption =
         document.createElement("div");
+
 
       caption.className =
         "caption";
 
+
       caption.textContent =
         memory.caption;
 
+
       info.appendChild(caption);
 
+
     }
+
+
 
 
     if(info.children.length){
 
+
       card.appendChild(info);
+
 
     }
 
 
+
+
     if(admin()){
+
 
       const actions =
         document.createElement("div");
+
 
       actions.className =
         "card-actions";
 
 
+
+
       const deleteButton =
         document.createElement("button");
+
 
       deleteButton.className =
         "delete-memory";
 
+
       deleteButton.textContent =
         "delete";
+
+
 
 
       deleteButton.addEventListener(
@@ -1741,35 +2126,50 @@ async function loadGallery(){
       );
 
 
+
+
       actions.appendChild(
         deleteButton
       );
 
+
       card.appendChild(actions);
+
 
     }
 
 
+
+
     gallery.appendChild(card);
+
 
   });
 
+
 }
+
+
 
 
 /* =========================================================
    DELETE MEMORY
    ========================================================= */
 
+
 async function deleteMemory(memory){
 
+
   if(!admin()) return;
+
 
   if(
     !confirm(
       "Delete this memory and its stored file?"
     )
   ) return;
+
+
 
 
   const {
@@ -1783,22 +2183,27 @@ async function deleteMemory(memory){
     );
 
 
+
+
   if(error){
+
 
     alert(
       "Couldn't delete the memory ♡\n\n" +
       error.message
     );
 
+
     return;
+
 
   }
 
 
-  if(
-    memory.file_path &&
-    !isExternalMediaPath(memory.file_path)
-  ){
+
+
+  if(memory.file_path){
+
 
     const result =
       await db
@@ -1808,27 +2213,42 @@ async function deleteMemory(memory){
           memory.file_path
         ]);
 
+
     if(result.error){
+
+
       console.error(
         result.error
       );
+
+
     }
+
 
   }
 
 
+
+
   await loadGallery();
 
+
 }
+
+
 
 
 /* =========================================================
    DELETE SECTION
    ========================================================= */
 
+
 async function removeSection(section){
 
+
   if(!admin()) return;
+
+
 
 
   if(
@@ -1837,6 +2257,8 @@ async function removeSection(section){
       "Its memories will be kept and moved to All Memories."
     )
   ) return;
+
+
 
 
   const moved =
@@ -1851,16 +2273,23 @@ async function removeSection(section){
       );
 
 
+
+
   if(moved.error){
+
 
     alert(
       "Couldn't move the memories.\n\n" +
       moved.error.message
     );
 
+
     return;
 
+
   }
+
+
 
 
   const removed =
@@ -1873,16 +2302,23 @@ async function removeSection(section){
       );
 
 
+
+
   if(removed.error){
+
 
     alert(
       "Couldn't remove the section.\n\n" +
       removed.error.message
     );
 
+
     return;
 
+
   }
+
+
 
 
   if(
@@ -1890,55 +2326,75 @@ async function removeSection(section){
     section.id
   ){
 
+
     activeSectionId =
       null;
 
+
   }
+
+
 
 
   await loadSections();
   await loadGallery();
 
+
 }
+
+
 
 
 /* =========================================================
    SORT
    ========================================================= */
 
+
 $("sortSelect")
   .addEventListener(
     "change",
     event => {
 
+
       sortMode =
         event.target.value;
 
+
       loadGallery();
+
 
     }
   );
+
+
 
 
 /* =========================================================
    LOGIN
    ========================================================= */
 
+
 $("adminBtn")
   .addEventListener(
     "click",
     () => {
 
+
       if(!admin()){
+
 
         openModal(
           "loginModal"
         );
 
+
       }
+
 
     }
   );
+
+
 
 
 $("loginSubmit")
@@ -1946,44 +2402,61 @@ $("loginSubmit")
     "click",
     async () => {
 
+
       const email =
         $("email")
           .value
           .trim();
 
+
       const password =
         $("password")
           .value;
 
+
       const status =
         $("loginStatus");
 
+
       const button =
         $("loginSubmit");
+
+
 
 
       status.style.display =
         "none";
 
 
+
+
       if(!email || !password){
+
 
         status.textContent =
           "Please enter your email and password ♡";
 
+
         status.style.display =
           "block";
 
+
         return;
 
+
       }
+
+
 
 
       button.disabled =
         true;
 
+
       button.textContent =
         "logging in...";
+
+
 
 
       const {
@@ -1997,24 +2470,35 @@ $("loginSubmit")
           });
 
 
+
+
       button.disabled =
         false;
+
 
       button.textContent =
         "log in ♡";
 
 
+
+
       if(error){
+
 
         status.textContent =
           error.message;
 
+
         status.style.display =
           "block";
 
+
         return;
 
+
       }
+
+
 
 
       if(
@@ -2022,33 +2506,46 @@ $("loginSubmit")
         data.user.id !== ADMIN_UID
       ){
 
+
         await db.auth.signOut();
+
 
         status.textContent =
           "This account isn't the gallery admin ♡";
 
+
         status.style.display =
           "block";
 
+
         return;
 
+
       }
+
+
 
 
       currentUser =
         data.user;
 
+
       closeModal(
         "loginModal"
       );
 
+
       updateAdminUI();
       renderSections();
 
+
       updateLyssPresence();
+
 
     }
   );
+
+
 
 
 $("logoutBtn")
@@ -2056,37 +2553,50 @@ $("logoutBtn")
     "click",
     async () => {
 
+
       await db.auth.signOut();
+
 
       currentUser =
         null;
 
+
       updateAdminUI();
       renderSections();
 
+
       updateLyssPresence();
+
 
     }
   );
+
+
 
 
 /* =========================================================
    ADD MEMORY
    ========================================================= */
 
+
 $("addBtn")
   .addEventListener(
     "click",
     () => {
 
+
       populateSectionSelect();
+
 
       openModal(
         "memoryModal"
       );
 
+
     }
   );
+
+
 
 
 $("saveMemory")
@@ -2094,7 +2604,10 @@ $("saveMemory")
     "click",
     async () => {
 
+
       if(!admin()) return;
+
+
 
 
       const file =
@@ -2102,25 +2615,36 @@ $("saveMemory")
           .files[0];
 
 
+
+
       if(!file){
+
 
         alert(
           "Please choose a photo or video ♡"
         );
 
+
         return;
 
+
       }
+
+
 
 
       const button =
         $("saveMemory");
 
+
       button.disabled =
         true;
 
+
       button.textContent =
         "saving... ♡";
+
+
 
 
       const sectionId =
@@ -2128,15 +2652,18 @@ $("saveMemory")
           .value ||
         null;
 
+
       const date =
         $("memoryDate")
           .value ||
         null;
 
+
       const location =
         $("memoryLocation")
           .value
           .trim();
+
 
       const caption =
         $("memoryCaption")
@@ -2144,10 +2671,14 @@ $("saveMemory")
           .trim();
 
 
+
+
       const type =
         file.type.startsWith("video/")
           ? "video"
           : "image";
+
+
 
 
       const safe =
@@ -2163,30 +2694,57 @@ $("saveMemory")
           );
 
 
+
+
       const path =
         `uploads/${crypto.randomUUID()}-${safe}`;
 
 
-      let storedPath = path;
 
-      try{
-        storedPath =
-          await uploadToCloudinary(file);
-      }catch(error){
-        console.error(
-          "Cloudinary upload error:",
-          error
-        );
+
+      const upload =
+        await db
+          .storage
+          .from(STORAGE_BUCKET)
+          .upload(
+            path,
+            file,
+            {
+              contentType:
+                file.type,
+              cacheControl:
+                "3600",
+              upsert:
+                false
+            }
+          );
+
+
+
+
+      if(upload.error){
+
 
         alert(
           "Upload failed ♡\n\n" +
-          (error.message || error)
+          upload.error.message
         );
 
-        button.disabled = false;
-        button.textContent = "add memory ♡";
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          "add memory ♡";
+
+
         return;
+
+
       }
+
+
 
 
       const insert =
@@ -2194,7 +2752,7 @@ $("saveMemory")
           .from(MEMORIES_TABLE)
           .insert({
             file_path:
-              storedPath,
+              path,
             type,
             section_id:
               sectionId,
@@ -2204,48 +2762,71 @@ $("saveMemory")
           });
 
 
+
+
       if(insert.error){
 
-        /* Cloudinary media is left in place if the DB insert fails.
-           Deleting Cloudinary assets requires a server-side signed request. */
+
+        await db
+          .storage
+          .from(STORAGE_BUCKET)
+          .remove([
+            path
+          ]);
+
 
         alert(
           "Couldn't save the memory ♡\n\n" +
           insert.error.message
         );
 
+
         button.disabled =
           false;
+
 
         button.textContent =
           "add memory ♡";
 
+
         return;
 
+
       }
+
+
 
 
       $("memoryFile").value =
         "";
 
+
       $("memorySection").value =
         "";
+
 
       $("memoryDate").value =
         "";
 
+
       $("memoryLocation").value =
         "";
+
 
       $("memoryCaption").value =
         "";
 
 
+
+
       button.disabled =
         false;
 
+
       button.textContent =
         "add memory ♡";
+
+
 
 
       closeModal(
@@ -2253,15 +2834,21 @@ $("saveMemory")
       );
 
 
+
+
       await loadGallery();
+
 
     }
   );
 
 
+
+
 /* =========================================================
    NEW SECTION
    ========================================================= */
+
 
 $("newSectionBtn")
   .addEventListener(
@@ -2273,12 +2860,17 @@ $("newSectionBtn")
   );
 
 
+
+
 $("saveSection")
   .addEventListener(
     "click",
     async () => {
 
+
       if(!admin()) return;
+
+
 
 
       const title =
@@ -2286,21 +2878,29 @@ $("saveSection")
           .value
           .trim();
 
+
       const subtitle =
         $("sectionSubtitle")
           .value
           .trim();
 
 
+
+
       if(!title){
+
 
         alert(
           "Please give the section a name ♡"
         );
 
+
         return;
 
+
       }
+
+
 
 
       if(
@@ -2308,13 +2908,18 @@ $("saveSection")
         "all memories ♡"
       ){
 
+
         alert(
           "All Memories is built in and cannot be created as a section."
         );
 
+
         return;
 
+
       }
+
+
 
 
       if(
@@ -2327,23 +2932,32 @@ $("saveSection")
         )
       ){
 
+
         alert(
           "That section already exists ♡"
         );
 
+
         return;
 
+
       }
+
+
 
 
       const button =
         $("saveSection");
 
+
       button.disabled =
         true;
 
+
       button.textContent =
         "creating... ♡";
+
+
 
 
       const insert =
@@ -2355,30 +2969,43 @@ $("saveSection")
           });
 
 
+
+
       button.disabled =
         false;
+
 
       button.textContent =
         "create section ♡";
 
 
+
+
       if(insert.error){
+
 
         alert(
           "Couldn't create the section ♡\n\n" +
           insert.error.message
         );
 
+
         return;
 
+
       }
+
+
 
 
       $("sectionName").value =
         "";
 
+
       $("sectionSubtitle").value =
         "";
+
+
 
 
       closeModal(
@@ -2386,34 +3013,47 @@ $("saveSection")
       );
 
 
+
+
       await loadSections();
+
 
     }
   );
+
+
 
 
 /* =========================================================
    LIGHTBOX
    ========================================================= */
 
+
 function openLightbox(
   memory,
   isVideo
 ){
 
+
   const wrap =
     $("lbMedia");
+
 
   const caption =
     $("lbCaption");
 
 
+
+
   wrap.innerHTML =
     "";
+
 
   caption.textContent =
     memory.caption ||
     "";
+
+
 
 
   const url =
@@ -2422,48 +3062,66 @@ function openLightbox(
     );
 
 
+
+
   if(isVideo){
+
 
     const video =
       document.createElement("video");
 
+
     video.src =
       url;
+
 
     video.controls =
       true;
 
+
     video.playsInline =
       true;
+
 
     wrap.appendChild(
       video
     );
 
+
   }else{
+
 
     const image =
       document.createElement("img");
 
+
     image.src =
       url;
+
 
     image.alt =
       memory.caption ||
       "Memory photo";
 
+
     wrap.appendChild(
       image
     );
 
+
   }
+
+
 
 
   openModal(
     "lightbox"
   );
 
+
 }
+
+
 
 
 $("lbClose")
@@ -2476,31 +3134,41 @@ $("lbClose")
   );
 
 
+
+
 $("lightbox")
   .addEventListener(
     "click",
     event => {
+
 
       if(
         event.target.id ===
         "lightbox"
       ){
 
+
         closeModal(
           "lightbox"
         );
 
+
       }
+
 
     }
   );
+
+
 
 
 document.addEventListener(
   "keydown",
   event => {
 
+
     if(event.key === "Escape"){
+
 
       document
         .querySelectorAll(
@@ -2512,22 +3180,30 @@ document.addEventListener(
               .remove("open")
         );
 
+
     }
+
 
   }
 );
+
+
 
 
 /* =========================================================
    AUTH STATE
    ========================================================= */
 
+
 db.auth.onAuthStateChange(
   (_event,session) => {
+
 
     currentUser =
       session?.user ||
       null;
+
+
 
 
     if(
@@ -2536,21 +3212,30 @@ db.auth.onAuthStateChange(
       ADMIN_UID
     ){
 
+
       db.auth.signOut();
+
 
       currentUser =
         null;
 
+
     }
+
+
 
 
     updateAdminUI();
     renderSections();
 
+
     updateLyssPresence();
+
 
   }
 );
+
+
 
 
 /* =========================================================
@@ -2563,16 +3248,22 @@ db.auth.onAuthStateChange(
    ♡ lyss was last active X minutes ago
    ========================================================= */
 
+
 const PRESENCE_ID =
   "lyss";
 
+
 const ONLINE_TIME =
-  90000;
+  60000;
+
+
 
 
 /* Create the status widget */
 
+
 function createLyssPresence(){
+
 
   if(
     document.getElementById(
@@ -2580,19 +3271,27 @@ function createLyssPresence(){
     )
   ){
 
+
     return;
 
+
   }
+
+
 
 
   const presence =
     document.createElement("div");
 
+
   presence.id =
     "lyss-presence";
 
+
   presence.className =
     "offline";
+
+
 
 
   presence.innerHTML = `
@@ -2603,73 +3302,105 @@ function createLyssPresence(){
   `;
 
 
+
+
   document.body
     .appendChild(
       presence
     );
 
+
 }
+
+
 
 
 function setLyssOnline(){
 
+
   createLyssPresence();
+
+
 
 
   const widget =
     $("lyss-presence");
 
+
   const heart =
     $("lyss-presence-heart");
+
 
   const text =
     $("lyss-presence-text");
 
 
+
+
   widget.className =
     "online";
+
 
   heart.textContent =
     "♥";
 
+
   text.textContent =
     "lyss is online";
 
+
 }
+
+
 
 
 function setLyssOffline(
   lastSeen
 ){
 
+
   createLyssPresence();
+
+
 
 
   const widget =
     $("lyss-presence");
 
+
   const heart =
     $("lyss-presence-heart");
+
 
   const text =
     $("lyss-presence-text");
 
 
+
+
   widget.className =
     "offline";
+
 
   heart.textContent =
     "♡";
 
 
+
+
   if(!lastSeen){
+
 
     text.textContent =
       "lyss was last active…";
 
+
     return;
 
+
   }
+
+
 
 
   const seconds =
@@ -2686,14 +3417,21 @@ function setLyssOffline(
     );
 
 
+
+
   if(seconds < 60){
+
 
     text.textContent =
       "lyss was last active just now";
 
+
     return;
 
+
   }
+
+
 
 
   const minutes =
@@ -2702,26 +3440,38 @@ function setLyssOffline(
     );
 
 
+
+
   if(minutes === 1){
+
 
     text.textContent =
       "lyss was last active 1 minute ago";
 
+
     return;
+
 
   }
 
 
+
+
   if(minutes < 60){
+
 
     text.textContent =
       "lyss was last active " +
       minutes +
       " minutes ago";
 
+
     return;
 
+
   }
+
+
 
 
   const hours =
@@ -2730,32 +3480,46 @@ function setLyssOffline(
     );
 
 
+
+
   if(hours === 1){
+
 
     text.textContent =
       "lyss was last active 1 hour ago";
 
+
     return;
+
 
   }
 
 
+
+
   if(hours < 24){
+
 
     text.textContent =
       "lyss was last active " +
       hours +
       " hours ago";
 
+
     return;
 
+
   }
+
+
 
 
   const days =
     Math.floor(
       hours / 24
     );
+
+
 
 
   text.textContent =
@@ -2765,15 +3529,22 @@ function setLyssOffline(
         days +
         " days ago";
 
+
 }
+
+
 
 
 async function updateLyssPresence(){
 
+
   createLyssPresence();
 
 
+
+
   try{
+
 
     const {
       data,
@@ -2789,16 +3560,23 @@ async function updateLyssPresence(){
         .maybeSingle();
 
 
+
+
     if(error){
+
 
       console.error(
         "Lyss presence read error:",
         error
       );
 
+
       return;
 
+
     }
+
+
 
 
     if(
@@ -2806,13 +3584,18 @@ async function updateLyssPresence(){
       !data.last_seen
     ){
 
+
       setLyssOffline(
         null
       );
 
+
       return;
 
+
     }
+
+
 
 
     const lastSeen =
@@ -2821,41 +3604,58 @@ async function updateLyssPresence(){
       ).getTime();
 
 
+
+
     const online =
       Date.now() -
       lastSeen <=
       ONLINE_TIME;
 
 
+
+
     if(online){
+
 
       setLyssOnline();
 
+
     }else{
+
 
       setLyssOffline(
         data.last_seen
       );
 
+
     }
 
+
   }catch(error){
+
 
     console.error(
       "Lyss presence error:",
       error
     );
 
+
   }
+
 
 }
 
 
+
+
 /* Keep Lyss online */
+
 
 async function lyssHeartbeat(){
 
+
   try{
+
 
     const {
       data
@@ -2864,8 +3664,12 @@ async function lyssHeartbeat(){
         .getSession();
 
 
+
+
     const user =
       data?.session?.user;
+
+
 
 
     if(
@@ -2874,9 +3678,13 @@ async function lyssHeartbeat(){
       ADMIN_UID
     ){
 
+
       return;
 
+
     }
+
+
 
 
     await db
@@ -2896,35 +3704,49 @@ async function lyssHeartbeat(){
       );
 
 
+
+
     updateLyssPresence();
 
+
   }catch(error){
+
 
     console.error(
       "Lyss heartbeat error:",
       error
     );
 
+
   }
 
+
 }
+
+
 
 
 /* =========================================================
    VISITOR TRACKING
    ========================================================= */
 
+
 const VISITOR_KEY =
   "lyss_gallery_visitor_id";
+
 
 const SESSION_KEY =
   "lyss_gallery_session_id";
 
+
 const VISITOR_HEARTBEAT =
-  20000;
+  30000;
+
+
 
 
 /* Persistent anonymous visitor ID */
+
 
 let visitorId =
   localStorage.getItem(
@@ -2932,20 +3754,28 @@ let visitorId =
   );
 
 
+
+
 if(!visitorId){
+
 
   visitorId =
     crypto.randomUUID();
+
 
   localStorage.setItem(
     VISITOR_KEY,
     visitorId
   );
 
+
 }
 
 
+
+
 /* One session per browser tab */
+
 
 let sessionId =
   sessionStorage.getItem(
@@ -2953,156 +3783,229 @@ let sessionId =
   );
 
 
+
+
 if(!sessionId){
+
 
   sessionId =
     crypto.randomUUID();
+
 
   sessionStorage.setItem(
     SESSION_KEY,
     sessionId
   );
 
+
 }
 
 
-/* Record visitor / keep the current session alive.
-   This is intentionally independent of the admin login. */
-let visitorWriteInFlight = false;
 
-function getDeviceType(){
-  const ua = String(navigator.userAgent || "").toLowerCase();
 
-  if(/ipad|tablet|playbook|silk/.test(ua))
-    return "Tablet";
+/* Record visitor */
 
-  if(/mobile|iphone|ipod|android.*mobile|windows phone/.test(ua))
-    return "Mobile";
-
-  return "Desktop";
-}
 
 async function recordVisitor(){
-  if(visitorWriteInFlight)
-    return;
 
-  visitorWriteInFlight = true;
 
   try{
-    const now = new Date().toISOString();
-    const section = activeSectionId;
-    const deviceType = getDeviceType();
 
-    /* Upsert the anonymous visitor and check the result. */
-    const visitorResult = await db
-      .from("gallery_visitors")
+
+    const now =
+      new Date()
+        .toISOString();
+
+
+
+
+    const section =
+      activeSectionId;
+
+
+
+
+    /* Visitor */
+
+
+    await db
+      .from(
+        "gallery_visitors"
+      )
       .upsert(
         {
-          visitor_id: visitorId,
-          last_seen: now,
-          device_type: deviceType
+          visitor_id:
+            visitorId,
+          last_seen:
+            now
         },
         {
-          onConflict: "visitor_id"
+          onConflict:
+            "visitor_id"
         }
       );
 
-    if(visitorResult.error){
-      console.error(
-        "Visitor tracking write error:",
-        visitorResult.error
-      );
-      return;
-    }
 
-    /* Read the current session. */
+
+
+    /* Existing session */
+
+
     const {
-      data: existing,
-      error: sessionReadError
-    } = await db
-      .from("gallery_sessions")
-      .select("id,started_at,sections_visited")
-      .eq("id", sessionId)
-      .maybeSingle();
+      data:existing,
+      error:sessionReadError
+    } =
+      await db
+        .from(
+          "gallery_sessions"
+        )
+        .select(
+          "id,started_at,sections_visited"
+        )
+        .eq(
+          "id",
+          sessionId
+        )
+        .maybeSingle();
+
+
+
 
     if(sessionReadError){
+
+
       console.error(
         "Visitor session read error:",
         sessionReadError
       );
+
+
       return;
+
+
     }
 
+
+
+
     if(existing){
-      const visited = Array.isArray(existing.sections_visited)
-        ? [...existing.sections_visited]
-        : [];
+
+
+      const visited =
+        Array.isArray(
+          existing.sections_visited
+        )
+          ? [
+              ...existing.sections_visited
+            ]
+          : [];
+
+
+
 
       if(
         section &&
-        !visited.includes(section)
+        !visited.includes(
+          section
+        )
       ){
-        visited.push(section);
-      }
 
-      const result = await db
-        .from("gallery_sessions")
-        .update({
-          last_seen: now,
-          current_section_id: section,
-          sections_visited: visited,
-          ended_at: null
-        })
-        .eq("id", sessionId);
 
-      if(result.error){
-        console.error(
-          "Visitor session update error:",
-          result.error
+        visited.push(
+          section
         );
+
+
       }
+
+
+
+
+      await db
+        .from(
+          "gallery_sessions"
+        )
+        .update(
+          {
+            last_seen:
+              now,
+            current_section_id:
+              section,
+            sections_visited:
+              visited,
+            ended_at:
+              null
+          }
+        )
+        .eq(
+          "id",
+          sessionId
+        );
+
 
     }else{
-      const result = await db
-        .from("gallery_sessions")
-        .insert({
-          id: sessionId,
-          visitor_id: visitorId,
-          started_at: now,
-          last_seen: now,
-          current_section_id: section,
-          sections_visited: section ? [section] : [],
-          ended_at: null
-        });
 
-      if(result.error){
-        console.error(
-          "Visitor session insert error:",
-          result.error
+
+      await db
+        .from(
+          "gallery_sessions"
+        )
+        .insert(
+          {
+            id:
+              sessionId,
+            visitor_id:
+              visitorId,
+            started_at:
+              now,
+            last_seen:
+              now,
+            current_section_id:
+              section,
+            sections_visited:
+              section
+                ? [section]
+                : [],
+            ended_at:
+              null
+          }
         );
-      }
+
+
     }
 
+
   }catch(error){
+
+
     console.error(
       "Visitor tracking error:",
       error
     );
-  }finally{
-    visitorWriteInFlight = false;
+
+
   }
+
+
 }
+
+
+
 
 /* =========================================================
    VISITOR HISTORY DASHBOARD
    ========================================================= */
 
+
 function visitorTimeAgo(
   value
 ){
 
+
   if(!value)
     return "unknown";
+
+
 
 
   const seconds =
@@ -3118,8 +4021,12 @@ function visitorTimeAgo(
     );
 
 
+
+
   if(seconds < 60)
     return "just now";
+
+
 
 
   const minutes =
@@ -3128,13 +4035,19 @@ function visitorTimeAgo(
     );
 
 
+
+
   if(minutes === 1)
     return "1 minute ago";
+
+
 
 
   if(minutes < 60)
     return minutes +
       " minutes ago";
+
+
 
 
   const hours =
@@ -3143,13 +4056,19 @@ function visitorTimeAgo(
     );
 
 
+
+
   if(hours === 1)
     return "1 hour ago";
+
+
 
 
   if(hours < 24)
     return hours +
       " hours ago";
+
+
 
 
   const days =
@@ -3158,22 +4077,32 @@ function visitorTimeAgo(
     );
 
 
+
+
   if(days === 1)
     return "1 day ago";
+
+
 
 
   return days +
     " days ago";
 
+
 }
+
+
 
 
 function formatVisitorDate(
   value
 ){
 
+
   if(!value)
     return "—";
+
+
 
 
   return new Date(
@@ -3188,15 +4117,21 @@ function formatVisitorDate(
     }
   );
 
+
 }
+
+
 
 
 function getSectionTitle(
   id
 ){
 
+
   if(!id)
     return "All Memories";
+
+
 
 
   const section =
@@ -3207,30 +4142,44 @@ function getSectionTitle(
     );
 
 
+
+
   return section
     ? section.title
     : "Unknown section";
 
+
 }
+
+
 
 
 async function loadVisitorHistory(){
 
+
   if(!admin())
     return;
+
+
 
 
   const wrap =
     $("visitorTableWrap");
 
 
+
+
   wrap.innerHTML =
     '<div class="visitor-loading">loading visitor history ♡</div>';
 
 
+
+
   try{
 
+
     /* Visitors */
+
 
     const {
       data:visitors,
@@ -3251,11 +4200,16 @@ async function loadVisitorHistory(){
         );
 
 
+
+
     if(visitorError)
       throw visitorError;
 
 
+
+
     /* Sessions */
+
 
     const {
       data:sessions,
@@ -3277,18 +4231,26 @@ async function loadVisitorHistory(){
         .limit(100);
 
 
+
+
     if(sessionError)
       throw sessionError;
+
+
 
 
     const visitorRows =
       visitors || [];
 
+
     const sessionRows =
       sessions || [];
 
 
+
+
     /* Stats */
+
 
     const activeCount =
       visitorRows.filter(
@@ -3301,9 +4263,13 @@ async function loadVisitorHistory(){
       ).length;
 
 
+
+
     $("visitorTotal")
       .textContent =
       visitorRows.length;
+
+
 
 
     $("visitorSessions")
@@ -3311,19 +4277,28 @@ async function loadVisitorHistory(){
       sessionRows.length;
 
 
+
+
     $("visitorActive")
       .textContent =
       activeCount;
 
 
+
+
     if(!sessionRows.length){
+
 
       wrap.innerHTML =
         '<div class="visitor-empty">no visitor history yet ♡</div>';
 
+
       return;
 
+
     }
+
+
 
 
     const table =
@@ -3331,8 +4306,11 @@ async function loadVisitorHistory(){
         "table"
       );
 
+
     table.className =
       "visitor-table";
+
+
 
 
     table.innerHTML = `
@@ -3350,19 +4328,26 @@ async function loadVisitorHistory(){
     `;
 
 
+
+
     const tbody =
       table.querySelector(
         "tbody"
       );
 
 
+
+
     sessionRows.forEach(
       session => {
+
 
         const row =
           document.createElement(
             "tr"
           );
+
+
 
 
         const visitorCell =
@@ -3371,17 +4356,23 @@ async function loadVisitorHistory(){
           );
 
 
+
+
         const visitorIdElement =
           document.createElement(
             "div"
           );
 
+
         visitorIdElement.className =
           "visitor-id";
+
 
         visitorIdElement.textContent =
           session.visitor_id ||
           "unknown";
+
+
 
 
         visitorCell.appendChild(
@@ -3389,13 +4380,18 @@ async function loadVisitorHistory(){
         );
 
 
+
+
         const lastSeenCell =
           document.createElement(
             "td"
           );
 
+
         lastSeenCell.innerHTML =
           `<strong>${visitorTimeAgo(session.last_seen)}</strong><br><small>${formatVisitorDate(session.last_seen)}</small>`;
+
+
 
 
         const startedCell =
@@ -3403,10 +4399,13 @@ async function loadVisitorHistory(){
             "td"
           );
 
+
         startedCell.textContent =
           formatVisitorDate(
             session.started_at
           );
+
+
 
 
         const sectionCell =
@@ -3414,16 +4413,21 @@ async function loadVisitorHistory(){
             "td"
           );
 
+
         sectionCell.textContent =
           getSectionTitle(
             session.current_section_id
           );
 
 
+
+
         const visitedCell =
           document.createElement(
             "td"
           );
+
+
 
 
         const visited =
@@ -3434,7 +4438,10 @@ async function loadVisitorHistory(){
             : [];
 
 
+
+
         if(visited.length){
+
 
           visitedCell.textContent =
             visited
@@ -3444,18 +4451,25 @@ async function loadVisitorHistory(){
               )
               .join(", ");
 
+
         }else{
+
 
           visitedCell.textContent =
             "All Memories";
 
+
         }
+
+
 
 
         const statusCell =
           document.createElement(
             "td"
           );
+
+
 
 
         const isActive =
@@ -3466,80 +4480,109 @@ async function loadVisitorHistory(){
           <= 90000;
 
 
+
+
         if(isActive){
+
 
           const status =
             document.createElement(
               "span"
             );
 
+
           status.className =
             "visitor-online";
+
+
 
 
           status.innerHTML =
             '<span class="visitor-online-dot"></span> active';
 
 
+
+
           statusCell.appendChild(
             status
           );
 
+
         }else{
+
 
           statusCell.textContent =
             "offline";
 
+
         }
+
+
 
 
         row.appendChild(
           visitorCell
         );
 
+
         row.appendChild(
           lastSeenCell
         );
+
 
         row.appendChild(
           startedCell
         );
 
+
         row.appendChild(
           sectionCell
         );
 
+
         row.appendChild(
           visitedCell
         );
+
 
         row.appendChild(
           statusCell
         );
 
 
+
+
         tbody.appendChild(
           row
         );
+
 
       }
     );
 
 
+
+
     wrap.innerHTML =
       "";
+
 
     wrap.appendChild(
       table
     );
 
 
+
+
   }catch(error){
+
 
     console.error(
       "Visitor history error:",
       error
     );
+
+
 
 
     wrap.innerHTML =
@@ -3551,20 +4594,28 @@ async function loadVisitorHistory(){
         </div>
       `;
 
+
   }
+
 
 }
 
 
+
+
 /* Open dashboard */
+
 
 $("visitorHistoryBtn")
   .addEventListener(
     "click",
     async () => {
 
+
       if(!admin())
         return;
+
+
 
 
       openModal(
@@ -3572,52 +4623,74 @@ $("visitorHistoryBtn")
       );
 
 
+
+
       await loadVisitorHistory();
+
 
     }
   );
 
 
+
+
 /* Refresh dashboard */
+
 
 $("refreshVisitors")
   .addEventListener(
     "click",
     async () => {
 
+
       if(!admin())
         return;
+
+
 
 
       const button =
         $("refreshVisitors");
 
 
+
+
       button.disabled =
         true;
+
 
       button.textContent =
         "refreshing...";
 
 
+
+
       await loadVisitorHistory();
+
+
 
 
       button.disabled =
         false;
 
+
       button.textContent =
         "refresh ♡";
 
+
     }
   );
+
+
 
 
 /* =========================================================
    EDIT MEMORY / SECTION TOOLS
    ========================================================= */
 
+
 function escapeHtml(value){
+
 
   return String(
     value ?? ""
@@ -3632,13 +4705,17 @@ function escapeHtml(value){
     }[character])
   );
 
+
 }
+
+
 
 
 function storageKey(
   type,
   sectionId
 ){
+
 
   return (
     "lyss_" +
@@ -3650,7 +4727,10 @@ function storageKey(
     )
   );
 
+
 }
+
+
 
 
 function getSavedOrder(
@@ -3658,7 +4738,9 @@ function getSavedOrder(
   sectionId
 ){
 
+
   try{
+
 
     return JSON.parse(
       localStorage.getItem(
@@ -3669,13 +4751,19 @@ function getSavedOrder(
       ) || "[]"
     );
 
+
   }catch{
+
 
     return [];
 
+
   }
 
+
 }
+
+
 
 
 function saveOrder(
@@ -3683,6 +4771,7 @@ function saveOrder(
   sectionId,
   ids
 ){
+
 
   localStorage.setItem(
     storageKey(
@@ -3692,7 +4781,10 @@ function saveOrder(
     JSON.stringify(ids)
   );
 
+
 }
+
+
 
 
 function applySavedOrder(
@@ -3701,6 +4793,7 @@ function applySavedOrder(
   sectionId
 ){
 
+
   const saved =
     getSavedOrder(
       type,
@@ -3708,8 +4801,12 @@ function applySavedOrder(
     );
 
 
+
+
   if(!saved.length)
     return items;
+
+
 
 
   const position =
@@ -3724,8 +4821,11 @@ function applySavedOrder(
     );
 
 
+
+
   return [...items].sort(
     (a,b) => {
+
 
       const pa =
         position.has(
@@ -3735,6 +4835,8 @@ function applySavedOrder(
               String(a.id)
             )
           : 999999;
+
+
 
 
       const pb =
@@ -3747,12 +4849,18 @@ function applySavedOrder(
           : 999999;
 
 
+
+
       return pa - pb;
+
 
     }
   );
 
+
 }
+
+
 
 
 function showEditBox(
@@ -3761,6 +4869,7 @@ function showEditBox(
   saveFunction
 ){
 
+
   document
     .getElementById(
       "extraEditBox"
@@ -3768,36 +4877,48 @@ function showEditBox(
     ?.remove();
 
 
+
+
   const overlay =
     document.createElement(
       "div"
     );
 
+
   overlay.id =
     "extraEditBox";
 
+
   overlay.className =
     "open";
+
+
 
 
   let fieldsHtml =
     "";
 
 
+
+
   fields.forEach(
     field => {
+
 
       if(
         field.type ===
         "textarea"
       ){
 
+
         fieldsHtml += `
           <label>${escapeHtml(field.label)}</label>
           <textarea id="extraField_${escapeHtml(field.key)}">${escapeHtml(field.value || "")}</textarea>
         `;
 
+
       }else{
+
 
         fieldsHtml += `
           <label>${escapeHtml(field.label)}</label>
@@ -3808,28 +4929,39 @@ function showEditBox(
           >
         `;
 
+
       }
+
 
     }
   );
 
 
+
+
   overlay.innerHTML = `
     <div class="extra-edit-card">
 
+
       <h2>${escapeHtml(title)}</h2>
+
 
       <p>edit this little detail ♡</p>
 
+
       ${fieldsHtml}
+
 
       <div class="extra-edit-buttons">
         <button id="extraCancel">cancel</button>
         <button class="save-extra" id="extraSave">save ♡</button>
       </div>
 
+
     </div>
   `;
+
+
 
 
   document.body.appendChild(
@@ -3837,11 +4969,17 @@ function showEditBox(
   );
 
 
+
+
   function close(){
+
 
     overlay.remove();
 
+
   }
+
+
 
 
   overlay
@@ -3852,21 +4990,29 @@ function showEditBox(
     close;
 
 
+
+
   overlay.addEventListener(
     "click",
     event => {
+
 
       if(
         event.target ===
         overlay
       ){
 
+
         close();
+
 
       }
 
+
     }
   );
+
+
 
 
   overlay
@@ -3876,11 +5022,15 @@ function showEditBox(
     .onclick =
     async () => {
 
+
       const values = {};
+
+
 
 
       fields.forEach(
         field => {
+
 
           values[field.key] =
             document
@@ -3890,8 +5040,11 @@ function showEditBox(
               )
               .value;
 
+
         }
       );
+
+
 
 
       const button =
@@ -3900,29 +5053,40 @@ function showEditBox(
         );
 
 
+
+
       button.disabled =
         true;
+
 
       button.textContent =
         "saving...";
 
 
+
+
       try{
+
 
         await saveFunction(
           values
         );
 
+
         close();
+
 
         await loadSections();
         await loadGallery();
 
+
       }catch(error){
+
 
         console.error(
           error
         );
+
 
         alert(
           "Couldn't save the changes ♡\n\n" +
@@ -3932,25 +5096,35 @@ function showEditBox(
           )
         );
 
+
         button.disabled =
           false;
+
 
         button.textContent =
           "save ♡";
 
+
       }
+
 
     };
 
+
 }
+
+
 
 
 async function editMemory(
   memory
 ){
 
+
   if(!admin())
     return;
+
+
 
 
   showEditBox(
@@ -3980,6 +5154,7 @@ async function editMemory(
     ],
     async values => {
 
+
       const {
         error
       } =
@@ -4006,16 +5181,23 @@ async function editMemory(
           );
 
 
+
+
       if(error)
         throw error;
+
 
     }
   );
 
+
 }
 
 
+
+
 async function getCurrentMemories(){
+
 
   let query =
     db
@@ -4025,10 +5207,13 @@ async function getCurrentMemories(){
       .select("*");
 
 
+
+
   if(
     activeSectionId !==
     null
   ){
+
 
     query =
       query.eq(
@@ -4036,25 +5221,36 @@ async function getCurrentMemories(){
         activeSectionId
       );
 
+
   }
+
+
 
 
   const result =
     await query;
 
 
+
+
   if(result.error)
     throw result.error;
+
+
 
 
   let rows =
     result.data || [];
 
 
+
+
   rows =
     sortMemories(
       rows
     );
+
+
 
 
   rows =
@@ -4065,39 +5261,58 @@ async function getCurrentMemories(){
     );
 
 
+
+
   return rows;
+
 
 }
 
 
+
+
 async function addMemoryTools(){
+
 
   if(!admin())
     return;
+
+
 
 
   const gallery =
     $("gallery");
 
 
+
+
   let memories;
+
+
 
 
   try{
 
+
     memories =
       await getCurrentMemories();
 
+
   }catch(error){
+
 
     console.error(
       "memory tools:",
       error
     );
 
+
     return;
 
+
   }
+
+
 
 
   const cards =
@@ -4109,23 +5324,34 @@ async function addMemoryTools(){
     ];
 
 
+
+
   cards.forEach(
     (card,index) => {
 
+
       const memory =
         memories[index];
+
+
 
 
       if(!memory)
         return;
 
 
+
+
       card.dataset.memoryId =
         memory.id;
 
 
+
+
       card.draggable =
         true;
+
+
 
 
       if(
@@ -4134,13 +5360,17 @@ async function addMemoryTools(){
         )
       ){
 
+
         const tools =
           document.createElement(
             "div"
           );
 
+
         tools.className =
           "extra-memory-tools";
+
+
 
 
         tools.innerHTML = `
@@ -4148,10 +5378,13 @@ async function addMemoryTools(){
             ✏️ edit
           </button>
 
+
           <button type="button" class="extra-delete-memory">
             🗑️ delete
           </button>
         `;
+
+
 
 
         tools
@@ -4161,13 +5394,18 @@ async function addMemoryTools(){
           .onclick =
           event => {
 
+
             event.stopPropagation();
+
 
             editMemory(
               memory
             );
 
+
           };
+
+
 
 
         tools
@@ -4177,7 +5415,10 @@ async function addMemoryTools(){
           .onclick =
           async event => {
 
+
             event.stopPropagation();
+
+
 
 
             if(
@@ -4188,40 +5429,55 @@ async function addMemoryTools(){
               return;
 
 
+
+
             await deleteMemory(
               memory
             );
 
+
           };
+
+
 
 
         card.appendChild(
           tools
         );
 
+
       }
+
+
 
 
       card.addEventListener(
         "dragstart",
         () => {
 
+
           card.classList.add(
             "memory-dragging"
           );
+
 
         },
         {once:true}
       );
 
 
+
+
       card.addEventListener(
         "dragend",
         () => {
 
+
           card.classList.remove(
             "memory-dragging"
           );
+
+
 
 
           const orderedIds =
@@ -4236,28 +5492,38 @@ async function addMemoryTools(){
             );
 
 
+
+
           saveOrder(
             "memories",
             activeSectionId,
             orderedIds
           );
 
+
         },
         {once:true}
       );
+
+
 
 
       card.addEventListener(
         "dragover",
         event => {
 
+
           event.preventDefault();
+
+
 
 
           const dragging =
             gallery.querySelector(
               ".memory-dragging"
             );
+
+
 
 
           if(
@@ -4267,8 +5533,12 @@ async function addMemoryTools(){
             return;
 
 
+
+
           const rect =
             card.getBoundingClientRect();
+
+
 
 
           const before =
@@ -4277,37 +5547,51 @@ async function addMemoryTools(){
             rect.height / 2;
 
 
+
+
           if(before){
+
 
             gallery.insertBefore(
               dragging,
               card
             );
 
+
           }else{
+
 
             gallery.insertBefore(
               dragging,
               card.nextSibling
             );
 
+
           }
+
 
         }
       );
 
+
     }
   );
 
+
 }
+
+
 
 
 async function editSection(
   section
 ){
 
+
   if(!admin())
     return;
+
+
 
 
   showEditBox(
@@ -4329,6 +5613,7 @@ async function editSection(
       }
     ],
     async values => {
+
 
       const {
         error
@@ -4352,16 +5637,23 @@ async function editSection(
           );
 
 
+
+
       if(error)
         throw error;
+
 
     }
   );
 
+
 }
 
 
+
+
 function applySectionOrder(){
+
 
   sections =
     applySavedOrder(
@@ -4370,17 +5662,25 @@ function applySectionOrder(){
       "main"
     );
 
+
 }
 
 
+
+
 function addSectionTools(){
+
 
   if(!admin())
     return;
 
 
+
+
   const nav =
     $("sectionsNav");
+
+
 
 
   const tabs =
@@ -4391,27 +5691,40 @@ function addSectionTools(){
     ];
 
 
+
+
   const realTabs =
     tabs.slice(1);
+
+
 
 
   realTabs.forEach(
     (tab,index) => {
 
+
       const section =
         sections[index];
+
+
 
 
       if(!section)
         return;
 
 
+
+
       tab.dataset.sectionId =
         section.id;
 
 
+
+
       tab.draggable =
         true;
+
+
 
 
       if(
@@ -4422,14 +5735,20 @@ function addSectionTools(){
         return;
 
 
+
+
       const tools =
         document.createElement(
           "span"
         );
 
 
+
+
       tools.className =
         "extra-section-tools";
+
+
 
 
       tools.innerHTML = `
@@ -4439,16 +5758,23 @@ function addSectionTools(){
       `;
 
 
+
+
       const buttons =
         tools.querySelectorAll(
           "button"
         );
 
 
+
+
       buttons[0].onclick =
         event => {
 
+
           event.stopPropagation();
+
+
 
 
           const index =
@@ -4459,8 +5785,12 @@ function addSectionTools(){
             );
 
 
+
+
           if(index <= 1)
             return;
+
+
 
 
           nav.insertBefore(
@@ -4471,17 +5801,25 @@ function addSectionTools(){
           );
 
 
+
+
           saveCurrentSectionOrder(
             nav
           );
 
+
         };
+
+
 
 
       buttons[1].onclick =
         event => {
 
+
           event.stopPropagation();
+
+
 
 
           const index =
@@ -4492,12 +5830,16 @@ function addSectionTools(){
             );
 
 
+
+
           if(
             index < 1 ||
             index >=
             nav.children.length - 1
           )
             return;
+
+
 
 
           nav.insertBefore(
@@ -4508,23 +5850,33 @@ function addSectionTools(){
           );
 
 
+
+
           saveCurrentSectionOrder(
             nav
           );
 
+
         };
+
+
 
 
       buttons[2].onclick =
         event => {
 
+
           event.stopPropagation();
+
 
           editSection(
             section
           );
 
+
         };
+
+
 
 
       tab.appendChild(
@@ -4532,47 +5884,63 @@ function addSectionTools(){
       );
 
 
+
+
       tab.addEventListener(
         "dragstart",
         () => {
+
 
           tab.classList.add(
             "section-dragging"
           );
 
+
         },
         {once:true}
       );
+
+
 
 
       tab.addEventListener(
         "dragend",
         () => {
 
+
           tab.classList.remove(
             "section-dragging"
           );
 
+
           saveCurrentSectionOrder(
             nav
           );
+
 
         },
         {once:true}
       );
 
 
+
+
       tab.addEventListener(
         "dragover",
         event => {
 
+
           event.preventDefault();
+
+
 
 
           const dragging =
             nav.querySelector(
               ".section-dragging"
             );
+
+
 
 
           if(
@@ -4582,8 +5950,12 @@ function addSectionTools(){
             return;
 
 
+
+
           const rect =
             tab.getBoundingClientRect();
+
+
 
 
           const before =
@@ -4592,34 +5964,46 @@ function addSectionTools(){
             rect.width / 2;
 
 
+
+
           if(before){
+
 
             nav.insertBefore(
               dragging,
               tab
             );
 
+
           }else{
+
 
             nav.insertBefore(
               dragging,
               tab.nextSibling
             );
 
+
           }
+
 
         }
       );
 
+
     }
   );
 
+
 }
+
+
 
 
 function saveCurrentSectionOrder(
   nav
 ){
+
 
   const ids =
     [
@@ -4632,54 +6016,76 @@ function saveCurrentSectionOrder(
     );
 
 
+
+
   saveOrder(
     "sections",
     "main",
     ids
   );
 
+
 }
+
+
 
 
 /* =========================================================
    ADMIN TOOL REFRESH
    ========================================================= */
 
+
 function refreshExtraTools(){
+
 
   if(!admin())
     return;
 
 
+
+
   setTimeout(
     () => {
 
+
       applySectionOrder();
+
 
       renderSections();
 
+
       addSectionTools();
       addMemoryTools();
+
 
     },
     100
   );
 
+
 }
+
+
 
 
 const adminObserver =
   new MutationObserver(
     () => {
 
+
       if(admin()){
+
 
         refreshExtraTools();
 
+
       }
+
 
     }
   );
+
+
 
 
 adminObserver.observe(
@@ -4693,43 +6099,60 @@ adminObserver.observe(
 );
 
 
+
+
 window.addEventListener(
   "load",
   () => {
+
 
     setTimeout(
       refreshExtraTools,
       500
     );
 
+
   }
 );
+
+
 
 
 setInterval(
   () => {
 
+
     if(admin()){
+
 
       addSectionTools();
       addMemoryTools();
 
+
     }
+
 
   },
   2000
 );
 
 
+
+
 /* =========================================================
    START
    ========================================================= */
 
+
 (async function start(){
+
 
   createLyssPresence();
 
+
   updateLyssPresence();
+
+
 
 
   const {
@@ -4739,9 +6162,13 @@ setInterval(
       .getSession();
 
 
+
+
   currentUser =
     data.session?.user ||
     null;
+
+
 
 
   if(
@@ -4750,120 +6177,157 @@ setInterval(
     ADMIN_UID
   ){
 
+
     await db.auth.signOut();
+
 
     currentUser =
       null;
 
+
   }
+
+
 
 
   updateAdminUI();
 
 
+
+
   await loadSections();
+
 
   await loadGallery();
 
 
+
+
   /* Record initial visitor */
+
 
   await recordVisitor();
 
 
+
+
   /* Presence check */
+
 
   await updateLyssPresence();
 
 
+
+
   /* Admin heartbeat */
+
 
   await lyssHeartbeat();
 
+
 })();
+
+
 
 
 /* =========================================================
    CONTINUOUS TIMERS
    ========================================================= */
 
+
 /* Visitor history / session heartbeat */
+
 
 setInterval(
   () => {
 
+
     recordVisitor();
+
 
   },
   VISITOR_HEARTBEAT
 );
 
 
+
+
 /* Lyss admin heartbeat */
+
 
 setInterval(
   () => {
 
+
     lyssHeartbeat();
 
+
   },
-  20000
+  30000
 );
+
+
 
 
 /* Public status refresh */
 
+
 setInterval(
   () => {
 
+
     updateLyssPresence();
+
 
   },
   10000
 );
 
 
-/* End the session when the page is actually being closed. */
-function endVisitorSession(){
-  if(!sessionId)
-    return;
 
-  const now = new Date().toISOString();
 
-  try{
-    const url =
-      SUPABASE_URL +
-      "/rest/v1/gallery_sessions?id=eq." +
-      encodeURIComponent(sessionId);
+/* Visitor session ended */
 
-    fetch(url,{
-      method:"PATCH",
-      keepalive:true,
-      headers:{
-        "apikey":SUPABASE_ANON_KEY,
-        "Authorization":"Bearer " + SUPABASE_ANON_KEY,
-        "Content-Type":"application/json",
-        "Prefer":"return=minimal"
-      },
-      body:JSON.stringify({ended_at:now})
-    }).catch(() => {});
-  }catch{}
-}
 
-window.addEventListener("pagehide", endVisitorSession);
-window.addEventListener("beforeunload", endVisitorSession);
+window.addEventListener(
+  "beforeunload",
+  () => {
 
-document.addEventListener("visibilitychange", () => {
-  if(document.visibilityState === "visible")
-    recordVisitor();
-});
+
+    if(!sessionId)
+      return;
+
+
+
+
+    db
+      .from(
+        "gallery_sessions"
+      )
+      .update({
+        ended_at:
+          new Date()
+            .toISOString()
+      })
+      .eq(
+        "id",
+        sessionId
+      );
+
+
+  }
+);
+
+
 
 
 /* Keep header visible */
 
+
 document.addEventListener(
   "DOMContentLoaded",
   () => {
+
 
     const header =
       document.querySelector(
@@ -4871,23 +6335,94 @@ document.addEventListener(
       );
 
 
+
+
     if(header){
+
 
       header.style.display =
         "block";
 
+
       header.style.visibility =
         "visible";
+
 
       header.style.opacity =
         "1";
 
+
     }
+
 
   }
 );
 
+
 </script>
+```html
+<script>
+/* =========================================================
+   DEVICE TYPE TRACKING
+   Adds desktop / mobile / tablet to visitor history
+   ========================================================= */
+
+
+(function () {
+  "use strict";
+
+
+  function getDeviceType() {
+    const ua = navigator.userAgent.toLowerCase();
+
+
+    if (/ipad|tablet|playbook|silk/.test(ua)) {
+      return "Tablet";
+    }
+
+
+    if (
+      /mobile|iphone|ipod|android.*mobile|windows phone/.test(ua)
+    ) {
+      return "Mobile";
+    }
+
+
+    return "Desktop";
+  }
+
+
+  async function saveDeviceType() {
+    if (typeof db === "undefined") return;
+    if (typeof visitorId === "undefined") return;
+
+
+    const deviceType = getDeviceType();
+
+
+    try {
+      await db
+        .from("gallery_visitors")
+        .update({
+          device_type: deviceType
+        })
+        .eq("visitor_id", visitorId);
+    } catch (error) {
+      console.error("Device type tracking:", error);
+    }
+  }
+
+
+  setTimeout(saveDeviceType, 1500);
+
+
+})();
+</script>
+```
+
 
 </body>
 </html>
+```
+
+
