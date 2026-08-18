@@ -8106,8 +8106,16 @@ setTimeout(
       }
 
 
-      const lastSeen =
-        new Date(data.last_seen);
+   const lastSeen =
+  new Date(data.last_seen);
+
+console.log("LYSS TIMESTAMP:", data.last_seen);
+console.log("LYSS PARSED:", lastSeen.toString());
+console.log("CURRENT TIME:", new Date().toString());
+
+const secondsAgo = Math.floor(
+  (Date.now() - lastSeen.getTime()) / 1000
+);
 
 
       const isOnline =
