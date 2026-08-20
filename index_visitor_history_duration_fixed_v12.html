@@ -1,0 +1,6294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>my memories ♡</title>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<style>
+:root{
+  --bg:#fff9fb;
+  --pink:#f5dce5;
+  --pink2:#fff2f6;
+  --border:#efd2de;
+  --text:#634f59;
+  --muted:#9e8992;
+  --danger:#a85d74;
+  --shadow:0 10px 28px rgba(99,79,89,.08)
+}
+
+
+*{box-sizing:border-box}
+
+
+body{
+  margin:0;
+  background:linear-gradient(#fffafd,#fff);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+
+
+.page{
+  max-width:1500px;
+  margin:auto;
+  padding:28px 24px 70px
+}
+
+
+.header{
+  text-align:center;
+  padding:8px 10px 22px
+}
+
+
+.header h1{
+  margin:0;
+  font:500 clamp(32px,4vw,50px) Georgia,serif;
+  color:#6b5460
+}
+
+
+.header p{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:13px
+}
+
+
+.actions,
+.sections,
+.sort{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap
+}
+
+
+.actions{margin-bottom:16px}
+.sections{margin-bottom:14px}
+
+
+button,select,input,textarea{
+  font:inherit
+}
+
+
+.btn{
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:9px 15px;
+  background:#fff;
+  color:#765766;
+  cursor:pointer
+}
+
+
+.btn.primary{
+  background:var(--pink)
+}
+
+
+.btn:hover{
+  transform:translateY(-1px)
+}
+
+
+.admin-only{
+  display:none
+}
+
+
+.tab{
+  display:inline-flex;
+  align-items:center;
+  gap:3px;
+  padding:4px 6px 4px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:#fff
+}
+
+
+.tab.active{
+  background:var(--pink2)
+}
+
+
+.tab button{
+  border:0;
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  font-size:12px;
+  padding:5px 3px
+}
+
+
+.remove-section{
+  display:none;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:16px;
+  padding:2px 6px;
+  border-radius:50%
+}
+
+
+.remove-section:hover{
+  background:var(--pink2);
+  color:var(--danger)
+}
+
+
+body.admin .remove-section{
+  display:block
+}
+
+
+.sort{
+  margin-bottom:24px;
+  color:var(--muted);
+  font-size:12px
+}
+
+
+.sort select{
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:7px 10px;
+  background:#fff;
+  color:var(--text)
+}
+
+
+.heading{
+  text-align:center;
+  margin-bottom:18px
+}
+
+
+.heading h2{
+  margin:0;
+  font:500 24px Georgia,serif
+}
+
+
+.heading p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:12px;
+  white-space:pre-wrap
+}
+
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(10px,1.4vw,18px);
+  align-items:start;
+  justify-content:start;
+  justify-items:start;
+  align-content:start
+}
+
+
+.card{
+  width:100%;
+  background:#fff;
+  border:1px solid rgba(239,210,222,.65);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow)
+}
+
+
+.media{
+  width:100%;
+  overflow:hidden;
+  background:#fff
+}
+
+
+.media img,
+.media video{
+  display:block;
+  max-width:100%;
+  height:auto
+}
+
+
+.media img{
+  width:auto;
+  margin:0 auto;
+  cursor:zoom-in
+}
+
+
+.media video{
+  width:100%;
+  background:#000
+}
+
+
+.info{
+  padding:11px 13px 13px
+}
+
+
+.date{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:var(--muted);
+  margin-bottom:5px
+}
+
+
+.location{
+  font-size:11px;
+  color:#987682;
+  margin-bottom:6px
+}
+
+
+.caption{
+  font:14px/1.5 Georgia,serif;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere
+}
+
+
+.card-actions{
+  display:none;
+  justify-content:flex-end;
+  padding:0 10px 10px
+}
+
+
+body.admin .card-actions{
+  display:flex
+}
+
+
+.delete-memory{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:11px
+}
+
+
+.empty{
+  grid-column:1/-1;
+  text-align:center;
+  padding:50px 20px;
+  color:var(--muted);
+  font:14px Georgia,serif
+}
+
+
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(45,30,37,.55);
+  backdrop-filter:blur(5px);
+  z-index:1000
+}
+
+
+.modal.open{
+  display:flex
+}
+
+
+.modal-card{
+  position:relative;
+  width:min(520px,100%);
+  max-height:90vh;
+  overflow:auto;
+  padding:24px;
+  background:#fff;
+  border-radius:22px;
+  box-shadow:0 24px 80px rgba(0,0,0,.2)
+}
+
+
+.modal-card h2{
+  margin:0 0 5px;
+  font:500 24px Georgia,serif
+}
+
+
+.sub{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:12px
+}
+
+
+.close{
+  position:absolute;
+  right:14px;
+  top:12px;
+  border:0;
+  border-radius:50%;
+  width:34px;
+  height:34px;
+  background:var(--pink2);
+  color:var(--text);
+  font-size:20px;
+  cursor:pointer
+}
+
+
+.field{
+  margin-bottom:14px
+}
+
+
+.field label{
+  display:block;
+  margin-bottom:6px;
+  font-size:12px;
+  font-weight:600
+}
+
+
+.field input,
+.field select,
+.field textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  color:var(--text)
+}
+
+
+.field textarea{
+  min-height:95px;
+  resize:vertical
+}
+
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:12px
+}
+
+
+.status{
+  display:none;
+  padding:9px 11px;
+  margin-bottom:14px;
+  border-radius:10px;
+  background:var(--pink2);
+  color:var(--muted);
+  font-size:12px
+}
+
+
+.lightbox{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:rgba(25,18,22,.82);
+  z-index:1200
+}
+
+
+.lightbox.open{
+  display:flex
+}
+
+
+.lb-inner{
+  position:relative;
+  max-width:96vw;
+  max-height:95vh;
+  background:#111;
+  border-radius:18px;
+  overflow:hidden
+}
+
+
+.lb-inner img,
+.lb-inner video{
+  display:block;
+  max-width:94vw;
+  max-height:82vh;
+  width:auto;
+  height:auto;
+  background:#111
+}
+
+
+.lb-caption{
+  padding:10px 14px;
+  background:#fff;
+  color:var(--text);
+  font-size:12px;
+  white-space:pre-wrap
+}
+
+
+/* LEFT SECTION NAVIGATION */
+
+
+#sectionsNav{
+  justify-content:flex-start !important;
+  align-items:flex-start !important;
+  width:100% !important;
+  text-align:left !important
+}
+
+
+#sectionsNav .tab{
+  margin-left:0 !important
+}
+
+
+/* EXTRA ADMIN TOOLS */
+
+
+.extra-memory-tools{
+  display:none;
+  flex-wrap:wrap;
+  gap:5px;
+  padding:0 10px 10px;
+  justify-content:flex-start
+}
+
+
+body.admin .extra-memory-tools{
+  display:flex !important
+}
+
+
+.extra-memory-tools button,
+.extra-section-tools button{
+  border:1px solid var(--border);
+  background:#fff;
+  color:var(--text);
+  border-radius:999px;
+  padding:5px 9px;
+  font-size:11px;
+  cursor:pointer
+}
+
+
+.extra-memory-tools button:hover,
+.extra-section-tools button:hover{
+  background:var(--pink2)
+}
+
+
+body.admin .card{
+  cursor:grab
+}
+
+
+body.admin .card:active{
+  cursor:grabbing
+}
+
+
+.memory-dragging,
+.section-dragging{
+  opacity:.45
+}
+
+
+.extra-section-tools{
+  display:none;
+  align-items:center;
+  gap:2px;
+  margin-left:2px
+}
+
+
+body.admin .extra-section-tools{
+  display:flex !important
+}
+
+
+.extra-section-tools button{
+  padding:3px 7px;
+  font-size:10px
+}
+
+
+body.admin .tab{
+  cursor:grab
+}
+
+
+/* EDIT BOX */
+
+
+#extraEditBox{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(45,30,37,.55);
+  backdrop-filter:blur(5px)
+}
+
+
+#extraEditBox.open{
+  display:flex
+}
+
+
+#extraEditBox .extra-edit-card{
+  width:min(500px,100%);
+  background:#fff;
+  border-radius:22px;
+  padding:24px;
+  box-shadow:0 24px 80px rgba(0,0,0,.2)
+}
+
+
+#extraEditBox h2{
+  margin:0 0 5px;
+  font:500 24px Georgia,serif;
+  color:var(--text)
+}
+
+
+#extraEditBox p{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:12px
+}
+
+
+#extraEditBox label{
+  display:block;
+  margin:12px 0 6px;
+  font-size:12px;
+  font-weight:600
+}
+
+
+#extraEditBox input,
+#extraEditBox textarea{
+  width:100%;
+  box-sizing:border-box;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 12px;
+  color:var(--text);
+  background:#fff;
+  font:inherit
+}
+
+
+#extraEditBox textarea{
+  min-height:100px;
+  resize:vertical
+}
+
+
+.extra-edit-buttons{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:18px
+}
+
+
+.extra-edit-buttons button{
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:9px 15px;
+  background:#fff;
+  color:var(--text);
+  cursor:pointer
+}
+
+
+.extra-edit-buttons .save-extra{
+  background:var(--pink)
+}
+
+
+/* =========================================================
+   LYSS ONLINE STATUS
+   ========================================================= */
+
+#lyss-presence{
+  position:fixed;
+  top:22px;
+  right:24px;
+  z-index:9998;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:10px 15px;
+  background:rgba(255,255,255,.94);
+  border:1px solid #efd2de;
+  border-radius:999px;
+  box-shadow:0 8px 25px rgba(99,79,89,.08);
+  color:#765766;
+  font-size:12px;
+  backdrop-filter:blur(8px)
+}
+
+#lyss-presence-heart{
+  font-family:Georgia,serif;
+  font-size:22px;
+  line-height:1;
+  display:inline-block;
+  transform-origin:center
+}
+
+#lyss-presence.online #lyss-presence-heart{
+  animation:lyssHeartPulse 1.2s ease-in-out infinite
+}
+
+#lyss-presence.offline #lyss-presence-heart{
+  opacity:.55
+}
+
+@keyframes lyssHeartPulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.25)}
+}
+
+#lyss-presence-text{
+  white-space:nowrap
+}
+
+
+/* VISITOR HISTORY */
+
+
+.visitor-modal-card{
+  width:min(950px,100%)
+}
+
+
+.visitor-summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:18px
+}
+
+
+.visitor-stat{
+  background:var(--pink2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  text-align:center
+}
+
+
+.visitor-stat-number{
+  font:500 24px Georgia,serif;
+  color:var(--text)
+}
+
+
+.visitor-stat-label{
+  margin-top:3px;
+  font-size:11px;
+  color:var(--muted)
+}
+
+
+.visitor-table-wrap{
+  width:100%;
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:14px
+}
+
+
+.visitor-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:700px;
+  font-size:12px
+}
+
+
+.visitor-table th{
+  background:var(--pink2);
+  color:var(--text);
+  text-align:left;
+  font-weight:600;
+  padding:11px 12px;
+  border-bottom:1px solid var(--border)
+}
+
+
+.visitor-table td{
+  padding:11px 12px;
+  border-bottom:1px solid #f4e5eb;
+  color:var(--text);
+  vertical-align:top
+}
+
+
+.visitor-table tr:last-child td{
+  border-bottom:0
+}
+
+
+.visitor-id{
+  font-family:monospace;
+  font-size:10px;
+  color:var(--muted);
+  word-break:break-all
+}
+
+
+.visitor-online{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  color:#8b6071
+}
+
+
+.visitor-online-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#d58ca4
+}
+
+
+.visitor-empty{
+  text-align:center;
+  padding:35px;
+  color:var(--muted);
+  font-family:Georgia,serif
+}
+
+
+.visitor-loading{
+  text-align:center;
+  padding:35px;
+  color:var(--muted)
+}
+
+
+.visitor-refresh{
+  margin-bottom:14px;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap
+}
+
+.visitor-filters{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:14px
+}
+
+.visitor-filters input,
+.visitor-filters select{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:9px 10px;
+  background:#fff;
+  color:var(--text);
+  font-size:12px
+}
+
+.visitor-filter-wide{
+  grid-column:span 2
+}
+
+.visitor-results{
+  margin:0 0 10px;
+  color:var(--muted);
+  font-size:11px
+}
+
+.visitor-event-id{
+  font-family:monospace;
+  font-size:9px;
+  color:var(--muted);
+  word-break:break-all
+}
+
+.visitor-ua{
+  max-width:320px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  color:var(--muted);
+  font-size:10px
+}
+
+
+@media(max-width:760px){
+  .visitor-filters{
+    grid-template-columns:1fr
+  }
+  .visitor-filter-wide{
+    grid-column:auto
+  }
+}
+
+@media(max-width:950px){
+  .gallery{
+    grid-template-columns:repeat(2,minmax(0,1fr))
+  }
+}
+
+
+@media(max-width:560px){
+  .page{
+    padding-left:9px;
+    padding-right:9px
+  }
+
+
+  .gallery{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px
+  }
+
+
+  .card{
+    border-radius:14px
+  }
+
+
+  .info{
+    padding:9px 10px 11px
+  }
+
+
+  #lyss-presence{
+    top:12px;
+    right:12px;
+    padding:8px 11px;
+    font-size:11px
+  }
+
+
+  #lyss-presence-heart{
+    font-size:19px
+  }
+
+
+  .visitor-summary{
+    grid-template-columns:1fr
+  }
+}
+</style>
+</head>
+
+
+<body>
+
+
+<main class="page">
+
+
+<header class="header">
+  <h1>my memories ♡</h1>
+  <p>photos, videos &amp; little memories</p>
+</header>
+
+
+<div class="actions">
+  <button class="btn" id="adminBtn">🔒 admin</button>
+  <button class="btn admin-only" id="logoutBtn">log out</button>
+  <button class="btn admin-only" id="addBtn">＋ add a little memory</button>
+  <button class="btn admin-only" id="newSectionBtn">＋ new section</button>
+  <button class="btn admin-only" id="visitorHistoryBtn">♡ visitor history</button>
+</div>
+
+
+<nav class="sections" id="sectionsNav"></nav>
+
+
+<div class="heading" id="heading"></div>
+
+
+<div class="sort">
+  <span>sort by</span>
+  <select id="sortSelect">
+    <option value="newest">newest first</option>
+    <option value="oldest">oldest first</option>
+    <option value="recently_added">recently added</option>
+  </select>
+</div>
+
+
+<section class="gallery" id="gallery">
+  <div class="empty">loading memories ♡</div>
+</section>
+
+
+</main>
+
+
+
+
+<!-- LOGIN -->
+
+
+<div class="modal" id="loginModal">
+  <div class="modal-card">
+
+
+    <button class="close" data-close="loginModal">×</button>
+
+
+    <h2>admin ♡</h2>
+    <p class="sub">log in to manage your gallery</p>
+
+
+    <div class="status" id="loginStatus"></div>
+
+
+    <div class="field">
+      <label>Email</label>
+      <input id="email" type="email" autocomplete="email">
+    </div>
+
+
+    <div class="field">
+      <label>Password</label>
+      <input id="password" type="password" autocomplete="current-password">
+    </div>
+
+
+    <div class="modal-actions">
+      <button class="btn" data-close="loginModal">cancel</button>
+      <button class="btn primary" id="loginSubmit">log in ♡</button>
+    </div>
+
+
+  </div>
+</div>
+
+
+
+
+<!-- ADD MEMORY -->
+
+
+<div class="modal" id="memoryModal">
+  <div class="modal-card">
+
+
+    <button class="close" data-close="memoryModal">×</button>
+
+
+    <h2>add a little memory ♡</h2>
+    <p class="sub">photos, videos, dates, places &amp; captions</p>
+
+
+    <div class="field">
+      <label>Photo or video</label>
+      <input id="memoryFile" type="file" accept="image/*,video/*">
+    </div>
+
+
+    <div class="field">
+      <label>Section</label>
+      <select id="memorySection"></select>
+    </div>
+
+
+    <div class="field">
+      <label>Date — optional</label>
+      <input id="memoryDate" type="date">
+    </div>
+
+
+    <div class="field">
+      <label>Location — optional</label>
+      <input id="memoryLocation" type="text" placeholder="Toronto, Canada">
+    </div>
+
+
+    <div class="field">
+      <label>Caption — optional</label>
+      <textarea id="memoryCaption" placeholder="a little memory ♡"></textarea>
+    </div>
+
+
+    <div class="modal-actions">
+      <button class="btn" data-close="memoryModal">cancel</button>
+      <button class="btn primary" id="saveMemory">add memory ♡</button>
+    </div>
+
+
+  </div>
+</div>
+
+
+
+
+<!-- NEW SECTION -->
+
+
+<div class="modal" id="sectionModal">
+  <div class="modal-card">
+
+
+    <button class="close" data-close="sectionModal">×</button>
+
+
+    <h2>new section ♡</h2>
+    <p class="sub">create another album for your memories</p>
+
+
+    <div class="field">
+      <label>Section name</label>
+      <input id="sectionName" placeholder="summer ♡">
+    </div>
+
+
+    <div class="field">
+      <label>Subtitle — optional</label>
+      <textarea id="sectionSubtitle" placeholder="sunny days & tiny adventures"></textarea>
+    </div>
+
+
+    <div class="modal-actions">
+      <button class="btn" data-close="sectionModal">cancel</button>
+      <button class="btn primary" id="saveSection">create section ♡</button>
+    </div>
+
+
+  </div>
+</div>
+
+
+
+
+<!-- VISITOR HISTORY -->
+
+
+<div class="modal" id="visitorHistoryModal">
+
+
+  <div class="modal-card visitor-modal-card">
+
+
+    <button class="close" data-close="visitorHistoryModal">×</button>
+
+
+    <h2>visitor history ♡</h2>
+
+
+    <p class="sub">
+      see who has visited your gallery and what sections they looked at
+    </p>
+
+
+    <div class="visitor-summary">
+
+
+      <div class="visitor-stat">
+        <div class="visitor-stat-number" id="visitorTotal">—</div>
+        <div class="visitor-stat-label">total visitors</div>
+      </div>
+
+
+      <div class="visitor-stat">
+        <div class="visitor-stat-number" id="visitorSessions">—</div>
+        <div class="visitor-stat-label">sessions</div>
+      </div>
+
+
+      <div class="visitor-stat">
+        <div class="visitor-stat-number" id="visitorActive">—</div>
+        <div class="visitor-stat-label">active now</div>
+      </div>
+
+
+    </div>
+
+
+    <div class="visitor-filters">
+      <input id="visitorSearch" class="visitor-filter-wide" type="search" placeholder="search visitor, IP, page, user agent…">
+      <input id="visitorFrom" type="date" title="from date">
+      <input id="visitorTo" type="date" title="to date">
+      <select id="visitorEventType">
+        <option value="">all event types</option>
+        <option value="page_view">page views</option>
+        <option value="section_view">section views</option>
+        <option value="memory_view">memory views</option>
+      </select>
+      <select id="visitorDevice">
+        <option value="">all devices</option>
+        <option value="Desktop · Safari">Mac / Safari</option>
+        <option value="Mac · Safari">Mac / Safari</option>
+        <option value="iPhone · Safari">iPhone / Safari</option>
+        <option value="iPhone · Chrome">iPhone / Chrome</option>
+        <option value="Android phone · Chrome">Android / Chrome</option>
+      </select>
+      <select id="visitorSort">
+        <option value="newest">newest first</option>
+        <option value="oldest">oldest first</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:7px;font-size:12px;white-space:nowrap;">
+        <input id="visitorShowMine" type="checkbox">
+        show my visits
+      </label>
+      <span style="font-size:11px;opacity:.65;white-space:nowrap;">
+        your IP is hidden from history
+      </span>
+    </div>
+
+    <div class="visitor-refresh">
+      <button class="btn" id="clearVisitorFilters">clear filters</button>
+      <button class="btn" id="refreshVisitors">refresh ♡</button>
+    </div>
+
+    <div class="visitor-results" id="visitorResults"></div>
+
+    <div class="visitor-table-wrap" id="visitorTableWrap">
+      <div class="visitor-loading">
+        loading visitor history ♡
+      </div>
+    </div>
+
+
+  </div>
+
+
+</div>
+
+
+
+
+<!-- LIGHTBOX -->
+
+
+<div class="lightbox" id="lightbox">
+
+
+  <div class="lb-inner">
+
+
+    <button class="close" id="lbClose">×</button>
+
+
+    <div id="lbMedia"></div>
+
+
+    <div class="lb-caption" id="lbCaption"></div>
+
+
+  </div>
+
+
+</div>
+
+
+
+
+<script>
+/* =========================================================
+   SUPABASE
+   ========================================================= */
+
+
+const SUPABASE_URL =
+  "https://jaubryfyktdfzxqbrzue.supabase.co";
+
+
+const SUPABASE_ANON_KEY =
+  "sb_publishable_qNcbkgifCJVk0cX7A7oRXg_AtlSlAld";
+
+
+const ADMIN_UID =
+  "dabf4e39-9760-4041-be58-b6a6c42e0351";
+
+/*
+  Personal/admin traffic to keep out of the history dashboard.
+  This is a DISPLAY FILTER only: the underlying history remains preserved.
+*/
+const HIDDEN_VISITOR_IPS = new Set([
+  "99.229.26.137"
+]);
+
+
+const MEMORIES_TABLE = "memories";
+const SECTIONS_TABLE = "sections";
+const STORAGE_BUCKET = "gallery";
+
+
+const db =
+  supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+
+
+
+let currentUser = null;
+let sections = [];
+let activeSectionId = null;
+let sortMode = "newest";
+
+
+
+
+const $ = id =>
+  document.getElementById(id);
+
+
+
+
+function admin(){
+  return !!currentUser &&
+         currentUser.id === ADMIN_UID;
+}
+
+async function ensureFreshAdminSession(){
+  try{
+    const {data,error}=await db.auth.refreshSession();
+    if(error){
+      console.warn("Admin session refresh:",error.message);
+      currentUser=null; updateAdminUI(); return false;
+    }
+    currentUser=data?.session?.user || null;
+    if(!currentUser || currentUser.id!==ADMIN_UID){
+      currentUser=null; updateAdminUI(); return false;
+    }
+    updateAdminUI(); return true;
+  }catch(error){
+    console.warn("Admin session refresh:",error);
+    currentUser=null; updateAdminUI(); return false;
+  }
+}
+
+
+
+
+function openModal(id){
+  $(id).classList.add("open");
+}
+
+
+
+
+function closeModal(id){
+  $(id).classList.remove("open");
+}
+
+
+
+
+document
+  .querySelectorAll("[data-close]")
+  .forEach(button => {
+
+
+    button.addEventListener(
+      "click",
+      () => closeModal(button.dataset.close)
+    );
+
+
+  });
+
+
+
+
+/* =========================================================
+   ADMIN UI
+   ========================================================= */
+
+
+function updateAdminUI(){
+
+
+  document.body.classList.toggle(
+    "admin",
+    admin()
+  );
+
+
+  document
+    .querySelectorAll(".admin-only")
+    .forEach(element => {
+
+
+      element.style.display =
+        admin()
+          ? "inline-flex"
+          : "none";
+
+
+    });
+
+
+}
+
+
+
+
+/* =========================================================
+   DATE HELPERS
+   ========================================================= */
+
+
+function formatDate(value){
+
+
+  if(!value) return "";
+
+
+  const s =
+    String(value).trim();
+
+
+  if(
+    /^\d{4}-\d{2}-\d{2}$/.test(s)
+  ){
+
+
+    const [y,m,d] =
+      s.split("-").map(Number);
+
+
+    return new Date(
+      y,
+      m - 1,
+      d
+    ).toLocaleDateString(
+      undefined,
+      {
+        year:"numeric",
+        month:"long",
+        day:"numeric"
+      }
+    );
+
+
+  }
+
+
+  const parsed =
+    Date.parse(s);
+
+
+  return Number.isNaN(parsed)
+    ? s
+    : new Date(parsed)
+        .toLocaleDateString(
+          undefined,
+          {
+            year:"numeric",
+            month:"long",
+            day:"numeric"
+          }
+        );
+}
+
+
+
+
+function sortValue(value){
+
+
+  if(!value) return null;
+
+
+  const s =
+    String(value).trim();
+
+
+  if(
+    /^\d{4}-\d{2}-\d{2}$/.test(s)
+  ){
+
+
+    return Number(
+      s.replaceAll("-","")
+    );
+
+
+  }
+
+
+  const t =
+    Date.parse(s);
+
+
+  return Number.isNaN(t)
+    ? null
+    : t;
+}
+
+
+
+
+function sortMemories(rows){
+
+
+  return [...rows].sort(
+    (a,b) => {
+
+
+      if(
+        sortMode ===
+        "recently_added"
+      ){
+
+
+        return new Date(
+          b.created_at || 0
+        ) - new Date(
+          a.created_at || 0
+        );
+
+
+      }
+
+
+      const da =
+        sortValue(a.date);
+
+
+      const db =
+        sortValue(b.date);
+
+
+      if(
+        da === null &&
+        db === null
+      ){
+
+
+        return new Date(
+          b.created_at || 0
+        ) - new Date(
+          a.created_at || 0
+        );
+
+
+      }
+
+
+      if(da === null) return 1;
+      if(db === null) return -1;
+
+
+      return sortMode === "oldest"
+        ? da - db
+        : db - da;
+
+
+    }
+  );
+
+
+}
+
+
+
+
+/* =========================================================
+   STORAGE
+   ========================================================= */
+
+
+function publicUrl(path){
+
+
+  if(!path) return "";
+
+
+  if(
+    /^https?:\/\//i.test(path)
+  ){
+
+
+    return path;
+
+
+  }
+
+
+  return db
+    .storage
+    .from(STORAGE_BUCKET)
+    .getPublicUrl(path)
+    .data
+    .publicUrl;
+
+
+}
+
+
+
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+
+function renderHeading(){
+
+
+  if(activeSectionId === null){
+
+
+    $("heading").innerHTML = "";
+
+
+    return;
+
+
+  }
+
+
+  const section =
+    sections.find(
+      item =>
+        item.id === activeSectionId
+    );
+
+
+  if(!section){
+
+
+    activeSectionId = null;
+
+
+    return renderHeading();
+
+
+  }
+
+
+  $("heading").innerHTML = "";
+
+
+  const h =
+    document.createElement("h2");
+
+
+  h.textContent =
+    section.title;
+
+
+  $("heading")
+    .appendChild(h);
+
+
+  if(section.subtitle){
+
+
+    const p =
+      document.createElement("p");
+
+
+    p.textContent =
+      section.subtitle;
+
+
+    $("heading")
+      .appendChild(p);
+
+
+  }
+
+
+}
+
+
+
+
+function renderSections(){
+
+
+  const nav =
+    $("sectionsNav");
+
+
+  nav.innerHTML = "";
+
+
+  const all =
+    document.createElement("div");
+
+
+  all.className =
+    "tab" +
+    (
+      activeSectionId === null
+        ? " active"
+        : ""
+    );
+
+
+  const allButton =
+    document.createElement("button");
+
+
+  allButton.textContent =
+    "all memories ♡";
+
+
+  allButton.addEventListener(
+    "click",
+    async () => {
+
+
+      activeSectionId = null;
+
+
+      renderSections();
+
+
+      await loadGallery();
+
+
+      recordVisitor();
+
+
+    }
+  );
+
+
+  all.appendChild(allButton);
+
+
+  nav.appendChild(all);
+
+
+
+
+  sections.forEach(section => {
+
+
+    const wrap =
+      document.createElement("div");
+
+
+    wrap.className =
+      "tab" +
+      (
+        activeSectionId === section.id
+          ? " active"
+          : ""
+      );
+
+
+    const pick =
+      document.createElement("button");
+
+
+    pick.textContent =
+      section.title;
+
+
+    pick.addEventListener(
+      "click",
+      async () => {
+
+
+        activeSectionId =
+          section.id;
+
+
+        renderSections();
+
+
+        await loadGallery();
+
+
+        recordVisitor();
+
+
+      }
+    );
+
+
+    wrap.appendChild(pick);
+
+
+
+
+    const remove =
+      document.createElement("button");
+
+
+    remove.className =
+      "remove-section";
+
+
+    remove.type =
+      "button";
+
+
+    remove.title =
+      "Remove section";
+
+
+    remove.textContent =
+      "×";
+
+
+    remove.addEventListener(
+      "click",
+      event => {
+
+
+        event.stopPropagation();
+
+
+        removeSection(section);
+
+
+      }
+    );
+
+
+    wrap.appendChild(remove);
+
+
+    nav.appendChild(wrap);
+
+
+  });
+
+
+  updateAdminUI();
+
+
+}
+
+
+
+
+function populateSectionSelect(){
+
+
+  const select =
+    $("memorySection");
+
+
+  select.innerHTML = "";
+
+
+  const all =
+    document.createElement("option");
+
+
+  all.value = "";
+
+
+  all.textContent =
+    "All memories ♡";
+
+
+  select.appendChild(all);
+
+
+
+
+  sections.forEach(section => {
+
+
+    const option =
+      document.createElement("option");
+
+
+    option.value =
+      section.id;
+
+
+    option.textContent =
+      section.title;
+
+
+    select.appendChild(option);
+
+
+  });
+
+
+}
+
+
+
+
+async function loadSections(){
+
+
+  const {
+    data,
+    error
+  } = await db
+    .from(SECTIONS_TABLE)
+    .select(
+      "id,title,subtitle,created_at"
+    )
+    .order(
+      "created_at",
+      {ascending:true}
+    );
+
+
+  if(error){
+
+
+    console.error(error);
+
+
+    sections = [];
+
+
+  }else{
+
+
+    sections = data || [];
+
+
+  }
+
+
+  renderSections();
+  populateSectionSelect();
+  renderHeading();
+
+
+}
+
+
+
+
+/* =========================================================
+   GALLERY
+   ========================================================= */
+
+
+async function loadGallery(){
+
+
+  renderHeading();
+
+
+  const gallery =
+    $("gallery");
+
+
+  gallery.innerHTML =
+    '<div class="empty">loading memories ♡</div>';
+
+
+
+
+  let query =
+    db
+      .from(MEMORIES_TABLE)
+      .select("*");
+
+
+
+
+  if(activeSectionId !== null){
+
+
+    query =
+      query.eq(
+        "section_id",
+        activeSectionId
+      );
+
+
+  }
+
+
+
+
+  const {
+    data,
+    error
+  } = await query;
+
+
+
+
+  if(error){
+
+
+    console.error(error);
+
+
+    gallery.innerHTML =
+      '<div class="empty">couldn\'t load memories ♡</div>';
+
+
+    return;
+
+
+  }
+
+
+
+
+  const rows =
+    sortMemories(
+      data || []
+    );
+
+
+
+
+  gallery.innerHTML = "";
+
+
+
+
+  if(!rows.length){
+
+
+    gallery.innerHTML =
+      '<div class="empty">no memories here yet ♡</div>';
+
+
+    return;
+
+
+  }
+
+
+
+
+  rows.forEach(memory => {
+
+
+    const card =
+      document.createElement("article");
+
+
+    card.className =
+      "card";
+
+
+
+
+    const media =
+      document.createElement("div");
+
+
+    media.className =
+      "media";
+
+
+
+
+    const url =
+      publicUrl(
+        memory.file_path
+      );
+
+
+
+
+    const isVideo =
+      memory.type === "video" ||
+      /\.(mp4|webm|ogg|mov)(\?|$)/i
+        .test(
+          memory.file_path || ""
+        );
+
+
+
+
+    if(isVideo){
+
+
+      const video =
+        document.createElement("video");
+
+
+      video.src =
+        url;
+
+
+      video.controls =
+        true;
+
+
+      video.preload =
+        "metadata";
+
+
+      video.playsInline =
+        true;
+
+      video.addEventListener(
+        "play",
+        () => {
+          recordMemoryVisit(memory);
+        },
+        {once:true}
+      );
+
+
+      media.appendChild(video);
+
+
+    }else{
+
+
+      const img =
+        document.createElement("img");
+
+
+      img.src =
+        url;
+
+
+      img.loading =
+        "lazy";
+
+
+      img.decoding =
+        "async";
+
+
+      img.alt =
+        memory.caption ||
+        "Memory photo";
+
+
+      media.appendChild(img);
+
+
+    }
+
+
+
+
+    card.appendChild(media);
+
+    /*
+      Track the exact memory/post whenever a visitor opens its card.
+      This works for taps/clicks on the image OR caption area.
+      Admin edit/delete controls stop propagation and are not counted.
+    */
+    card.addEventListener(
+      "click",
+      async event => {
+        if(event.target.closest("button, .extra-memory-tools")) return;
+        await recordMemoryVisit(memory);
+        openLightbox(memory,false);
+      }
+    );
+
+
+
+
+
+    const info =
+      document.createElement("div");
+
+
+    info.className =
+      "info";
+
+
+
+
+    if(memory.date){
+
+
+      const date =
+        document.createElement("div");
+
+
+      date.className =
+        "date";
+
+
+      date.textContent =
+        formatDate(
+          memory.date
+        );
+
+
+      info.appendChild(date);
+
+
+    }
+
+
+
+
+    if(memory.location){
+
+
+      const location =
+        document.createElement("div");
+
+
+      location.className =
+        "location";
+
+
+      location.textContent =
+        "📍 " +
+        memory.location;
+
+
+      info.appendChild(location);
+
+
+    }
+
+
+
+
+    if(memory.caption){
+
+
+      const caption =
+        document.createElement("div");
+
+
+      caption.className =
+        "caption";
+
+
+      caption.textContent =
+        memory.caption;
+
+
+      info.appendChild(caption);
+
+
+    }
+
+
+
+
+    if(info.children.length){
+
+
+      card.appendChild(info);
+
+
+    }
+
+
+
+
+    if(admin()){
+
+
+      const actions =
+        document.createElement("div");
+
+
+      actions.className =
+        "card-actions";
+
+
+
+
+      const deleteButton =
+        document.createElement("button");
+
+
+      deleteButton.className =
+        "delete-memory";
+
+
+      deleteButton.textContent =
+        "delete";
+
+
+
+
+      deleteButton.addEventListener(
+        "click",
+        () =>
+          deleteMemory(memory)
+      );
+
+
+
+
+      actions.appendChild(
+        deleteButton
+      );
+
+
+      card.appendChild(actions);
+
+
+    }
+
+
+
+
+    gallery.appendChild(card);
+
+
+  });
+
+
+}
+
+
+
+
+/* =========================================================
+   DELETE MEMORY
+   ========================================================= */
+
+
+async function deleteMemory(memory){
+
+
+  if(!admin()) return;
+
+
+  if(
+    !confirm(
+      "Delete this memory and its stored file?"
+    )
+  ) return;
+
+
+
+
+  const {
+    error
+  } = await db
+    .from(MEMORIES_TABLE)
+    .delete()
+    .eq(
+      "id",
+      memory.id
+    );
+
+
+
+
+  if(error){
+
+
+    alert(
+      "Couldn't delete the memory ♡\n\n" +
+      error.message
+    );
+
+
+    return;
+
+
+  }
+
+
+
+
+  if(memory.file_path){
+
+
+    const result =
+      await db
+        .storage
+        .from(STORAGE_BUCKET)
+        .remove([
+          memory.file_path
+        ]);
+
+
+    if(result.error){
+
+
+      console.error(
+        result.error
+      );
+
+
+    }
+
+
+  }
+
+
+
+
+  await loadGallery();
+
+
+}
+
+
+
+
+/* =========================================================
+   DELETE SECTION
+   ========================================================= */
+
+
+async function removeSection(section){
+
+
+  if(!admin()) return;
+
+
+
+
+  if(
+    !confirm(
+      `Remove "${section.title}"?\n\n` +
+      "Its memories will be kept and moved to All Memories."
+    )
+  ) return;
+
+
+
+
+  const moved =
+    await db
+      .from(MEMORIES_TABLE)
+      .update({
+        section_id:null
+      })
+      .eq(
+        "section_id",
+        section.id
+      );
+
+
+
+
+  if(moved.error){
+
+
+    alert(
+      "Couldn't move the memories.\n\n" +
+      moved.error.message
+    );
+
+
+    return;
+
+
+  }
+
+
+
+
+  const removed =
+    await db
+      .from(SECTIONS_TABLE)
+      .delete()
+      .eq(
+        "id",
+        section.id
+      );
+
+
+
+
+  if(removed.error){
+
+
+    alert(
+      "Couldn't remove the section.\n\n" +
+      removed.error.message
+    );
+
+
+    return;
+
+
+  }
+
+
+
+
+  if(
+    activeSectionId ===
+    section.id
+  ){
+
+
+    activeSectionId =
+      null;
+
+
+  }
+
+
+
+
+  await loadSections();
+  await loadGallery();
+
+
+}
+
+
+
+
+/* =========================================================
+   SORT
+   ========================================================= */
+
+
+$("sortSelect")
+  .addEventListener(
+    "change",
+    event => {
+
+
+      sortMode =
+        event.target.value;
+
+
+      loadGallery();
+
+
+    }
+  );
+
+
+
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
+
+$("adminBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+
+      if(!admin()){
+
+
+        openModal(
+          "loginModal"
+        );
+
+
+      }
+
+
+    }
+  );
+
+
+
+
+$("loginSubmit")
+  .addEventListener(
+    "click",
+    async () => {
+
+
+      const email =
+        $("email")
+          .value
+          .trim();
+
+
+      const password =
+        $("password")
+          .value;
+
+
+      const status =
+        $("loginStatus");
+
+
+      const button =
+        $("loginSubmit");
+
+
+
+
+      status.style.display =
+        "none";
+
+
+
+
+      if(!email || !password){
+
+
+        status.textContent =
+          "Please enter your email and password ♡";
+
+
+        status.style.display =
+          "block";
+
+
+        return;
+
+
+      }
+
+
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        "logging in...";
+
+
+
+
+      const {
+        data,
+        error
+      } =
+        await db.auth
+          .signInWithPassword({
+            email,
+            password
+          });
+
+
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "log in ♡";
+
+
+
+
+      if(error){
+
+
+        status.textContent =
+          error.message;
+
+
+        status.style.display =
+          "block";
+
+
+        return;
+
+
+      }
+
+
+
+
+      if(
+        !data.user ||
+        data.user.id !== ADMIN_UID
+      ){
+
+
+        await db.auth.signOut();
+
+
+        status.textContent =
+          "This account isn't the gallery admin ♡";
+
+
+        status.style.display =
+          "block";
+
+
+        return;
+
+
+      }
+
+
+
+
+      currentUser =
+        data.user;
+
+
+      closeModal(
+        "loginModal"
+      );
+
+
+      updateAdminUI();
+      renderSections();
+
+
+      updateLyssPresence();
+
+
+    }
+  );
+
+
+
+
+$("logoutBtn")
+  .addEventListener(
+    "click",
+    async () => {
+
+
+      await db.auth.signOut();
+
+
+      currentUser =
+        null;
+
+
+      updateAdminUI();
+      renderSections();
+
+
+      updateLyssPresence();
+
+
+    }
+  );
+
+
+
+
+/* =========================================================
+   ADD MEMORY
+   ========================================================= */
+
+
+$("addBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+
+      populateSectionSelect();
+
+
+      openModal(
+        "memoryModal"
+      );
+
+
+    }
+  );
+
+
+
+
+$("saveMemory")
+  .addEventListener(
+    "click",
+    async () => {
+
+
+      if(!admin()) return;
+
+
+
+
+      const file =
+        $("memoryFile")
+          .files[0];
+
+
+
+
+      if(!file){
+
+
+        alert(
+          "Please choose a photo or video ♡"
+        );
+
+
+        return;
+
+
+      }
+
+
+
+
+      const button =
+        $("saveMemory");
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        "saving... ♡";
+
+
+
+
+      const sectionId =
+        $("memorySection")
+          .value ||
+        null;
+
+
+      const date =
+        $("memoryDate")
+          .value ||
+        null;
+
+
+      const location =
+        $("memoryLocation")
+          .value
+          .trim();
+
+
+      const caption =
+        $("memoryCaption")
+          .value
+          .trim();
+
+
+
+
+      const type =
+        file.type.startsWith("video/")
+          ? "video"
+          : "image";
+
+
+
+
+      const safe =
+        file.name
+          .normalize("NFKD")
+          .replace(
+            /[^\w.\- ]/g,
+            ""
+          )
+          .replace(
+            /\s+/g,
+            "-"
+          );
+
+
+
+
+      const path =
+        `uploads/${crypto.randomUUID()}-${safe}`;
+
+
+
+
+      const upload =
+        await db
+          .storage
+          .from(STORAGE_BUCKET)
+          .upload(
+            path,
+            file,
+            {
+              contentType:
+                file.type,
+              cacheControl:
+                "3600",
+              upsert:
+                false
+            }
+          );
+
+
+
+
+      if(upload.error){
+
+
+        alert(
+          "Upload failed ♡\n\n" +
+          upload.error.message
+        );
+
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          "add memory ♡";
+
+
+        return;
+
+
+      }
+
+
+
+
+      const insert =
+        await db
+          .from(MEMORIES_TABLE)
+          .insert({
+            file_path:
+              path,
+            type,
+            section_id:
+              sectionId,
+            date,
+            location,
+            caption
+          });
+
+
+
+
+      if(insert.error){
+
+
+        await db
+          .storage
+          .from(STORAGE_BUCKET)
+          .remove([
+            path
+          ]);
+
+
+        alert(
+          "Couldn't save the memory ♡\n\n" +
+          insert.error.message
+        );
+
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          "add memory ♡";
+
+
+        return;
+
+
+      }
+
+
+
+
+      $("memoryFile").value =
+        "";
+
+
+      $("memorySection").value =
+        "";
+
+
+      $("memoryDate").value =
+        "";
+
+
+      $("memoryLocation").value =
+        "";
+
+
+      $("memoryCaption").value =
+        "";
+
+
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "add memory ♡";
+
+
+
+
+      closeModal(
+        "memoryModal"
+      );
+
+
+
+
+      await loadGallery();
+
+
+    }
+  );
+
+
+
+
+/* =========================================================
+   NEW SECTION
+   ========================================================= */
+
+
+$("newSectionBtn")
+  .addEventListener(
+    "click",
+    () =>
+      openModal(
+        "sectionModal"
+      )
+  );
+
+
+
+
+$("saveSection")
+  .addEventListener(
+    "click",
+    async () => {
+
+
+      if(!admin()) return;
+
+
+
+
+      const title =
+        $("sectionName")
+          .value
+          .trim();
+
+
+      const subtitle =
+        $("sectionSubtitle")
+          .value
+          .trim();
+
+
+
+
+      if(!title){
+
+
+        alert(
+          "Please give the section a name ♡"
+        );
+
+
+        return;
+
+
+      }
+
+
+
+
+      if(
+        title.toLowerCase() ===
+        "all memories ♡"
+      ){
+
+
+        alert(
+          "All Memories is built in and cannot be created as a section."
+        );
+
+
+        return;
+
+
+      }
+
+
+
+
+      if(
+        sections.some(
+          section =>
+            section.title
+              .trim()
+              .toLowerCase() ===
+            title.toLowerCase()
+        )
+      ){
+
+
+        alert(
+          "That section already exists ♡"
+        );
+
+
+        return;
+
+
+      }
+
+
+
+
+      const button =
+        $("saveSection");
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        "creating... ♡";
+
+
+
+
+      const insert =
+        await db
+          .from(SECTIONS_TABLE)
+          .insert({
+            title,
+            subtitle
+          });
+
+
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "create section ♡";
+
+
+
+
+      if(insert.error){
+
+
+        alert(
+          "Couldn't create the section ♡\n\n" +
+          insert.error.message
+        );
+
+
+        return;
+
+
+      }
+
+
+
+
+      $("sectionName").value =
+        "";
+
+
+      $("sectionSubtitle").value =
+        "";
+
+
+
+
+      closeModal(
+        "sectionModal"
+      );
+
+
+
+
+      await loadSections();
+
+
+    }
+  );
+
+
+
+
+/* =========================================================
+   LIGHTBOX
+   ========================================================= */
+
+
+function openLightbox(
+  memory,
+  isVideo
+){
+
+
+  const wrap =
+    $("lbMedia");
+
+
+  const caption =
+    $("lbCaption");
+
+
+
+
+  wrap.innerHTML =
+    "";
+
+
+  caption.textContent =
+    memory.caption ||
+    "";
+
+
+
+
+  const url =
+    publicUrl(
+      memory.file_path
+    );
+
+
+
+
+  if(isVideo){
+
+
+    const video =
+      document.createElement("video");
+
+
+    video.src =
+      url;
+
+
+    video.controls =
+      true;
+
+
+    video.playsInline =
+      true;
+
+
+    wrap.appendChild(
+      video
+    );
+
+
+  }else{
+
+
+    const image =
+      document.createElement("img");
+
+
+    image.src =
+      url;
+
+
+    image.alt =
+      memory.caption ||
+      "Memory photo";
+
+
+    wrap.appendChild(
+      image
+    );
+
+
+  }
+
+
+
+
+  openModal(
+    "lightbox"
+  );
+
+
+}
+
+
+
+
+$("lbClose")
+  .addEventListener(
+    "click",
+    async () => {
+      await stopMemoryView();
+      closeModal("lightbox");
+    }
+  );
+
+
+
+
+$("lightbox")
+  .addEventListener(
+    "click",
+    event => {
+
+
+      if(
+        event.target.id ===
+        "lightbox"
+      ){
+
+
+        stopMemoryView();
+        closeModal("lightbox");
+
+
+      }
+
+
+    }
+  );
+
+
+
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+
+    if(event.key === "Escape"){
+      stopMemoryView();
+
+
+      document
+        .querySelectorAll(
+          ".modal.open,.lightbox.open"
+        )
+        .forEach(
+          element =>
+            element.classList
+              .remove("open")
+        );
+
+
+    }
+
+
+  }
+);
+
+
+
+
+/* =========================================================
+   AUTH STATE
+   ========================================================= */
+
+
+db.auth.onAuthStateChange(
+  (_event,session) => {
+
+
+    currentUser =
+      session?.user ||
+      null;
+
+
+
+
+    if(
+      currentUser &&
+      currentUser.id !==
+      ADMIN_UID
+    ){
+
+
+      db.auth.signOut();
+
+
+      currentUser =
+        null;
+
+
+    }
+
+
+
+
+    updateAdminUI();
+    renderSections();
+
+
+    updateLyssPresence();
+
+
+  }
+);
+
+
+
+
+/* =========================================================
+   SERVER CLOCK SYNC
+   =========================================================
+   All "time ago" / duration displays in this app rely on
+   Date.now() from the visitor's own device. If a visitor's
+   system clock is wrong (bad CMOS clock, no NTP sync, wrong
+   time set manually), every relative time it computes will
+   be skewed by that same amount, even though timestamps are
+   stored correctly in the database as UTC.
+
+   To fix this, we ask Supabase (via the now_utc() SQL
+   function) what the real time is once per page load, and
+   measure the gap between that and this device's own clock.
+   correctedNow() is then used everywhere instead of
+   Date.now(), so a wrong local clock no longer affects what
+   is displayed.
+   ========================================================= */
+
+let clockOffsetMs = 0;
+
+async function syncServerClock(){
+  try{
+    const {data, error} = await db.rpc("now_utc");
+
+    if(error || !data){
+      console.warn("Clock sync failed, falling back to local device clock:", error);
+      return;
+    }
+
+    const serverNow = new Date(data).getTime();
+
+    if(!Number.isFinite(serverNow)) return;
+
+    clockOffsetMs = serverNow - Date.now();
+  }catch(error){
+    console.warn("Clock sync error, falling back to local device clock:", error);
+  }
+}
+
+function correctedNow(){
+  return Date.now() + clockOffsetMs;
+}
+
+
+/* =========================================================
+   LYSS PRESENCE — REWRITTEN
+   =========================================================
+   One presence system:
+   - admin_presence row: id = "lyss"
+   - admin heartbeat every 30 seconds
+   - online when last_seen is <= 90 seconds old
+   - public status refreshes automatically
+   - timestamps are stored as ISO/UTC values
+   - no manual timezone offsets are used
+   ========================================================= */
+
+const PRESENCE_ID = "lyss";
+const PRESENCE_HEARTBEAT_MS = 30000;
+const PRESENCE_REFRESH_MS = 30000;
+const PRESENCE_ONLINE_WINDOW_MS = 90000;
+
+
+/* Create the status widget once */
+
+function createLyssPresence(){
+  if($("lyss-presence")) return;
+
+  const presence = document.createElement("div");
+  presence.id = "lyss-presence";
+  presence.className = "offline";
+
+  presence.innerHTML = `
+    <span id="lyss-presence-heart">♡</span>
+    <span id="lyss-presence-text">lyss was last active…</span>
+  `;
+
+  document.body.appendChild(presence);
+}
+
+
+/* Convert the database timestamp to milliseconds.
+   ISO timestamps with a timezone (including Supabase timestamptz)
+   are parsed by JavaScript without any manual hour adjustment. */
+
+function lyssTimestampMs(value){
+  if(!value) return NaN;
+
+  const timestamp = new Date(value).getTime();
+
+  return Number.isFinite(timestamp)
+    ? timestamp
+    : NaN;
+}
+
+
+/* Public online state */
+
+function setLyssOnline(){
+  createLyssPresence();
+
+  const widget = $("lyss-presence");
+  const heart = $("lyss-presence-heart");
+  const text = $("lyss-presence-text");
+
+  widget.className = "online";
+  heart.textContent = "♥";
+  text.textContent = "lyss is online";
+}
+
+
+/* Public offline state */
+
+function setLyssOffline(lastSeen){
+  createLyssPresence();
+
+  const widget = $("lyss-presence");
+  const heart = $("lyss-presence-heart");
+  const text = $("lyss-presence-text");
+
+  widget.className = "offline";
+  heart.textContent = "♡";
+
+  const lastSeenMs = lyssTimestampMs(lastSeen);
+
+  if(!Number.isFinite(lastSeenMs)){
+    text.textContent = "lyss was last active…";
+    return;
+  }
+
+  const elapsedMs = Math.max(0, correctedNow() - lastSeenMs);
+  const seconds = Math.floor(elapsedMs / 1000);
+
+  if(seconds < 60){
+    text.textContent = "lyss was last active just now";
+    return;
+  }
+
+  const minutes = Math.floor(seconds / 60);
+
+  if(minutes < 60){
+    text.textContent =
+      `lyss was last active ${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+    return;
+  }
+
+  const hours = Math.floor(minutes / 60);
+
+  if(hours < 24){
+    text.textContent =
+      `lyss was last active ${hours} hour${hours === 1 ? "" : "s"} ago`;
+    return;
+  }
+
+  const days = Math.floor(hours / 24);
+
+  text.textContent =
+    `lyss was last active ${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+
+/* Read the one and only presence row */
+
+async function updateLyssPresence(){
+  createLyssPresence();
+
+  try{
+    const {data, error} = await db
+      .from("admin_presence")
+      .select("last_seen")
+      .eq("id", PRESENCE_ID)
+      .maybeSingle();
+
+    if(error){
+      console.error("Lyss presence read error:", error);
+      return;
+    }
+
+    if(!data?.last_seen){
+      setLyssOffline(null);
+      return;
+    }
+
+    const lastSeenMs = lyssTimestampMs(data.last_seen);
+
+    if(!Number.isFinite(lastSeenMs)){
+      setLyssOffline(null);
+      return;
+    }
+
+    const isOnline =
+      correctedNow() - lastSeenMs <= PRESENCE_ONLINE_WINDOW_MS;
+
+    if(isOnline){
+      setLyssOnline();
+    }else{
+      setLyssOffline(data.last_seen);
+    }
+
+  }catch(error){
+    console.error("Lyss presence error:", error);
+  }
+}
+
+
+/* Update Lyss's heartbeat only when the admin is actually logged in */
+
+async function lyssHeartbeat(){
+  try{
+    const {data, error} = await db.auth.getSession();
+
+    if(error){
+      console.error("Lyss session read error:", error);
+      return;
+    }
+
+    const user = data?.session?.user;
+
+    if(!user || user.id !== ADMIN_UID){
+      return;
+    }
+
+    const {error: presenceError} = await db
+      .from("admin_presence")
+      .upsert(
+        {
+          id: PRESENCE_ID,
+          last_seen: new Date().toISOString()
+        },
+        {
+          onConflict: "id"
+        }
+      );
+
+    if(presenceError){
+      console.error("Lyss heartbeat write error:", presenceError);
+      return;
+    }
+
+    setLyssOnline();
+
+  }catch(error){
+    console.error("Lyss heartbeat error:", error);
+  }
+}
+
+
+/* =========================================================
+   VISITOR TRACKING
+   =========================================================
+ */
+
+
+const VISITOR_KEY = "lyss_gallery_visitor_id";
+const SESSION_KEY = "lyss_gallery_session_id";
+const VISITOR_HEARTBEAT = 30000;
+
+/* Persistent anonymous visitor ID. */
+let visitorId = localStorage.getItem(VISITOR_KEY);
+if(!visitorId){
+  visitorId = crypto.randomUUID();
+  localStorage.setItem(VISITOR_KEY, visitorId);
+}
+
+/* One session per browser tab. */
+let sessionId = sessionStorage.getItem(SESSION_KEY);
+if(!sessionId){
+  sessionId = crypto.randomUUID();
+  sessionStorage.setItem(SESSION_KEY, sessionId);
+}
+
+function visitorDeviceType(){
+  const ua = navigator.userAgent || "";
+  const low = ua.toLowerCase();
+
+  let device = "Desktop";
+  if(/ipad|tablet|playbook|silk/.test(low)) device = "iPad / Tablet";
+  else if(/iphone|ipod/.test(low)) device = "iPhone";
+  else if(/android/.test(low)) device = /mobile/.test(low) ? "Android phone" : "Android tablet";
+  else if(/macintosh|mac os x/.test(low)) device = "Mac";
+  else if(/windows/.test(low)) device = "Windows PC";
+
+  let browser = "Browser";
+  if(/edg\//i.test(ua)) browser = "Edge";
+  else if(/opr\//i.test(ua)) browser = "Opera";
+  else if(/chrome\//i.test(ua) && !/edg\//i.test(ua)) browser = "Chrome";
+  else if(/firefox\//i.test(ua)) browser = "Firefox";
+  else if(/safari\//i.test(ua) && !/chrome\//i.test(ua)) browser = "Safari";
+
+  return `${device} · ${browser}`;
+}
+
+function currentPagePath(){
+  return window.location.pathname || "/";
+}
+
+function currentPageName(){
+  return document.title || "my memories ♡";
+}
+
+/*
+  Legacy visitor/session summary.
+  This is intentionally kept separate from the immutable visit-event history.
+*/
+async function recordVisitor(){
+  /*
+    Visitor/session heartbeat is now server-side.
+    This avoids RLS/policy differences between desktop and mobile browsers.
+    The RPC updates gallery_visitors + gallery_sessions atomically.
+  */
+  try{
+    const {error} = await db.rpc(
+      "record_gallery_heartbeat",
+      {
+        p_visitor_id: visitorId,
+        p_session_id: sessionId,
+        p_section_id: activeSectionId ? String(activeSectionId) : null,
+        p_device_type: visitorDeviceType()
+      }
+    );
+
+    if(error){
+      console.error(
+        "Visitor heartbeat RPC error:",
+        error
+      );
+    }
+  }catch(error){
+    console.error(
+      "Visitor heartbeat error:",
+      error
+    );
+  }
+}
+
+/*
+  Immutable visit-event queue.
+  The event ID is saved locally BEFORE the network call. If the request
+  fails or the tab closes, the same event is retried later. The database
+  unique event_id makes retries idempotent, so they cannot create duplicates.
+*/
+const VISIT_QUEUE_KEY = "lyss_gallery_visit_queue";
+let visitQueueFlushing = false;
+
+function readVisitQueue(){
+  try{
+    const value = JSON.parse(
+      localStorage.getItem(VISIT_QUEUE_KEY) || "[]"
+    );
+    return Array.isArray(value) ? value : [];
+  }catch{
+    return [];
+  }
+}
+
+function writeVisitQueue(queue){
+  try{
+    localStorage.setItem(
+      VISIT_QUEUE_KEY,
+      JSON.stringify(queue)
+    );
+  }catch(error){
+    console.error("Visitor queue storage error:",error);
+  }
+}
+
+function queueVisitEvent(payload){
+  const queue = readVisitQueue();
+
+  if(!queue.some(item => item.p_event_id === payload.p_event_id)){
+    queue.push(payload);
+    writeVisitQueue(queue);
+  }
+}
+
+async function sendVisitEvent(payload){
+  const {error} = await db.rpc(
+    "record_gallery_visit",
+    payload
+  );
+
+  if(error) throw error;
+}
+
+async function flushVisitQueue(){
+  if(visitQueueFlushing) return;
+
+  visitQueueFlushing = true;
+
+  try{
+    let queue = readVisitQueue();
+
+    while(queue.length){
+      try{
+        await sendVisitEvent(queue[0]);
+
+        queue.shift();
+        writeVisitQueue(queue);
+      }catch(error){
+        console.error(
+          "Visitor history write failed; keeping event queued:",
+          error
+        );
+        break;
+      }
+    }
+  }finally{
+    visitQueueFlushing = false;
+  }
+}
+
+async function recordVisitEvent({
+  eventType="page_view",
+  sectionId=activeSectionId,
+  memoryId=null,
+  pageName=currentPageName(),
+  returnEventId=false
+} = {}){
+  const payload = {
+    p_event_id: crypto.randomUUID(),
+    p_visitor_id: visitorId,
+    p_session_id: sessionId,
+    p_event_type: eventType,
+    p_page_path: currentPagePath(),
+    p_page_name: pageName,
+    p_section_id: sectionId ? String(sectionId) : null,
+    p_memory_id: memoryId ? String(memoryId) : null,
+    p_device_type: visitorDeviceType(),
+    p_referrer: document.referrer || null
+  };
+
+  queueVisitEvent(payload);
+  await flushVisitQueue();
+
+  const saved =
+    !readVisitQueue().some(
+      item => item.p_event_id === payload.p_event_id
+    );
+
+  return returnEventId
+    ? (saved ? payload.p_event_id : null)
+    : saved;
+}
+
+
+/* Record the initial page visit once per page load. */
+async function recordInitialVisit(){
+  await recordVisitEvent({
+    eventType:"page_view",
+    sectionId:activeSectionId,
+    memoryId:null,
+    pageName:currentPageName()
+  });
+}
+
+/* Record a section visit as a separate immutable event. */
+async function recordSectionVisit(sectionId){
+  await recordVisitEvent({
+    eventType:"section_view",
+    sectionId:sectionId,
+    memoryId:null,
+    pageName:getSectionTitle(sectionId)
+  });
+}
+
+/* =========================================================
+   TIME SPENT ON INDIVIDUAL MEMORIES / POSTS
+   ========================================================= */
+
+let activeMemoryView = null;
+let memoryDurationTimer = null;
+
+async function saveMemoryViewDuration(){
+  if(!activeMemoryView) return;
+
+  const view = activeMemoryView;
+  const seconds = Math.max(
+    0,
+    Math.floor((Date.now() - view.startedAt) / 1000)
+  );
+
+  try{
+    const {error} = await db.rpc(
+      "finish_gallery_memory_view",
+      {
+        p_event_id:view.eventId,
+        p_visitor_id:visitorId,
+        p_duration_seconds:seconds
+      }
+    );
+
+    if(error) throw error;
+
+    view.lastSavedSeconds = seconds;
+  }catch(error){
+    console.warn("Could not save memory time:",error);
+  }
+}
+
+async function stopMemoryView(){
+  if(!activeMemoryView) return;
+
+  if(memoryDurationTimer){
+    clearInterval(memoryDurationTimer);
+    memoryDurationTimer = null;
+  }
+
+  const view = activeMemoryView;
+  activeMemoryView = null;
+
+  const seconds = Math.max(
+    0,
+    Math.floor((Date.now() - view.startedAt) / 1000)
+  );
+
+  try{
+    const {error} = await db.rpc(
+      "finish_gallery_memory_view",
+      {
+        p_event_id:view.eventId,
+        p_visitor_id:visitorId,
+        p_duration_seconds:seconds
+      }
+    );
+
+    if(error) throw error;
+  }catch(error){
+    console.warn("Could not finalize memory time:",error);
+  }
+}
+
+async function recordMemoryVisit(memory){
+  if(!memory || !memory.id) return;
+
+  if(activeMemoryView){
+    await stopMemoryView();
+  }
+
+  const eventId = await recordVisitEvent({
+    eventType:"memory_view",
+    sectionId:memory.section_id || activeSectionId,
+    memoryId:memory.id,
+    pageName:memory.caption || "Memory",
+    returnEventId:true
+  });
+
+  if(!eventId) return;
+
+  activeMemoryView = {
+    eventId:eventId,
+    memoryId:String(memory.id),
+    startedAt:Date.now(),
+    lastSavedSeconds:0
+  };
+
+  memoryDurationTimer = setInterval(
+    () => { saveMemoryViewDuration(); },
+    5000
+  );
+}
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if(document.visibilityState === "hidden"){
+      saveMemoryViewDuration();
+    }
+  }
+);
+
+window.addEventListener(
+  "pagehide",
+  () => {
+    saveMemoryViewDuration();
+  }
+);
+
+function formatSessionDuration(startedAt, endedAt, lastSeenAt){
+  if(!startedAt) return "—";
+
+  const start = new Date(startedAt).getTime();
+  const lastSeen = lastSeenAt
+    ? new Date(lastSeenAt).getTime()
+    : NaN;
+
+  const now = correctedNow();
+
+  if(!Number.isFinite(start)){
+    return "—";
+  }
+
+  /*
+    A session is considered active while its heartbeat is fresh.
+    For an active session, show elapsed time up to now.
+    For a stale/ended session, stop at its final known heartbeat/end time.
+  */
+  const fresh =
+    Number.isFinite(lastSeen) &&
+    now - lastSeen <= 90000;
+
+  let end = NaN;
+
+  if(endedAt){
+    const ended = new Date(endedAt).getTime();
+    if(Number.isFinite(ended)) end = ended;
+  }
+
+  if(!Number.isFinite(end)){
+    if(Number.isFinite(lastSeen)){
+      end = fresh ? Math.max(lastSeen, now) : lastSeen;
+    }else{
+      end = now;
+    }
+  }
+
+  if(end < start){
+    return "—";
+  }
+
+  let seconds = Math.floor((end - start) / 1000);
+
+  /*
+    A newly-created session can legitimately have less than one second
+    between its first event and first heartbeat. Don't make that look like
+    a broken duration.
+  */
+  if(seconds < 1) return "<1s";
+
+  if(seconds < 60) return `${seconds}s`;
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  if(minutes < 60){
+    return remainingSeconds
+      ? `${minutes}m ${remainingSeconds}s`
+      : `${minutes}m`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return remainingMinutes
+    ? `${hours}h ${remainingMinutes}m`
+    : `${hours}h`;
+}
+
+/* =========================================================
+   VISITOR HISTORY DASHBOARD
+   ========================================================= */
+
+
+function visitorTimeAgo(value){
+  if(!value) return "unknown";
+
+  const ms = correctedNow() - new Date(value).getTime();
+  if(!Number.isFinite(ms)) return "unknown";
+
+  const seconds = Math.max(0,Math.floor(ms/1000));
+  if(seconds < 60) return "just now";
+
+  const minutes = Math.floor(seconds/60);
+  if(minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+
+  const hours = Math.floor(minutes/60);
+  if(hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+
+  const days = Math.floor(hours/24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+function formatVisitorDate(value){
+  if(!value) return "—";
+
+  const date = new Date(value);
+  if(Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleString("en-CA",{
+    timeZone:"America/Toronto",
+    dateStyle:"medium",
+    timeStyle:"short"
+  });
+}
+
+function getSectionTitle(id){
+  if(!id) return "All Memories";
+
+  const section = sections.find(
+    item => String(item.id) === String(id)
+  );
+
+  return section ? section.title : "Unknown section";
+}
+
+function getVisitorFilters(){
+  return {
+    search: $("visitorSearch")?.value.trim().toLowerCase() || "",
+    from: $("visitorFrom")?.value || "",
+    to: $("visitorTo")?.value || "",
+    eventType: $("visitorEventType")?.value || "",
+    device: $("visitorDevice")?.value || "",
+    sort: $("visitorSort")?.value || "newest",
+    showMine: Boolean($("visitorShowMine")?.checked)
+  };
+}
+
+function formatHistoryLocation(row){
+  /*
+    Make the page/post column human-readable:
+    - A memory event gets the memory title/caption.
+    - A section event gets the section title.
+    - A generic page view gets a friendly page label instead of only
+      showing "/my-gallery/".
+  */
+  if(row.memory_id){
+    const memory = row._memory || null;
+
+    const memoryLabel =
+      (memory && memory.caption) ||
+      (row.page_name && row.page_name !== "Memory" ? row.page_name : "") ||
+      (memory && memory.location) ||
+      (memory && memory.date) ||
+      `post ${String(row.memory_id).slice(0,8)}`;
+
+    return `Memory · ${memoryLabel}`;
+  }
+
+  if(row.event_type === "section_view"){
+    return `Section · ${row.page_name || getSectionTitle(row.section_id)}`;
+  }
+
+  if(row.event_type === "page_view"){
+    if(row.page_name && row.page_name !== "my memories ♡"){
+      return row.page_name;
+    }
+
+    const path = row.page_path || "/";
+    if(path === "/my-gallery/" || path === "/my-gallery" || path === "/"){
+      return "Gallery home";
+    }
+
+    return path;
+  }
+
+  return row.page_name || row.page_path || getSectionTitle(row.section_id);
+}
+
+function visitorRowMatches(row,filters){
+  const myVisitorId = (() => {
+    try { return localStorage.getItem(VISITOR_KEY); } catch { return null; }
+  })();
+
+  const isMine = row.user_id === ADMIN_UID ||
+    (myVisitorId && row.visitor_id === myVisitorId);
+
+  /*
+    Hide the specified IP regardless of whether its rows have a user_id.
+    This handles older visits that were recorded before admin filtering.
+  */
+  if(row.ip_address && HIDDEN_VISITOR_IPS.has(String(row.ip_address).trim())){
+    return false;
+  }
+
+  if(!filters.showMine && isMine){
+    return false;
+  }
+
+  if(filters.eventType && row.event_type !== filters.eventType){
+    return false;
+  }
+
+  if(filters.device && row.device_type !== filters.device){
+    return false;
+  }
+
+  const timestamp = new Date(row.visited_at);
+  if(Number.isNaN(timestamp.getTime())) return false;
+
+  if(filters.from){
+    const from = new Date(`${filters.from}T00:00:00`);
+    if(timestamp < from) return false;
+  }
+
+  if(filters.to){
+    const to = new Date(`${filters.to}T23:59:59.999`);
+    if(timestamp > to) return false;
+  }
+
+  if(filters.search){
+    const haystack = [
+      row.visitor_id,
+      row.ip_address,
+      row.page_path,
+      row.page_name,
+      row.user_agent,
+      row.event_type,
+      row.device_type,
+      row.referrer
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    if(!haystack.includes(filters.search)) return false;
+  }
+
+  return true;
+}
+
+function formatSeconds(seconds){
+  seconds = Math.max(0, Math.floor(Number(seconds) || 0));
+
+  if(seconds < 60) return `${seconds}s`;
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  if(minutes < 60){
+    return remainingSeconds
+      ? `${minutes}m ${remainingSeconds}s`
+      : `${minutes}m`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return remainingMinutes
+    ? `${hours}h ${remainingMinutes}m`
+    : `${hours}h`;
+}
+
+function getEventSessionDuration(row, allRows){
+  if(row._session){
+    return formatSessionDuration(
+      row._session.started_at,
+      row._session.ended_at,
+      row._session.last_seen
+    );
+  }
+
+  /*
+    Older history rows can exist without a corresponding session row.
+    When that happens, use the earliest/latest events sharing the same
+    session_id as a safe fallback instead of showing a blank duration.
+  */
+  if(!row.session_id) return "—";
+
+  const sameSession = (allRows || [])
+    .filter(item =>
+      String(item.session_id || "") === String(row.session_id)
+    )
+    .map(item => new Date(item.visited_at).getTime())
+    .filter(Number.isFinite);
+
+  if(!sameSession.length) return "—";
+
+  const first = Math.min(...sameSession);
+  const last = Math.max(...sameSession);
+
+  return formatSessionDuration(
+    new Date(first).toISOString(),
+    new Date(last).toISOString(),
+    new Date(last).toISOString()
+  );
+}
+
+function renderVisitorHistory(rows, allHistoryRows = rows){
+  const wrap = $("visitorTableWrap");
+  const filters = getVisitorFilters();
+
+  let filtered = rows.filter(row => visitorRowMatches(row,filters));
+
+  filtered.sort((a,b) => {
+    const ta = new Date(a.visited_at).getTime();
+    const tb = new Date(b.visited_at).getTime();
+    return filters.sort === "oldest" ? ta - tb : tb - ta;
+  });
+
+  $("visitorResults").textContent =
+    `${filtered.length} event${filtered.length === 1 ? "" : "s"} shown`;
+
+  if(!filtered.length){
+    wrap.innerHTML =
+      '<div class="visitor-empty">no matching visitor history ♡</div>';
+    return;
+  }
+
+  const table = document.createElement("table");
+  table.className = "visitor-table";
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>date / time</th>
+        <th>visitor</th>
+        <th>IP</th>
+        <th>event</th>
+        <th>page / post</th>
+        <th>time spent</th>
+        <th>device</th>
+        <th>user agent</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector("tbody");
+
+  filtered.forEach(row => {
+    const tr = document.createElement("tr");
+
+    const dateCell = document.createElement("td");
+    dateCell.innerHTML =
+      `<strong>${formatVisitorDate(row.visited_at)}</strong>`;
+
+    const visitorCell = document.createElement("td");
+    visitorCell.innerHTML =
+      `<div class="visitor-id">${escapeHtml(row.visitor_id || "unknown")}</div>
+       <div class="visitor-event-id">event: ${escapeHtml(row.event_id || "—")}</div>`;
+
+    const ipCell = document.createElement("td");
+    ipCell.textContent = row.ip_address || "—";
+
+    const eventCell = document.createElement("td");
+    eventCell.textContent =
+      String(row.event_type || "page_view").replaceAll("_"," ");
+
+    const pageCell = document.createElement("td");
+
+    const locationLabel = formatHistoryLocation(row);
+    pageCell.textContent = locationLabel;
+
+    /*
+      Keep the raw path available as a smaller secondary line, but don't
+      make "/my-gallery/" the main identifier shown to you.
+    */
+    if(row.page_path && row.page_path !== "/my-gallery/" && row.page_path !== "/my-gallery"){
+      const path = document.createElement("div");
+      path.className = "visitor-id";
+      path.textContent = row.page_path;
+      pageCell.appendChild(path);
+    }
+
+    if(row.memory_id){
+      const memory = row._memory || null;
+      const memoryMeta = document.createElement("div");
+      memoryMeta.className = "visitor-id";
+
+      const details = [];
+      if(memory && memory.location) details.push(memory.location);
+      if(memory && memory.date) details.push(memory.date);
+
+      memoryMeta.textContent =
+        details.length
+          ? details.join(" · ")
+          : "memory: " + String(row.memory_id).slice(0,8);
+
+      pageCell.appendChild(memoryMeta);
+    }
+
+    const durationCell = document.createElement("td");
+    const session = row._session;
+    if(row.event_type === "memory_view"){
+      const seconds = Number(row.duration_seconds);
+
+      durationCell.textContent =
+        Number.isFinite(seconds)
+          ? formatSeconds(seconds)
+          : "—";
+    }else{
+      durationCell.textContent =
+        getEventSessionDuration(row, allHistoryRows);
+    }
+
+    const deviceCell = document.createElement("td");
+    deviceCell.textContent = row.device_type || "—";
+
+    const uaCell = document.createElement("td");
+    uaCell.className = "visitor-ua";
+    uaCell.textContent = row.user_agent || "—";
+
+    tr.append(
+      dateCell,
+      visitorCell,
+      ipCell,
+      eventCell,
+      pageCell,
+      durationCell,
+      deviceCell,
+      uaCell
+    );
+
+    tbody.appendChild(tr);
+  });
+
+  wrap.innerHTML = "";
+  wrap.appendChild(table);
+}
+
+function getExcludedVisitorIds(eventRows){
+  const excluded = new Set();
+  const myVisitorId = (() => {
+    try { return localStorage.getItem(VISITOR_KEY); } catch { return null; }
+  })();
+
+  if(myVisitorId) excluded.add(String(myVisitorId));
+  if(typeof ADMIN_UID !== "undefined" && ADMIN_UID) excluded.add(String(ADMIN_UID));
+
+  const excludedIps = new Set(["99.229.26.137"]);
+  (eventRows || []).forEach(row => {
+    if(row.ip_address && excludedIps.has(String(row.ip_address).trim())){
+      if(row.visitor_id) excluded.add(String(row.visitor_id));
+    }
+  });
+
+  return excluded;
+}
+
+async function loadVisitorHistory(){
+  const wrap = $("visitorTableWrap");
+
+  const sessionOk = await ensureFreshAdminSession();
+  if(!sessionOk){
+    wrap.innerHTML = `<div class="visitor-empty">your admin session expired ♡<br><br><small>Please log in again, then open visitor history.</small></div>`;
+    openModal("loginModal");
+    return;
+  }
+  wrap.innerHTML =
+    '<div class="visitor-loading">loading visitor history ♡</div>';
+
+  try{
+    const {data:visitors,error:visitorError} = await db
+      .from("gallery_visitors")
+      .select("visitor_id,last_seen")
+      .order("last_seen",{ascending:false});
+
+    if(visitorError) throw visitorError;
+
+    const {data:sessions,error:sessionError} = await db
+      .from("gallery_sessions")
+      .select("id,visitor_id,started_at,last_seen,ended_at")
+      .order("last_seen",{ascending:false})
+      .limit(1000);
+
+    if(sessionError) throw sessionError;
+
+    const {data:events,error:eventError} = await db
+      .from("gallery_visit_history")
+      .select("event_id,visitor_id,user_id,session_id,visited_at,event_type,page_path,page_name,section_id,memory_id,ip_address,user_agent,device_type,referrer,created_at,duration_seconds")
+      .order("visited_at",{ascending:false})
+      .limit(2000);
+
+    if(eventError) throw eventError;
+
+    /*
+      Resolve memory_id -> actual memory metadata for the dashboard.
+      This makes individual posts identifiable even when an older event
+      only stored a UUID or the generic "Memory" label.
+    */
+    let memoryRows = [];
+    try{
+      const {data:memories,error:memoryError} = await db
+        .from(MEMORIES_TABLE)
+        .select("id,caption,date,location,section_id");
+
+      if(!memoryError){
+        memoryRows = memories || [];
+      }else{
+        console.warn(
+          "Could not load memory labels for visitor history:",
+          memoryError
+        );
+      }
+    }catch(error){
+      console.warn(
+        "Could not load memory labels for visitor history:",
+        error
+      );
+    }
+
+    const memoryMap = new Map(
+      memoryRows.map(memory => [String(memory.id), memory])
+    );
+
+    const visitorRows = visitors || [];
+    const sessionRows = sessions || [];
+    const eventRows = events || [];
+
+    const sessionMap = new Map(
+      sessionRows.map(session => [String(session.id), session])
+    );
+
+    eventRows.forEach(event => {
+      event._session = event.session_id
+        ? sessionMap.get(String(event.session_id)) || null
+        : null;
+
+      event._memory = event.memory_id
+        ? memoryMap.get(String(event.memory_id)) || null
+        : null;
+    });
+
+    const excludedVisitorIds = getExcludedVisitorIds(eventRows);
+
+    const activeCount = sessionRows.filter(session => {
+      if(excludedVisitorIds.has(String(session.visitor_id))) return false;
+
+      const lastSeen = new Date(session.last_seen).getTime();
+      return Number.isFinite(lastSeen) &&
+        correctedNow() - lastSeen <= 90000;
+    }).length;
+
+    $("visitorTotal").textContent = visitorRows.length;
+    $("visitorSessions").textContent = sessionRows.length;
+    $("visitorActive").textContent = activeCount;
+
+    const visibleEventRows = eventRows.filter(row => {
+      if(row.ip_address === "99.229.26.137") return false;
+      return true;
+    });
+
+    window.__visitorHistoryRows = visibleEventRows;
+    renderVisitorHistory(visibleEventRows);
+
+  }catch(error){
+    console.error("Visitor history error:",error);
+    const message=String(error?.message || error || "");
+    if(/jwt expired|invalid jwt|token is expired/i.test(message)){
+      const refreshed=await ensureFreshAdminSession();
+      if(refreshed) return loadVisitorHistory();
+      wrap.innerHTML = `<div class="visitor-empty">your admin session expired ♡<br><br><small>Please log in again, then open visitor history.</small></div>`;
+      openModal("loginModal");
+      return;
+    }
+    $("visitorResults").textContent = "";
+    wrap.innerHTML = `<div class="visitor-empty">couldn't load visitor history ♡<br><br><small>${escapeHtml(message)}</small></div>`;
+  }
+}
+
+function applyVisitorFilters(){
+  renderVisitorHistory(
+    Array.isArray(window.__visitorHistoryRows)
+      ? window.__visitorHistoryRows
+      : []
+  );
+}
+
+/* Open dashboard */
+
+
+$("visitorHistoryBtn")
+  .addEventListener(
+    "click",
+    async () => {
+
+
+      if(!admin())
+        return;
+
+
+
+
+      openModal(
+        "visitorHistoryModal"
+      );
+
+
+
+
+      await loadVisitorHistory();
+
+
+    }
+  );
+
+
+
+
+/* Refresh dashboard */
+
+
+$("refreshVisitors")
+  .addEventListener(
+    "click",
+    async () => {
+
+
+      if(!admin())
+        return;
+
+
+
+
+      const button =
+        $("refreshVisitors");
+
+
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        "refreshing...";
+
+
+
+
+      await loadVisitorHistory();
+
+
+
+
+      button.disabled =
+        false;
+
+
+      button.textContent =
+        "refresh ♡";
+
+
+    }
+  );
+
+
+
+
+["visitorSearch","visitorFrom","visitorTo","visitorEventType","visitorDevice","visitorSort","visitorShowMine"]
+  .forEach(id => {
+    $(id)?.addEventListener(
+      id === "visitorSearch" ? "input" : "change",
+      applyVisitorFilters
+    );
+  });
+
+$("clearVisitorFilters")?.addEventListener("click",() => {
+  ["visitorSearch","visitorFrom","visitorTo"].forEach(id => {
+    if($(id)) $(id).value = "";
+  });
+
+  if($("visitorEventType")) $("visitorEventType").value = "";
+  if($("visitorDevice")) $("visitorDevice").value = "";
+  if($("visitorSort")) $("visitorSort").value = "newest";
+  if($("visitorShowMine")) $("visitorShowMine").checked = false;
+
+  applyVisitorFilters();
+});
+
+
+/* =========================================================
+   EDIT MEMORY / SECTION TOOLS
+   ========================================================= */
+
+
+function escapeHtml(value){
+
+
+  return String(
+    value ?? ""
+  ).replace(
+    /[&<>"']/g,
+    character => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#39;"
+    }[character])
+  );
+
+
+}
+
+
+
+
+function storageKey(
+  type,
+  sectionId
+){
+
+
+  return (
+    "lyss_" +
+    type +
+    "_" +
+    (
+      sectionId ||
+      "all"
+    )
+  );
+
+
+}
+
+
+
+
+function getSavedOrder(
+  type,
+  sectionId
+){
+
+
+  try{
+
+
+    return JSON.parse(
+      localStorage.getItem(
+        storageKey(
+          type,
+          sectionId
+        )
+      ) || "[]"
+    );
+
+
+  }catch{
+
+
+    return [];
+
+
+  }
+
+
+}
+
+
+
+
+function saveOrder(
+  type,
+  sectionId,
+  ids
+){
+
+
+  localStorage.setItem(
+    storageKey(
+      type,
+      sectionId
+    ),
+    JSON.stringify(ids)
+  );
+
+
+}
+
+
+
+
+function applySavedOrder(
+  items,
+  type,
+  sectionId
+){
+
+
+  const saved =
+    getSavedOrder(
+      type,
+      sectionId
+    );
+
+
+
+
+  if(!saved.length)
+    return items;
+
+
+
+
+  const position =
+    new Map(
+      saved.map(
+        (id,index) =>
+          [
+            String(id),
+            index
+          ]
+      )
+    );
+
+
+
+
+  return [...items].sort(
+    (a,b) => {
+
+
+      const pa =
+        position.has(
+          String(a.id)
+        )
+          ? position.get(
+              String(a.id)
+            )
+          : 999999;
+
+
+
+
+      const pb =
+        position.has(
+          String(b.id)
+        )
+          ? position.get(
+              String(b.id)
+            )
+          : 999999;
+
+
+
+
+      return pa - pb;
+
+
+    }
+  );
+
+
+}
+
+
+
+
+function showEditBox(
+  title,
+  fields,
+  saveFunction
+){
+
+
+  document
+    .getElementById(
+      "extraEditBox"
+    )
+    ?.remove();
+
+
+
+
+  const overlay =
+    document.createElement(
+      "div"
+    );
+
+
+  overlay.id =
+    "extraEditBox";
+
+
+  overlay.className =
+    "open";
+
+
+
+
+  let fieldsHtml =
+    "";
+
+
+
+
+  fields.forEach(
+    field => {
+
+
+      if(
+        field.type ===
+        "textarea"
+      ){
+
+
+        fieldsHtml += `
+          <label>${escapeHtml(field.label)}</label>
+          <textarea id="extraField_${escapeHtml(field.key)}">${escapeHtml(field.value || "")}</textarea>
+        `;
+
+
+      }else{
+
+
+        fieldsHtml += `
+          <label>${escapeHtml(field.label)}</label>
+          <input
+            id="extraField_${escapeHtml(field.key)}"
+            type="${escapeHtml(field.type || "text")}"
+            value="${escapeHtml(field.value || "")}"
+          >
+        `;
+
+
+      }
+
+
+    }
+  );
+
+
+
+
+  overlay.innerHTML = `
+    <div class="extra-edit-card">
+
+
+      <h2>${escapeHtml(title)}</h2>
+
+
+      <p>edit this little detail ♡</p>
+
+
+      ${fieldsHtml}
+
+
+      <div class="extra-edit-buttons">
+        <button id="extraCancel">cancel</button>
+        <button class="save-extra" id="extraSave">save ♡</button>
+      </div>
+
+
+    </div>
+  `;
+
+
+
+
+  document.body.appendChild(
+    overlay
+  );
+
+
+
+
+  function close(){
+
+
+    overlay.remove();
+
+
+  }
+
+
+
+
+  overlay
+    .querySelector(
+      "#extraCancel"
+    )
+    .onclick =
+    close;
+
+
+
+
+  overlay.addEventListener(
+    "click",
+    event => {
+
+
+      if(
+        event.target ===
+        overlay
+      ){
+
+
+        close();
+
+
+      }
+
+
+    }
+  );
+
+
+
+
+  overlay
+    .querySelector(
+      "#extraSave"
+    )
+    .onclick =
+    async () => {
+
+
+      const values = {};
+
+
+
+
+      fields.forEach(
+        field => {
+
+
+          values[field.key] =
+            document
+              .getElementById(
+                "extraField_" +
+                field.key
+              )
+              .value;
+
+
+        }
+      );
+
+
+
+
+      const button =
+        overlay.querySelector(
+          "#extraSave"
+        );
+
+
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        "saving...";
+
+
+
+
+      try{
+
+
+        await saveFunction(
+          values
+        );
+
+
+        close();
+
+
+        await loadSections();
+        await loadGallery();
+
+
+      }catch(error){
+
+
+        console.error(
+          error
+        );
+
+
+        alert(
+          "Couldn't save the changes ♡\n\n" +
+          (
+            error.message ||
+            error
+          )
+        );
+
+
+        button.disabled =
+          false;
+
+
+        button.textContent =
+          "save ♡";
+
+
+      }
+
+
+    };
+
+
+}
+
+
+
+
+async function editMemory(
+  memory
+){
+
+
+  if(!admin())
+    return;
+
+
+
+
+  showEditBox(
+    "edit memory ♡",
+    [
+      {
+        key:"date",
+        label:"Date",
+        type:"date",
+        value:
+          memory.date || ""
+      },
+      {
+        key:"location",
+        label:"Location",
+        type:"text",
+        value:
+          memory.location || ""
+      },
+      {
+        key:"caption",
+        label:"Caption",
+        type:"textarea",
+        value:
+          memory.caption || ""
+      }
+    ],
+    async values => {
+
+
+      const {
+        error
+      } =
+        await db
+          .from(
+            MEMORIES_TABLE
+          )
+          .update({
+            date:
+              values.date ||
+              null,
+            location:
+              values.location
+                .trim() ||
+              null,
+            caption:
+              values.caption
+                .trim() ||
+              null
+          })
+          .eq(
+            "id",
+            memory.id
+          );
+
+
+
+
+      if(error)
+        throw error;
+
+
+    }
+  );
+
+
+}
+
+
+
+
+async function getCurrentMemories(){
+
+
+  let query =
+    db
+      .from(
+        MEMORIES_TABLE
+      )
+      .select("*");
+
+
+
+
+  if(
+    activeSectionId !==
+    null
+  ){
+
+
+    query =
+      query.eq(
+        "section_id",
+        activeSectionId
+      );
+
+
+  }
+
+
+
+
+  const result =
+    await query;
+
+
+
+
+  if(result.error)
+    throw result.error;
+
+
+
+
+  let rows =
+    result.data || [];
+
+
+
+
+  rows =
+    sortMemories(
+      rows
+    );
+
+
+
+
+  rows =
+    applySavedOrder(
+      rows,
+      "memories",
+      activeSectionId
+    );
+
+
+
+
+  return rows;
+
+
+}
+
+
+
+
+async function addMemoryTools(){
+
+
+  if(!admin())
+    return;
+
+
+
+
+  const gallery =
+    $("gallery");
+
+
+
+
+  let memories;
+
+
+
+
+  try{
+
+
+    memories =
+      await getCurrentMemories();
+
+
+  }catch(error){
+
+
+    console.error(
+      "memory tools:",
+      error
+    );
+
+
+    return;
+
+
+  }
+
+
+
+
+  const cards =
+    [
+      ...gallery
+        .querySelectorAll(
+          ".card"
+        )
+    ];
+
+
+
+
+  cards.forEach(
+    (card,index) => {
+
+
+      const memory =
+        memories[index];
+
+
+
+
+      if(!memory)
+        return;
+
+
+
+
+      card.dataset.memoryId =
+        memory.id;
+
+
+
+
+      card.draggable =
+        true;
+
+
+
+
+      if(
+        !card.querySelector(
+          ".extra-memory-tools"
+        )
+      ){
+
+
+        const tools =
+          document.createElement(
+            "div"
+          );
+
+
+        tools.className =
+          "extra-memory-tools";
+
+
+
+
+        tools.innerHTML = `
+          <button type="button" class="extra-edit-memory">
+            ✏️ edit
+          </button>
+
+
+          <button type="button" class="extra-delete-memory">
+            🗑️ delete
+          </button>
+        `;
+
+
+
+
+        tools
+          .querySelector(
+            ".extra-edit-memory"
+          )
+          .onclick =
+          event => {
+
+
+            event.stopPropagation();
+
+
+            editMemory(
+              memory
+            );
+
+
+          };
+
+
+
+
+        tools
+          .querySelector(
+            ".extra-delete-memory"
+          )
+          .onclick =
+          async event => {
+
+
+            event.stopPropagation();
+
+
+
+
+            if(
+              !confirm(
+                "Delete this memory and its stored file?"
+              )
+            )
+              return;
+
+
+
+
+            await deleteMemory(
+              memory
+            );
+
+
+          };
+
+
+
+
+        card.appendChild(
+          tools
+        );
+
+
+      }
+
+
+
+
+      card.addEventListener(
+        "dragstart",
+        () => {
+
+
+          card.classList.add(
+            "memory-dragging"
+          );
+
+
+        },
+        {once:true}
+      );
+
+
+
+
+      card.addEventListener(
+        "dragend",
+        () => {
+
+
+          card.classList.remove(
+            "memory-dragging"
+          );
+
+
+
+
+          const orderedIds =
+            [
+              ...gallery
+                .querySelectorAll(
+                  ".card[data-memory-id]"
+                )
+            ].map(
+              item =>
+                item.dataset.memoryId
+            );
+
+
+
+
+          saveOrder(
+            "memories",
+            activeSectionId,
+            orderedIds
+          );
+
+
+        },
+        {once:true}
+      );
+
+
+
+
+      card.addEventListener(
+        "dragover",
+        event => {
+
+
+          event.preventDefault();
+
+
+
+
+          const dragging =
+            gallery.querySelector(
+              ".memory-dragging"
+            );
+
+
+
+
+          if(
+            !dragging ||
+            dragging === card
+          )
+            return;
+
+
+
+
+          const rect =
+            card.getBoundingClientRect();
+
+
+
+
+          const before =
+            event.clientY <
+            rect.top +
+            rect.height / 2;
+
+
+
+
+          if(before){
+
+
+            gallery.insertBefore(
+              dragging,
+              card
+            );
+
+
+          }else{
+
+
+            gallery.insertBefore(
+              dragging,
+              card.nextSibling
+            );
+
+
+          }
+
+
+        }
+      );
+
+
+    }
+  );
+
+
+}
+
+
+
+
+async function editSection(
+  section
+){
+
+
+  if(!admin())
+    return;
+
+
+
+
+  showEditBox(
+    "edit section ♡",
+    [
+      {
+        key:"title",
+        label:"Section name",
+        type:"text",
+        value:
+          section.title || ""
+      },
+      {
+        key:"subtitle",
+        label:"Subtitle",
+        type:"textarea",
+        value:
+          section.subtitle || ""
+      }
+    ],
+    async values => {
+
+
+      const {
+        error
+      } =
+        await db
+          .from(
+            SECTIONS_TABLE
+          )
+          .update({
+            title:
+              values.title
+                .trim(),
+            subtitle:
+              values.subtitle
+                .trim() ||
+              null
+          })
+          .eq(
+            "id",
+            section.id
+          );
+
+
+
+
+      if(error)
+        throw error;
+
+
+    }
+  );
+
+
+}
+
+
+
+
+function applySectionOrder(){
+
+
+  sections =
+    applySavedOrder(
+      sections,
+      "sections",
+      "main"
+    );
+
+
+}
+
+
+
+
+function addSectionTools(){
+
+
+  if(!admin())
+    return;
+
+
+
+
+  const nav =
+    $("sectionsNav");
+
+
+
+
+  const tabs =
+    [
+      ...nav.querySelectorAll(
+        ".tab"
+      )
+    ];
+
+
+
+
+  const realTabs =
+    tabs.slice(1);
+
+
+
+
+  realTabs.forEach(
+    (tab,index) => {
+
+
+      const section =
+        sections[index];
+
+
+
+
+      if(!section)
+        return;
+
+
+
+
+      tab.dataset.sectionId =
+        section.id;
+
+
+
+
+      tab.draggable =
+        true;
+
+
+
+
+      if(
+        tab.querySelector(
+          ".extra-section-tools"
+        )
+      )
+        return;
+
+
+
+
+      const tools =
+        document.createElement(
+          "span"
+        );
+
+
+
+
+      tools.className =
+        "extra-section-tools";
+
+
+
+
+      tools.innerHTML = `
+        <button type="button" title="move left">←</button>
+        <button type="button" title="move right">→</button>
+        <button type="button" title="edit">✏️</button>
+      `;
+
+
+
+
+      const buttons =
+        tools.querySelectorAll(
+          "button"
+        );
+
+
+
+
+      buttons[0].onclick =
+        event => {
+
+
+          event.stopPropagation();
+
+
+
+
+          const index =
+            [
+              ...nav.children
+            ].indexOf(
+              tab
+            );
+
+
+
+
+          if(index <= 1)
+            return;
+
+
+
+
+          nav.insertBefore(
+            tab,
+            nav.children[
+              index - 1
+            ]
+          );
+
+
+
+
+          saveCurrentSectionOrder(
+            nav
+          );
+
+
+        };
+
+
+
+
+      buttons[1].onclick =
+        event => {
+
+
+          event.stopPropagation();
+
+
+
+
+          const index =
+            [
+              ...nav.children
+            ].indexOf(
+              tab
+            );
+
+
+
+
+          if(
+            index < 1 ||
+            index >=
+            nav.children.length - 1
+          )
+            return;
+
+
+
+
+          nav.insertBefore(
+            nav.children[
+              index + 1
+            ],
+            tab
+          );
+
+
+
+
+          saveCurrentSectionOrder(
+            nav
+          );
+
+
+        };
+
+
+
+
+      buttons[2].onclick =
+        event => {
+
+
+          event.stopPropagation();
+
+
+          editSection(
+            section
+          );
+
+
+        };
+
+
+
+
+      tab.appendChild(
+        tools
+      );
+
+
+
+
+      tab.addEventListener(
+        "dragstart",
+        () => {
+
+
+          tab.classList.add(
+            "section-dragging"
+          );
+
+
+        },
+        {once:true}
+      );
+
+
+
+
+      tab.addEventListener(
+        "dragend",
+        () => {
+
+
+          tab.classList.remove(
+            "section-dragging"
+          );
+
+
+          saveCurrentSectionOrder(
+            nav
+          );
+
+
+        },
+        {once:true}
+      );
+
+
+
+
+      tab.addEventListener(
+        "dragover",
+        event => {
+
+
+          event.preventDefault();
+
+
+
+
+          const dragging =
+            nav.querySelector(
+              ".section-dragging"
+            );
+
+
+
+
+          if(
+            !dragging ||
+            dragging === tab
+          )
+            return;
+
+
+
+
+          const rect =
+            tab.getBoundingClientRect();
+
+
+
+
+          const before =
+            event.clientX <
+            rect.left +
+            rect.width / 2;
+
+
+
+
+          if(before){
+
+
+            nav.insertBefore(
+              dragging,
+              tab
+            );
+
+
+          }else{
+
+
+            nav.insertBefore(
+              dragging,
+              tab.nextSibling
+            );
+
+
+          }
+
+
+        }
+      );
+
+
+    }
+  );
+
+
+}
+
+
+
+
+function saveCurrentSectionOrder(
+  nav
+){
+
+
+  const ids =
+    [
+      ...nav.querySelectorAll(
+        ".tab[data-section-id]"
+      )
+    ].map(
+      tab =>
+        tab.dataset.sectionId
+    );
+
+
+
+
+  saveOrder(
+    "sections",
+    "main",
+    ids
+  );
+
+
+}
+
+
+
+
+/* =========================================================
+   ADMIN TOOL REFRESH
+   ========================================================= */
+
+
+function refreshExtraTools(){
+
+
+  if(!admin())
+    return;
+
+
+
+
+  setTimeout(
+    () => {
+
+
+      applySectionOrder();
+
+
+      renderSections();
+
+
+      addSectionTools();
+      addMemoryTools();
+
+
+    },
+    100
+  );
+
+
+}
+
+
+
+
+const adminObserver =
+  new MutationObserver(
+    () => {
+
+
+      if(admin()){
+
+
+        refreshExtraTools();
+
+
+      }
+
+
+    }
+  );
+
+
+
+
+adminObserver.observe(
+  document.body,
+  {
+    attributes:true,
+    attributeFilter:[
+      "class"
+    ]
+  }
+);
+
+
+
+
+window.addEventListener(
+  "load",
+  () => {
+
+
+    setTimeout(
+      refreshExtraTools,
+      500
+    );
+
+
+  }
+);
+
+
+
+
+setInterval(
+  () => {
+
+
+    if(admin()){
+
+
+      addSectionTools();
+      addMemoryTools();
+
+
+    }
+
+
+  },
+  2000
+);
+
+
+
+
+/* =========================================================
+   START
+   ========================================================= */
+
+
+(async function start(){
+
+
+  await syncServerClock();
+
+
+  createLyssPresence();
+
+
+  updateLyssPresence();
+
+
+
+
+  const {
+    data
+  } =
+    await db.auth
+      .getSession();
+
+
+
+
+  currentUser =
+    data.session?.user ||
+    null;
+
+
+
+
+  if(
+    currentUser &&
+    currentUser.id !==
+    ADMIN_UID
+  ){
+
+
+    await db.auth.signOut();
+
+
+    currentUser =
+      null;
+
+
+  }
+
+
+
+
+  updateAdminUI();
+
+
+
+
+  /*
+    Start visitor tracking BEFORE gallery data loads.
+    A gallery/load error must never prevent the visit from being recorded.
+  */
+
+  await flushVisitQueue();
+  await recordInitialVisit();
+  await recordVisitor();
+  await flushVisitQueue();
+
+  await loadSections();
+  await loadGallery();
+
+  /* Presence check */
+
+
+  await updateLyssPresence();
+
+
+
+
+  /* Admin heartbeat */
+
+
+  await lyssHeartbeat();
+
+
+})();
+
+
+
+
+/*
+  Extra reliability for mobile browsers:
+  - pageshow catches BFCache restores.
+  - online retries queued events after reconnect.
+*/
+window.addEventListener("pageshow", () => {
+  flushVisitQueue();
+});
+
+window.addEventListener("online", () => {
+  flushVisitQueue();
+  recordVisitor();
+});
+
+/* =========================================================
+   CONTINUOUS TIMERS
+   ========================================================= */
+
+
+/* Visitor history / session heartbeat */
+
+
+setInterval(
+  () => {
+
+
+    recordVisitor();
+    flushVisitQueue();
+
+
+  },
+  VISITOR_HEARTBEAT
+);
+
+
+
+
+/* Lyss admin heartbeat */
+
+
+setInterval(
+  () => {
+
+
+    lyssHeartbeat();
+
+
+  },
+  PRESENCE_HEARTBEAT_MS
+);
+
+
+
+
+/* Public status refresh */
+
+
+setInterval(
+  () => {
+
+
+    updateLyssPresence();
+
+
+  },
+  PRESENCE_REFRESH_MS
+);
+
+
+
+
+/* Re-sync against the real server clock periodically, in case
+   a visitor leaves the page open a long time (protects against
+   local clock drift during a long session). */
+
+
+setInterval(
+  () => {
+
+
+    syncServerClock();
+
+
+  },
+  5 * 60 * 1000
+);
+
+
+
+
+/* Visitor session ended */
+
+
+/*
+  Do not write ended_at directly from beforeunload. Mobile browsers often
+  kill/skip that request, which can make every event appear to have the
+  same short duration. The session duration is derived from started_at and
+  the final successful last_seen heartbeat instead.
+*/
+
+
+/* Keep header visible */
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+
+    const header =
+      document.querySelector(
+        ".header"
+      );
+
+
+
+
+    if(header){
+
+
+      header.style.display =
+        "block";
+
+
+      header.style.visibility =
+        "visible";
+
+
+      header.style.opacity =
+        "1";
+
+
+    }
+
+
+  }
+);
+
+
+</script>
+</body>
+</html>
